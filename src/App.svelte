@@ -92,6 +92,12 @@
                             ><Icon name="arrow-left" size="lg" /></Button
                         >
 
+                        <span style="display: flex; align-items: center ">
+                            {$index + 1}
+                            /
+                            {quiz.questions.length}
+                        </span>
+
                         <Button
                             disabled="{$onLast || $onResults || $isEvaluated}"
                             buttonAction="{quiz.next}"
