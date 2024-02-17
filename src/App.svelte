@@ -91,7 +91,9 @@
                             ><Icon name="arrow-left" size="lg" /></Button
                         >
 
-                        <span style="display: flex; align-items: center ">
+                        <span 
+						style="display: flex; align-items: center; visibility: {$onResults ? 'hidden' : ''}; "
+						>
                             {$index + 1}
                             /
                             {quiz.questions.length}
