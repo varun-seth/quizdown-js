@@ -25,14 +25,11 @@
     }
 </script>
 
-<h3>{$_('resultsTitle')}</h3>
+<h3 style="text-align: center;">{$_('resultsTitle')}</h3>
 <Loading ms="{waitTime}" minHeight="{150}">
     <div in:fade="{{ duration: 1000 }}">
-        <h1>
-            <Icon name="check-double" />
-            {format(points)}/{format(quiz.questions.length)}
-        </h1>
 
+		<div style="display: flex; justify-content: space-around;">
         <ol>
             {#each quiz.questions as question, i}
                 <li class="top-list-item" on:click="{() => quiz.jump(i)}">
@@ -57,6 +54,15 @@
                 </li>
             {/each}
         </ol>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<div class="badge">
+				{Math.round(100 * points / quiz.questions.length)}%
+			</div>
+			<h3>
+				{format(points)} / {format(quiz.questions.length)}
+			</h3>
+		</div>
+		</div>
     </div>
 </Loading>
 
@@ -85,4 +91,16 @@
         margin-left: 2em;
         list-style-type: initial;
     }
+
+	.badge{
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 3em;
+		width: 3em;
+		border: 0.2em solid var(--quizdown-color-primary);
+		font-size: 2em;
+		border-radius: 50%;
+	}
+	
 </style>

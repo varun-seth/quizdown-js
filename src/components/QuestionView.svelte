@@ -8,8 +8,6 @@
 
     export let question: BaseQuestion;
 
-    export let n: number;
-
     // a mapping from quiz types to svelte components
     let componentMap: Record<QuestionType, typeof SvelteComponent> = {
         Sequence: SequenceView,
@@ -19,7 +17,7 @@
 </script>
 
 <h3>
-    {$_('questionLetter')}{n}: {@html question.text}
+    {@html question.text}
 </h3>
 
 {#if question.explanation}

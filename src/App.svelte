@@ -67,7 +67,6 @@
                         {:else}
                             <QuestionView
                                 question="{$question}"
-                                n="{$index + 1}"
                             />
                             <Hint hint="{$question.hint}" show="{$showHint}" />
                         {/if}
@@ -91,6 +90,14 @@
                             buttonAction="{quiz.previous}"
                             ><Icon name="arrow-left" size="lg" /></Button
                         >
+
+                        <span 
+						style="display: flex; align-items: center; visibility: {$onResults ? 'hidden' : ''}; "
+						>
+                            {$index + 1}
+                            /
+                            {quiz.questions.length}
+                        </span>
 
                         <Button
                             disabled="{$onLast || $onResults || $isEvaluated}"
