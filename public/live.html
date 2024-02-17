@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
+
+    <title>Quiz with Monaco Editor</title>
+
+    <script src="./build/quizdown.js"></script>
+    <script src="./build/extensions/quizdownKatex.js"></script>
+    <script src="./build/extensions/quizdownHighlight.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.js"></script>
+
+    <style>
+        html, body {
+            font-family: sans-serif;
+            height: 100%;
+            margin: 0;
+        }
+        #editorContainer, #quizContainer {
+            height: 100%;
+            width: 50%;
+            float: left;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="editorContainer"></div>
+        <div id="quizContainer"></div>
+    </div>
+
+    <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            var editor = monaco.editor.create(document.getElementById('editorContainer'), {
+                value: [
+                    '## What is 2 + 2 ?',
+                    '- [x] 4',
+					'- [ ] 5'
+                ].join('\n'),
+                language: 'markdown',
+				minimap: { enabled: false },
+            });
+
+            editor.onDidChangeModelContent(function() {
+                renderQuiz(editor.getValue());
+            });
+
+            renderQuiz(editor.getValue());
+        });
+
+        function renderQuiz(markdown) {
+            const quizContainer = document.getElementById('quizContainer');
+            quizContainer.innerHTML = ''; // Clear previous content
+            const newQuizElement = document.createElement('div');
+            newQuizElement.className = 'quizdown';
+            quizContainer.appendChild(newQuizElement);
+
+            let config = {
+                "shuffleAnswers": false,
+                "shuffleQuestions": false,
+                "primaryColor": "#316FF6",
+                "secondaryColor": "#f8f8f8",
+            };
+            quizdown.register(quizdownKatex).register(quizdownHighlight).createApp(markdown, newQuizElement, config);
+        }
+    </script>
+</body>
+
+</html>
