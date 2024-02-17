@@ -7,4 +7,10 @@
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
         border-radius: 0 0 4px 4px;
     }
+		/* Smaller screens */
+		@media (max-width: 600px) {
+		.card {
+			box-shadow: none !important;
+		}
+	}
 </style>

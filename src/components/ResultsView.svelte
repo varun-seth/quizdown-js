@@ -27,9 +27,7 @@
 
 <h3 style="text-align: center;">{$_('resultsTitle')}</h3>
 <Loading ms="{waitTime}" minHeight="{150}">
-    <div in:fade="{{ duration: 1000 }}">
-
-		<div style="display: flex; justify-content: space-around;">
+    <div in:fade="{{ duration: 1000 }}" class="results">
         <ol>
             {#each quiz.questions as question, i}
                 <li class="top-list-item" on:click="{() => quiz.jump(i)}">
@@ -61,7 +59,6 @@
 			<h3>
 				{format(points)} / {format(quiz.questions.length)}
 			</h3>
-		</div>
 		</div>
     </div>
 </Loading>
@@ -101,6 +98,18 @@
 		border: 0.2em solid var(--quizdown-color-primary);
 		font-size: 2em;
 		border-radius: 50%;
+	}
+
+	.results {
+		display: flex; 
+		justify-content: space-around;
+	}
+
+	/* Smaller screens */
+	@media (max-width: 600px) {
+		.results {
+			flex-direction: column-reverse;
+		}
 	}
 	
 </style>

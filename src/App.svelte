@@ -92,7 +92,7 @@
                         >
 
                         <span 
-						style="display: flex; align-items: center; visibility: {$onResults ? 'hidden' : ''}; "
+						style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onResults ? 'hidden' : ''}; "
 						>
                             {$index + 1}
                             /
@@ -172,4 +172,12 @@
         max-width: 900px;
         margin: auto;
     }
+	/* Smaller screens */
+	@media (max-width: 600px) {
+		.quizdown-content {
+			padding: 0;
+			height: 100%;
+		}
+	}
+
 </style>
