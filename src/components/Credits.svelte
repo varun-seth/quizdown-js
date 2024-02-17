@@ -7,11 +7,13 @@
 
 <style>
     .credits a {
-        color: gray;
+        opacity: 0.5;
+		color: gray;
         text-decoration: none;
     }
 
     .credits a:hover {
+		opacity: 1;
         text-decoration: underline;
     }
 
