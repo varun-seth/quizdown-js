@@ -67,7 +67,6 @@
                         {:else}
                             <QuestionView
                                 question="{$question}"
-                                n="{$index + 1}"
                             />
                             <Hint hint="{$question.hint}" show="{$showHint}" />
                         {/if}
