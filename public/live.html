@@ -39,18 +39,31 @@
     <script>
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs' }});
         require(['vs/editor/editor.main'], function() {
-            var editor = monaco.editor.create(document.getElementById('editorContainer'), {
-                value: [
+			function getSavedContent() {
+				// Try getting content from sessionStorage first, then localStorage
+				var savedContent = sessionStorage.getItem('liveEditorContent') || localStorage.getItem('markdownContent');
+				if (savedContent) {
+					return savedContent;
+				} else {
+					return [
                     '## What is 2 + 2 ?',
                     '- [x] 4',
 					'- [ ] 5'
-                ].join('\n'),
+                ].join('\n'); // Default content if nothing is saved
+				}
+			}
+
+            var editor = monaco.editor.create(document.getElementById('editorContainer'), {
+                value: getSavedContent(),
                 language: 'markdown',
 				minimap: { enabled: false },
             });
 
             editor.onDidChangeModelContent(function() {
+				var currentContent = editor.getValue();
                 renderQuiz(editor.getValue());
+				sessionStorage.setItem('liveEditorContent', currentContent);
+		        localStorage.setItem('liveEditorContent', currentContent);
             });
 
             renderQuiz(editor.getValue());
