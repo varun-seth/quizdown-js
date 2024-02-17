@@ -5,20 +5,38 @@
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width,initial-scale=1'>
 
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
 	<title>Quiz</title>
 
 	<script src="./build/quizdown.js"></script>
 	<script src="./build/extensions/quizdownKatex.js"></script>
 	<script src="./build/extensions/quizdownHighlight.js"></script>
 	<script>
-		// Fetch the markdown content from the provided URL
-		const queryParams = new URLSearchParams(window.location.search);
-		const sourceUrl = queryParams.get('source') || queryParams.get('s') || 'sample.md';
+document.addEventListener('DOMContentLoaded', function() {
 
-		fetch(sourceUrl)
+	// Fetch the markdown content from the provided URL
+	const queryParams = new URLSearchParams(window.location.search);
+	const sourceUrl = queryParams.get('source') || queryParams.get('s');
+	const githubShortcut = queryParams.get('github');
+	let urlToFetch = '';
+
+	if (githubShortcut) {
+	// Construct the GitHub raw content URL from the githubShortcut value
+		const parts = githubShortcut.split("!");
+		urlToFetch = `https://raw.githubusercontent.com/${parts[0]}/${parts[1]}/${parts[2]}/${parts[3]}`;
+	} else if (sourceUrl) {
+	// Use the direct URL provided by source or s
+		urlToFetch = sourceUrl;
+	}
+
+	if (urlToFetch) {
+	fetch(urlToFetch)
 		.then(response => response.text())
 		.then(markdown => {
+			// Inject the markdown into the quiz container
 			const quizContainer = document.getElementById('quizContainer');
+			quizContainer.classList.remove('hidden');
 			const newQuizElement = document.createElement('div');
 			newQuizElement.className = 'quizdown';
 
@@ -27,11 +45,53 @@
 				"shuffleAnswers": false,
 				"shuffleQuestions": false,
 				"primaryColor": "#316FF6",
-				"secondaryColor": "#f8f8f8",
+				"secondaryColor": "#ffffff",
 			};
 			quizdown.register(quizdownKatex).register(quizdownHighlight).createApp(markdown, newQuizElement, config);
 		})
 		.catch(error => console.error('Error fetching markdown:', error));
+	}
+	else {
+		const helpContainer = document.getElementById('helpContainer');
+		helpContainer.classList.remove('hidden');
+		const submitButton = document.getElementById('submitButton');
+
+		// Add click event listener to the button
+		submitButton.addEventListener('click', function() {
+			const url = urlInput.value;
+			
+			// Check if URL is not empty
+			if (url.trim() !== '') {
+				const githubPattern = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/;
+				const match = url.match(githubPattern);
+
+				const newUrl = new URL(window.location.href);
+
+				if (match) {
+					// If it's a GitHub URL, format it accordingly
+					const [, username, reponame, branch, filepath] = match;
+					const formattedGithubPath = `${username}!${reponame}!${branch}!${filepath}`;
+					newUrl.searchParams.set('github', formattedGithubPath);
+				} else {
+					// For non-GitHub URLs, proceed as before
+					newUrl.searchParams.set('source', url);
+				}
+				
+				helpContainer.classList.add('hidden');
+				window.location.href = newUrl.toString();
+			} else {
+				console.log('No URL entered');
+			}
+		});
+
+		urlInput.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				submitButton.click();
+			}
+		});
+
+	}
+});
 	</script>
 </head>
 
@@ -46,6 +106,38 @@
 		margin: 8px;
 	}
 
+	.container {
+		margin: auto;
+	}
+
+	#helpContainer {
+		display:  flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		max-width: 800px;
+		padding: 20px;
+	}
+	.hidden {
+		display: none!important;
+	}
+
+	.url-input {
+		padding: 10px; 
+		width: 100%; 
+		margin-bottom: 10px; 
+		border-radius: 5px; 
+		border: 1px solid #ccc;
+	}
+	.submit-button {
+		padding: 10px 20px; 
+		border: none; 
+		border-radius: 5px; 
+		cursor: pointer; 
+		background-color: #007BFF; 
+		color: white; 
+		font-weight: bold;
+	}
 
 	/* Smaller screens */
 	@media (max-width: 600px) {
@@ -57,7 +149,23 @@
 </style>
 
 <body>
-	<div class="container" id="quizContainer" style="margin: auto; ">
+	<div class="container hidden" id="quizContainer" >
+	</div>
+	<div class="container hidden" id="helpContainer">
+		<input class="url-input" type="text" 
+		placeholder="Enter the URL of a markdown file that contains the quiz."
+		id="urlInput"
+		>
+		<button class="submit-button" id="submitButton">
+		GO
+		</button>
+		<br>
+		<div>
+			Use <a href="/live.html">live editor</a> to create your own questions in markdown format
+		</div>
+		<br>
+		<div><a href="sample.md">This sample file</a> can generate <a href="/?s=sample.md">this quiz</a> </div>
+
 	</div>
 </body>
 
