@@ -1,3 +1,5 @@
+# Math Quiz
+
 ## Sort the following numbers in ascending order
 
 > An ascending order starts from the smallest values and increases till the largest.
@@ -48,3 +50,12 @@
 - [ ] $x + C$
 - [ ] $2x + C$
 - [x] $x^2 + C$
+
+
+## Invalid question
+
+This is an invalid question because none of the boxes are checked.
+- [ ] Wrong
+- [ ] Also Wrong
+- [ ] Wronger
+- [ ] None of the above.

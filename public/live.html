@@ -42,15 +42,33 @@
         require(['vs/editor/editor.main'], function() {
 			function getSavedContent() {
 				// Try getting content from sessionStorage first, then localStorage
-				var savedContent = sessionStorage.getItem('liveEditorContent') || localStorage.getItem('markdownContent');
+				var savedContent = sessionStorage.getItem('liveEditorContent');
 				if (savedContent) {
 					return savedContent;
 				} else {
+					// Default content if nothing is saved
 					return [
-                    '## What is 2 + 2 ?',
-                    '- [x] 4',
-					'- [ ] 5'
-                ].join('\n'); // Default content if nothing is saved
+                    '## What is 2 + 2 ?', '',
+					'MCQ\'s can be defined by a list of options with checkboxes.',
+					'A Single-Choice Question has only one checkbox with the x character.', '',
+					'- [ ] 0', 
+					'- [x] 4',
+					'- [ ] 5',
+					'',
+					'## Solve for x in x ^ 2 = 4', '',
+					'A Multiple-Choice Question has more than 1 checkboxes having the x character', '',
+					'- [x] -2',
+					'- [ ] 0',
+					'- [x] 2', 
+					'',
+					'## Sort from smallest to largest', '',
+					'An ordered list of options are shown as a Sequence question.',
+					'The quiz-participant must drag these options to the correct order.', '',
+					'1. 0',
+					'2. 1/3',
+					'3. 2/3', 
+					'',
+                ].join('\n');
 				}
 			}
 
@@ -60,11 +78,14 @@
 				minimap: { enabled: false },
             });
 
+			let renderQuizDebounceTimer;
             editor.onDidChangeModelContent(function() {
 				var currentContent = editor.getValue();
-                renderQuiz(editor.getValue());
-				sessionStorage.setItem('liveEditorContent', currentContent);
-		        localStorage.setItem('liveEditorContent', currentContent);
+				clearTimeout(renderQuizDebounceTimer);
+				renderQuizDebounceTimer = setTimeout(function() {
+					renderQuiz(currentContent);
+					sessionStorage.setItem('liveEditorContent', currentContent);
+				}, 1000); // Wait for 1 second before rendering
             });
 
 			// Intercept Ctrl+S and Command+S

@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	if (githubShortcut) {
 	// Construct the GitHub raw content URL from the githubShortcut value
-		const parts = githubShortcut.split("!");
+		const parts = githubShortcut.split("/");
 		urlToFetch = `https://raw.githubusercontent.com/${parts[0]}/${parts[1]}/${parts[2]}/${parts[3]}`;
 	} else if (sourceUrl) {
 	// Use the direct URL provided by source or s
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				if (match) {
 					// If it's a GitHub URL, format it accordingly
 					const [, username, reponame, branch, filepath] = match;
-					const formattedGithubPath = `${username}!${reponame}!${branch}!${filepath}`;
+					const formattedGithubPath = `${username}/${reponame}/${branch}/${filepath}`;
 					newUrl.searchParams.set('github', formattedGithubPath);
 				} else {
 					// For non-GitHub URLs, proceed as before

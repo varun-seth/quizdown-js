@@ -26,7 +26,7 @@ function shuffle(array: Array<any>, n: number | undefined): Array<any> {
 }
 
 // we need to reference the classes in the svelte app despite minifaction of class names
-export type QuestionType = 'MultipleChoice' | 'SingleChoice' | 'Sequence';
+export type QuestionType = 'MultipleChoice' | 'SingleChoice' | 'Sequence' | 'InvalidQuestion';
 
 export abstract class BaseQuestion {
     readonly text: string;
