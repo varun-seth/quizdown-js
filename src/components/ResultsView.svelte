@@ -26,12 +26,13 @@
 
 <h3 style="text-align: center;">{$_('resultsTitle')}</h3>
 <Loading ms="{waitTime}" minHeight="{150}">
-	<div style="display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;">
+<div class="results-container">
+	<div class="scores">
 		<div class="badge">
 			{Math.round(100 * points / quiz.questions.length)}%
 		</div>
 		<h4>
-			Score: {points} / {format(quiz.questions.length)}
+			{$_('score')} : {points} / {format(quiz.questions.length)}
 		</h4>
 	</div>
     <div in:fade="{{ duration: 1000 }}" class="results">
@@ -39,11 +40,11 @@
             {#each quiz.questions as question, i}
                 <li class="top-list-item" on:click="{() => quiz.jump(i)}">
                     <span class="list-question">
-						<span>
-                        {@html question.text}
-						</span>
-						<span style="padding: 5px; color: {question.solved ? '#16cc16': 'red'}">
+						<span style="padding: 5px; color: {question.solved ? '#16cc16': '#ff3131'}">
 						<Icon name="{question.solved ? 'circle-check' : 'circle-xmark'}"></Icon>
+						</span>
+						<span style="padding: 5px;">
+							{@html question.text}
 						</span>
                     </span>
                     <span class="list-answer-comment">
@@ -62,6 +63,7 @@
             {/each}
         </ol>
     </div>
+</div>
 </Loading>
 
 <style>
@@ -82,13 +84,14 @@
 
 	.list-question{
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-start;
 		align-items: center;
+		padding-left: 5px;
+		padding-right: 5px;
 	}
 
 	.top-list-item{
-		border-radius: 4px;
-		padding: 5px;
+		border-radius: 5px;
 	}
 
     .top-list-item:hover, .top-list-item:focus {
@@ -107,9 +110,19 @@
 		align-items: center;
 		height: 3em;
 		width: 3em;
-		border: 0.2em solid var(--quizdown-color-primary);
+		border: 0.15em solid var(--quizdown-color-primary);
 		font-size: 2em;
 		border-radius: 50%;
+	}
+
+	.results-container {
+		display: flex; 
+		flex-direction: row-reverse; 
+		align-items: center; 
+		justify-content: space-evenly;
+	}
+	.scores {
+		display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;
 	}
 
 	.results {
@@ -117,5 +130,11 @@
 		justify-content: space-around;
 	}
 
+	/* Smaller screens */
+	@media (max-width: 600px) {
+		.results-container {
+			flex-direction: column;
+		}
+	}
 	
 </style>

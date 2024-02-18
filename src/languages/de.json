@@ -4,7 +4,7 @@
     "evaluate": "Zum Ergebnis",
     "reset": "Noch einmal!",
     "hint": "Tipp anzeigen",
-    "resultsTitle": "Ihr Ergebnis",
+    "resultsTitle": "Ergebnis",
     "resultsText": "Sie haben {points} von {total} Fragen richtig beantwortet!",
     "questionLetter": "F"
 }

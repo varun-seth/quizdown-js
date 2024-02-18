@@ -4,7 +4,7 @@
     "evaluate": "Réponse",
     "reset": "Recommencer!",
     "hint": "Indice",
-    "resultsTitle": "Vos résultats",
+    "resultsTitle": "Résultats",
     "resultsText": "Vous avez répondu correctement à {points} questions sur {total}!",
     "questionLetter": "Q"
 }

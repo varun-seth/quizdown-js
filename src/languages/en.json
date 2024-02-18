@@ -4,7 +4,8 @@
     "evaluate": "Evaluate",
     "reset": "One more time!",
     "hint": "Show hint",
-    "resultsTitle": "Quiz Results",
+    "resultsTitle": "Results",
+	"score": "Score",
     "resultsText": "You have answered {points} out of {total} questions correctly!",
     "questionLetter": "Q"
 }
