@@ -100,14 +100,22 @@ document.addEventListener('DOMContentLoaded', function() {
 		font-family: sans-serif;
 	}
 
+	html, body, .container {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+
 	body {
 		font-size: 1.1em;
 		line-height: 1.5;
-		margin: 8px;
 	}
-
-	.container {
-		margin: auto;
+	.quizdown {
+		height: 100%;
+	}
+	
+	#quizContainer {
+		overflow: hidden;
 	}
 
 	#helpContainer {
@@ -117,6 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		justify-content: center;
 		max-width: 800px;
 		padding: 20px;
+		margin: auto;
 	}
 	.hidden {
 		display: none!important;
