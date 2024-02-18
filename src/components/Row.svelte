@@ -33,10 +33,6 @@
         justify-content: flex-end;
     }
 	.row {
-		left: 0px;
-		position: absolute;
-		bottom: 0px;
-		width: 100vw;
 		padding: 0;
 		margin: 0;
 	}

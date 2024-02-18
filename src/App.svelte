@@ -76,58 +76,59 @@
 
             </Container>
         </Loading>
-    </Card>
-	<Row>
+
+		<Row>
+			<Button
+			slot="left"
+			title="{$_('reset')}"
+			buttonAction="{() => {
+				reloaded = !reloaded;
+				quiz.reset();
+			}}"><Icon name="redo" /></Button
+			>
+			<svelte:fragment slot="center">
+				<Button
+					title="{$_('previous')}"
+					disabled="{$onFirst || $onResults || $isEvaluated}"
+					buttonAction="{quiz.previous}"
+					><Icon name="arrow-left" size="lg" /></Button
+				>
+
+				<span 
+				style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onResults ? 'hidden' : ''}; "
+				>
+					{$index + 1}
+					/
+					{quiz.questions.length}
+				</span>
+
+				<Button
+					disabled="{$onLast || $onResults || $isEvaluated}"
+					buttonAction="{quiz.next}"
+					title="{$_('next')}"
+					><Icon name="arrow-right" size="lg" /></Button
+				>
+
+				{#if $onLast || $allVisited}
+					<div in:fly="{{ x: 200, duration: 500 }}">
+						
+					</div>
+				{/if}
+			</svelte:fragment>
+
 		<Button
-		slot="left"
-		title="{$_('reset')}"
-		buttonAction="{() => {
-			reloaded = !reloaded;
-			quiz.reset();
-		}}"><Icon name="redo" /></Button
+		slot="right"
+		disabled="{$onResults}"
+		title="{$_('evaluate')}"
+		buttonAction="{() =>
+			quiz.jump(quiz.questions.length)}"
+		><Icon
+			name="check-double"
+			size="lg"
+		/></Button
 		>
-		<svelte:fragment slot="center">
-			<Button
-				title="{$_('previous')}"
-				disabled="{$onFirst || $onResults || $isEvaluated}"
-				buttonAction="{quiz.previous}"
-				><Icon name="arrow-left" size="lg" /></Button
-			>
-
-			<span 
-			style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onResults ? 'hidden' : ''}; "
-			>
-				{$index + 1}
-				/
-				{quiz.questions.length}
-			</span>
-
-			<Button
-				disabled="{$onLast || $onResults || $isEvaluated}"
-				buttonAction="{quiz.next}"
-				title="{$_('next')}"
-				><Icon name="arrow-right" size="lg" /></Button
-			>
-
-			{#if $onLast || $allVisited}
-				<div in:fly="{{ x: 200, duration: 500 }}">
-					
-				</div>
-			{/if}
-		</svelte:fragment>
-
-	<Button
-	slot="right"
-	disabled="{$onResults}"
-	title="{$_('evaluate')}"
-	buttonAction="{() =>
-		quiz.jump(quiz.questions.length)}"
-	><Icon
-		name="check-double"
-		size="lg"
-	/></Button
-	>
-	</Row>
+		</Row>
+	</Card>
 </div>
 
 <!-- global styles applied to all elements in the app -->
@@ -159,9 +160,10 @@
     }
 
     .quizdown-content {
-        padding: 1rem;
-        max-width: 900px;
-        margin: auto;
+        padding: 0;
+        max-width: 800px;
+        // margin: 0;
+		margin: auto;
     }
 	/* Smaller screens */
 	@media (max-width: 600px) {
