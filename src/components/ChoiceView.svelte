@@ -33,12 +33,14 @@
                     value="{i}"
                 />
                 <span>
+					<span style="color: {checked[i] ? 'var(--quizdown-color-primary)' : ''}">
 					{#if checked[i]}
 					<Icon name="check-square" ></Icon>
 					{/if}
 					{#if !checked[i]}
 					<Icon name="square" solid={false} ></Icon>
 					{/if}
+					</span>
 					{@html answer.html}
 				</span>
             </label>
@@ -53,7 +55,7 @@
                     value="{i}"
                 />
                 <span>
-					<span style={checked[i] ? '' : ''}>
+					<span style="color: {checked[i] ? 'var(--quizdown-color-primary)' : ''}">
 					{#if checked[i]}
 					<Icon name="dot-circle" solid="{true}" ></Icon>
 					{/if}
