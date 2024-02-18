@@ -23,8 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	if (githubShortcut) {
 	// Construct the GitHub raw content URL from the githubShortcut value
-		const parts = githubShortcut.split("/");
-		urlToFetch = `https://raw.githubusercontent.com/${parts[0]}/${parts[1]}/${parts[2]}/${parts[3]}`;
+
+	const parts = githubShortcut.split("/");
+	const username = parts[0];
+	const projectname = parts[1];
+	const branchname = parts[2];
+	const filepath = parts.slice(3).join('/');
+	urlToFetch = `https://raw.githubusercontent.com/${username}/${projectname}/${branchname}/${filepath}`;
+	
 	} else if (sourceUrl) {
 	// Use the direct URL provided by source or s
 		urlToFetch = sourceUrl;
