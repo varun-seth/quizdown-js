@@ -55,13 +55,25 @@ function extractQuestions(tokens: marked.Token[], config: Config) {
             // no next question on last question
             nextQuestion = tokens.length;
         }
-        let question = parseQuestion(
-            tokens.splice(0, nextQuestion + 1),
-            config
-        );
-        questions.push(question);
+		
+		let token = tokens.splice(0, nextQuestion + 1);
+
+        if (questionContainsList(token)) {
+            let question = parseQuestion(
+                token,
+                config
+            );
+            questions.push(question);
+        } else {
+            // Skip tokens without a list
+			console.log({"skipping question without any list": token})
+        }
     }
     return questions;
+}
+
+function questionContainsList(tokens: marked.Token[]): boolean {
+    return tokens.some(token => token.type === 'list');
 }
 
 function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
