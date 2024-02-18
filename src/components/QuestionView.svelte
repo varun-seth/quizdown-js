@@ -21,7 +21,7 @@
     };
 </script>
 
-<h3>
+<h3 style="text-align: center;">
     {@html question.text}
 </h3>
 

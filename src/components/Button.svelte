@@ -34,6 +34,8 @@
     }
 
     button:hover:not(:checked):not(:active):not(:disabled) {
-        filter: brightness(0.9);
+		/*reducing brightness also impacts colored icons*/
+		/*replacing background-color instead*/
+        background-color: rgb(0, 0,0, 0.1);
     }
 </style>

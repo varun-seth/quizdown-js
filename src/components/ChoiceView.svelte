@@ -103,7 +103,7 @@
     [type='checkbox']:focus + span,
     [type='radio']:hover + span,
     [type='radio']:focus + span {
-        filter: brightness(0.9);
+        background-color: rgb(0, 0,0, 0.1);
     }
 
     [type='checkbox']:checked + span,
