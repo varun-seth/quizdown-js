@@ -15,7 +15,6 @@
     import Animated from './components/Animated.svelte';
     import registerIcons from './registerIcons.js';
     import Icon from './components/Icon.svelte';
-    import Hint from './components/Hint.svelte';
     import { fly } from 'svelte/transition';
     import Container from './components/Container.svelte';
     import Loading from './components/Loading.svelte';
@@ -24,7 +23,6 @@
     export let quiz: Quiz;
     // https://github.com/sveltejs/svelte/issues/4079
     $: question = quiz.active;
-    $: showHint = $question.showHint;
     $: index = quiz.index;
     $: onLast = quiz.onLast;
     $: onFirst = quiz.onFirst;
@@ -68,75 +66,69 @@
                             <QuestionView
                                 question="{$question}"
                             />
-                            <Hint hint="{$question.hint}" show="{$showHint}" />
                         {/if}
                     </Animated>
                 </SmoothResize>
 
                 <!-- <Modal show="{showModal}">Are you sure?</Modal> -->
 
-                <Row>
-                    <Button
-                        slot="left"
-                        title="{$_('hint')}"
-                        disabled="{!$question.hint || $showHint || $onResults}"
-                        buttonAction="{$question.enableHint}"
-                        ><Icon name="lightbulb" solid="{false}" /></Button
-                    >
-                    <svelte:fragment slot="center">
-                        <Button
-                            title="{$_('previous')}"
-                            disabled="{$onFirst || $onResults || $isEvaluated}"
-                            buttonAction="{quiz.previous}"
-                            ><Icon name="arrow-left" size="lg" /></Button
-                        >
 
-                        <span 
-						style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onResults ? 'hidden' : ''}; "
-						>
-                            {$index + 1}
-                            /
-                            {quiz.questions.length}
-                        </span>
 
-                        <Button
-                            disabled="{$onLast || $onResults || $isEvaluated}"
-                            buttonAction="{quiz.next}"
-                            title="{$_('next')}"
-                            ><Icon name="arrow-right" size="lg" /></Button
-                        >
-
-                        {#if $onLast || $allVisited}
-                            <div in:fly="{{ x: 200, duration: 500 }}">
-                                <Button
-                                    disabled="{!($onLast || $allVisited) ||
-                                        $onResults}"
-                                    title="{$_('evaluate')}"
-                                    buttonAction="{() =>
-                                        quiz.jump(quiz.questions.length)}"
-                                    ><Icon
-                                        name="check-double"
-                                        size="lg"
-                                    /></Button
-                                >
-                            </div>
-                        {/if}
-                    </svelte:fragment>
-
-                    <Button
-                        slot="right"
-                        title="{$_('reset')}"
-                        buttonAction="{() => {
-                            reloaded = !reloaded;
-                            quiz.reset();
-                        }}"><Icon name="redo" /></Button
-                    >
-                </Row>
-
-                <Credits />
             </Container>
         </Loading>
-    </Card>
+
+		<Row>
+			<Button
+			slot="left"
+			title="{$_('reset')}"
+			buttonAction="{() => {
+				reloaded = !reloaded;
+				quiz.reset();
+			}}"><Icon name="redo" /></Button
+			>
+			<svelte:fragment slot="center">
+				<Button
+					title="{$_('previous')}"
+					disabled="{$onFirst || $onResults || $isEvaluated}"
+					buttonAction="{quiz.previous}"
+					><Icon name="arrow-left" size="lg" /></Button
+				>
+
+				<span 
+				style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onResults ? 'hidden' : ''}; "
+				>
+					{$index + 1}
+					/
+					{quiz.questions.length}
+				</span>
+
+				<Button
+					disabled="{$onLast || $onResults || $isEvaluated}"
+					buttonAction="{quiz.next}"
+					title="{$_('next')}"
+					><Icon name="arrow-right" size="lg" /></Button
+				>
+
+				{#if $onLast || $allVisited}
+					<div in:fly="{{ x: 200, duration: 500 }}">
+						
+					</div>
+				{/if}
+			</svelte:fragment>
+
+		<Button
+		slot="right"
+		disabled="{$onResults}"
+		title="{$_('evaluate')}"
+		buttonAction="{() =>
+			quiz.jump(quiz.questions.length)}"
+		><Icon
+			name="check-double"
+			size="lg"
+		/></Button
+		>
+		</Row>
+	</Card>
 </div>
 
 <!-- global styles applied to all elements in the app -->
@@ -168,9 +160,10 @@
     }
 
     .quizdown-content {
-        padding: 1rem;
-        max-width: 900px;
-        margin: auto;
+        padding: 0;
+        max-width: 800px;
+        // margin: 0;
+		margin: auto;
     }
 	/* Smaller screens */
 	@media (max-width: 600px) {

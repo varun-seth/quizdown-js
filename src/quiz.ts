@@ -64,9 +64,9 @@ export abstract class BaseQuestion {
         this.reset();
     }
 
-    enableHint() {
-        this.showHint.update((val) => true);
-    }
+	toggleHint() {
+		this.showHint.update(value => !value);
+	}
 
     reset() {
         this.selected = [];

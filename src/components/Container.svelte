@@ -4,9 +4,9 @@
 
 <style>
     .container {
-        padding: 2px 16px;
-        display: grid;
-        align-items: start;
-        overflow: hidden;
+		padding: 2px 16px;
+
+		flex-grow: 1;
+		overflow-y: auto;
     }
 </style>
