@@ -162,14 +162,14 @@
     .quizdown-content {
         padding: 0;
         max-width: 800px;
-        // margin: 0;
+		height: 100%;
 		margin: auto;
     }
 	/* Smaller screens */
 	@media (max-width: 600px) {
 		.quizdown-content {
 			padding: 0;
-			height: 100%;
+			margin: 0;
 		}
 	}
 
