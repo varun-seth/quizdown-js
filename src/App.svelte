@@ -55,7 +55,9 @@
 
 <div class="quizdown-content" bind:this="{node}">
     <Card>
+		{#if !($isEvaluated)}
         <ProgressBar value="{$index}" max="{quiz.questions.length - 1}" />
+		{/if}
         <Loading update="{reloaded}" ms="{800}" minHeight="{minHeight}">
             <Container>
                 <SmoothResize minHeight="{minHeight}">

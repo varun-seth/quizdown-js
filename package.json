@@ -60,8 +60,8 @@
     "repository": "https://github.com/bonartm/quizdown-js",
     "main": "public/build/quizdown.js",
     "dependencies": {
-        "@fortawesome/fontawesome-svg-core": "^1.2.35",
-        "@fortawesome/free-solid-svg-icons": "^5.15.3",
+        "@fortawesome/fontawesome-svg-core": "^6.5.1",
+        "@fortawesome/free-solid-svg-icons": "^6.5.1",
         "auto-bind": "^4.0.0",
         "dompurify": "^2.2.6",
         "highlight.js": "^10.7.0",

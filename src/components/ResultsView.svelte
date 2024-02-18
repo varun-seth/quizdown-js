@@ -3,7 +3,6 @@
     import { beforeUpdate } from 'svelte';
 
     export let quiz: Quiz;
-    let emojis = ['❌', '✅'];
     import { _ } from 'svelte-i18n';
     import { fade } from 'svelte/transition';
     import Icon from './Icon.svelte';
@@ -20,46 +19,48 @@
 
     function format(n: number) {
         return n.toLocaleString('en-US', {
-            minimumIntegerDigits: 2,
+            minimumIntegerDigits: 1,
         });
     }
 </script>
 
 <h3 style="text-align: center;">{$_('resultsTitle')}</h3>
 <Loading ms="{waitTime}" minHeight="{150}">
+	<div style="display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;">
+		<div class="badge">
+			{Math.round(100 * points / quiz.questions.length)}%
+		</div>
+		<h4>
+			Score: {points} / {format(quiz.questions.length)}
+		</h4>
+	</div>
     <div in:fade="{{ duration: 1000 }}" class="results">
         <ol>
             {#each quiz.questions as question, i}
                 <li class="top-list-item" on:click="{() => quiz.jump(i)}">
                     <span class="list-question">
-                        {emojis[+question.solved]}
+						<span>
                         {@html question.text}
+						</span>
+						<span style="padding: 5px; color: {question.solved ? '#16cc16': 'red'}">
+						<Icon name="{question.solved ? 'circle-check' : 'circle-xmark'}"></Icon>
+						</span>
                     </span>
-                    <ol>
+                    <span class="list-answer-comment">
                         <!-- answer comments when selected and available -->
                         {#each question.selected as selected}
                             {#if question.answers[selected].comment !== ''}
                                 <li class="list-comment">
-                                    <i
-                                        >{@html question.answers[selected]
-                                            .html}</i
-                                    >:
+                                    {@html question.answers[selected].html}
+									<br>
                                     {@html question.answers[selected].comment}
                                 </li>
                             {/if}
                         {/each}
-                    </ol>
+                    </span>
                 </li>
             {/each}
         </ol>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<div class="badge">
-				{Math.round(100 * points / quiz.questions.length)}%
-			</div>
-			<h3>
-				{format(points)} / {format(quiz.questions.length)}
-			</h3>
-		</div>
     </div>
 </Loading>
 
@@ -70,7 +71,6 @@
     }
 
     .top-list-item {
-        margin-bottom: 0.2rem;
         list-style-type: none;
         list-style: none;
     }
@@ -80,8 +80,20 @@
         background-color: var(--quizdown-color-secondary);
     }
 
-    .top-list-item:hover .list-question {
-        text-decoration: underline;
+	.list-question{
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.top-list-item{
+		border-radius: 4px;
+		padding: 5px;
+	}
+
+    .top-list-item:hover, .top-list-item:focus {
+        text-decoration: none;
+		background: rgb(0, 0, 0, 0.05);
     }
 
     .list-comment {
@@ -105,11 +117,5 @@
 		justify-content: space-around;
 	}
 
-	/* Smaller screens */
-	@media (max-width: 600px) {
-		.results {
-			flex-direction: column-reverse;
-		}
-	}
 	
 </style>

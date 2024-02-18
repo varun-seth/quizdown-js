@@ -1,37 +1,48 @@
-import { library, config } from '@fortawesome/fontawesome-svg-core';
+import { library, config, IconDefinition, IconPack } from '@fortawesome/fontawesome-svg-core';
 import {
     faArrowLeft,
     faArrowRight,
     faRedo,
-	faCheckDouble,
+    faCheckDouble,
     faCog,
     faCircleNotch,
-	faLightbulb,
-	faCheckSquare,
-	faSquare,
-	faDotCircle,
+    faLightbulb,
+    faCheckSquare,
+    faSquare,
+    faDotCircle,
+    faCircleCheck,
+    faCircleXmark,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
-	faSquare as faSquareRegular, 
-	faCircle as faCircleRegular,
-	faDotCircle as faDotCircleRegular
+    faSquare as faSquareRegular,
+    faCircle as faCircleRegular,
+    faDotCircle as faDotCircleRegular,
 } from '@fortawesome/free-regular-svg-icons';
 
-export default function () {
+function isIconDefinition(icon: any): icon is IconDefinition {
+    return icon && typeof icon === 'object' && 'iconName' in icon && 'prefix' in icon;
+}
+
+export default function() {
     config.autoAddCss = false;
-    library.add(
+    const icons = [
         faArrowLeft,
         faArrowRight,
         faRedo,
-        faLightbulb,
-		faCheckDouble,
+        faCheckDouble,
+        faCog,
         faCircleNotch,
-		faCheckSquare,
-		faSquare,
-		faSquareRegular,
-		faCircleRegular,
-		faDotCircle,
-		faDotCircleRegular,
-    );
+        faLightbulb,
+        faCheckSquare,
+        faSquare,
+        faDotCircle,
+        faCircleCheck,
+        faCircleXmark,
+        faSquareRegular,
+        faCircleRegular,
+        faDotCircleRegular,
+    ].filter(isIconDefinition);
+
+    library.add(...icons as IconDefinition[]);
 }
