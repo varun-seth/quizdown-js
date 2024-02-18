@@ -19,14 +19,27 @@ document.addEventListener('DOMContentLoaded', function() {
 	const queryParams = new URLSearchParams(window.location.search);
 	const sourceUrl = queryParams.get('source') || queryParams.get('s');
 	const githubShortcut = queryParams.get('github');
+	const gistShortcut = queryParams.get('gist');
+
 	let urlToFetch = '';
 
 	if (githubShortcut) {
-	// Construct the GitHub raw content URL from the githubShortcut value
-		const parts = githubShortcut.split("/");
-		urlToFetch = `https://raw.githubusercontent.com/${parts[0]}/${parts[1]}/${parts[2]}/${parts[3]}`;
+    // Construct the GitHub raw content URL from the githubShortcut value
+    const parts = githubShortcut.split("/");
+    const username = parts[0];
+    const projectname = parts[1];
+    const branchname = parts[2];
+    const filepath = parts.slice(3).join('/');
+    urlToFetch = `https://raw.githubusercontent.com/${username}/${projectname}/${branchname}/${filepath}`;
+	} else if (gistShortcut) {
+		// Construct the Gist raw content URL from the gistShortcut value
+		const parts = gistShortcut.split("/");
+		const username = parts[0];
+		const gistId = parts[1];
+		// Gists don't have a branch name or a direct file path in the URL, so use the Gist API URL format
+		urlToFetch = `https://gist.githubusercontent.com/${username}/${gistId}/raw`;
 	} else if (sourceUrl) {
-	// Use the direct URL provided by source or s
+		// Use the direct URL provided by source or s
 		urlToFetch = sourceUrl;
 	}
 
@@ -63,15 +76,24 @@ document.addEventListener('DOMContentLoaded', function() {
 			// Check if URL is not empty
 			if (url.trim() !== '') {
 				const githubPattern = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/;
-				const match = url.match(githubPattern);
+				const gistPattern = /^https:\/\/gist\.github\.com\/([^\/]+)\/([0-9a-fA-F]+)$/;
+				
+
+				const githubMatch = url.match(githubPattern);
+				const gistMatch = url.match(gistPattern);
 
 				const newUrl = new URL(window.location.href);
 
-				if (match) {
+				if (githubMatch) {
 					// If it's a GitHub URL, format it accordingly
-					const [, username, reponame, branch, filepath] = match;
+					const [, username, reponame, branch, filepath] = githubMatch;
 					const formattedGithubPath = `${username}/${reponame}/${branch}/${filepath}`;
 					newUrl.searchParams.set('github', formattedGithubPath);
+				} else if (gistMatch) {
+					// If it's a Gist URL, format it accordingly
+					const [, username, gistId] = gistMatch;
+					const formattedGistPath = `${username}/${gistId}`;
+					newUrl.searchParams.set('gist', formattedGistPath);
 				} else {
 					// For non-GitHub URLs, proceed as before
 					newUrl.searchParams.set('source', url);
@@ -118,11 +140,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		overflow: hidden;
 	}
 
-	#helpContainer {
+	#help {
 		display:  flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
 		max-width: 800px;
 		padding: 20px;
 		margin: auto;
@@ -167,6 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	<div class="container hidden" id="quizContainer" >
 	</div>
 	<div class="container hidden" id="helpContainer">
+	<div id="help">
 		<input class="url-input" type="text" 
 		placeholder="Enter the URL of a markdown file that contains the quiz."
 		id="urlInput"
@@ -215,6 +237,9 @@ document.addEventListener('DOMContentLoaded', function() {
 				</td>
 			</tr>
 		</table>		
+		Native github and gist urls are supported.
+		The github repository must be public. But the gist can be hidden.
+	</div>
 	</div>
 </body>
 
