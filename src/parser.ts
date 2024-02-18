@@ -124,19 +124,24 @@ function parseAnswer(item: marked.Tokens.ListItem) {
 }
 
 function determineQuestionType(tokens: marked.Token[]): QuestionType {
-    let list = tokens.find(
-        (token) => token.type == 'list'
-    ) as marked.Tokens.List;
-    if (list.ordered) {
-        if (list.items[0].task) {
-            return 'SingleChoice';
-        } else {
-            return 'Sequence';
-        }
-    } else {
+    let list = tokens.find((token) => token.type == 'list') as marked.Tokens.List;
+    let checkedItems = list.items.filter(item => item.checked);
+    let uncheckedItems = list.items.filter(item => !item.checked);
+
+    if (list.ordered && !list.items.some(item => item.task)) {
+        return 'Sequence';
+    } else if (!list.ordered && !list.items.some(item => item.task)) {
+		// Blanks
+        return 'Sequence';
+    } else if (checkedItems.length === 1) {
+        return 'SingleChoice';
+    } else if (checkedItems.length > 1) {
         return 'MultipleChoice';
+    } else {
+        throw 'SyntaxError: No correct options specified.';
     }
 }
+
 
 function parseTokens(tokens: marked.Token[]): string {
     return DOMPurify.sanitize(marked.parser(tokens as marked.TokensList));
