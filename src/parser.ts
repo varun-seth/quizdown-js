@@ -38,6 +38,16 @@ function hasQuizOptions(tokens: marked.TokensList) {
     return optionsIdx !== -1 && headingIdx > optionsIdx;
 }
 
+function findFirstHeadingIdx(tokens: marked.Token[], startIndex: number = 0): number {
+    for (let i = startIndex; i < tokens.length; i++) {
+        if (tokens[i]['type'] == 'heading') {
+            return i - startIndex; // Return relative index from the start index
+        }
+    }
+    return -1; // No heading found
+}
+
+
 function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
     // type definition does not allow custom token types
     // @ts-ignore
@@ -47,27 +57,22 @@ function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
 
 function extractQuestions(tokens: marked.Token[], config: Config) {
     let questions: BaseQuestion[] = [];
-    let nextQuestion = 0;
+    let startIdx = 0;
 
-    while (tokens.length !== 0) {
-        nextQuestion = findFirstHeadingIdx(tokens.slice(1));
-        if (nextQuestion === -1) {
-            // no next question on last question
-            nextQuestion = tokens.length;
-        }
-		
-		let token = tokens.splice(0, nextQuestion + 1);
+    while (startIdx < tokens.length) {
+        let relativeNextQuestionIdx = findFirstHeadingIdx(tokens, startIdx + 1);
+        let nextQuestionIdx = relativeNextQuestionIdx !== -1 ? relativeNextQuestionIdx + startIdx + 1 : tokens.length;
 
-        if (questionContainsList(token)) {
-            let question = parseQuestion(
-                token,
-                config
-            );
+        let currentTokens = tokens.slice(startIdx, nextQuestionIdx);
+		let questionType = determineQuestionType(currentTokens);
+
+        if (questionType != 'InvalidQuestion' && questionContainsList(currentTokens)) {
+            let question = parseQuestion(currentTokens, config);
             questions.push(question);
         } else {
-            // Skip tokens without a list
-			console.log({"skipping question without any list": token})
+            console.log({"skipping question without any list": currentTokens});
         }
+        startIdx = nextQuestionIdx; // Move start index forward to the next question's start or to the end of the array
     }
     return questions;
 }
@@ -94,9 +99,6 @@ function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
     }
 }
 
-function findFirstHeadingIdx(tokens: marked.Token[]): number {
-    return tokens.findIndex((token) => token['type'] == 'heading');
-}
 
 function parseHint(tokens: marked.Token[]): string {
     let blockquotes = tokens.filter((token) => token['type'] == 'blockquote');
@@ -137,6 +139,10 @@ function parseAnswer(item: marked.Tokens.ListItem) {
 
 function determineQuestionType(tokens: marked.Token[]): QuestionType {
     let list = tokens.find((token) => token.type == 'list') as marked.Tokens.List;
+	if (!list || !(list as marked.Tokens.List).items.length) {
+        // If there's no list or the list is empty, return 'Invalid' to indicate no valid question type
+        return 'InvalidQuestion';
+    }
     let checkedItems = list.items.filter(item => item.checked);
     let uncheckedItems = list.items.filter(item => !item.checked);
 
@@ -150,7 +156,8 @@ function determineQuestionType(tokens: marked.Token[]): QuestionType {
     } else if (checkedItems.length > 1) {
         return 'MultipleChoice';
     } else {
-        throw 'SyntaxError: No correct options specified.';
+		// Not even one checkbox is crossed. This is not valid.
+        return 'InvalidQuestion';
     }
 }
 
