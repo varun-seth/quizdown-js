@@ -26,7 +26,11 @@ function shuffle(array: Array<any>, n: number | undefined): Array<any> {
 }
 
 // we need to reference the classes in the svelte app despite minifaction of class names
-export type QuestionType = 'MultipleChoice' | 'SingleChoice' | 'Sequence' | 'InvalidQuestion';
+export type QuestionType =
+    | 'MultipleChoice'
+    | 'SingleChoice'
+    | 'Sequence'
+    | 'InvalidQuestion';
 
 export abstract class BaseQuestion {
     readonly text: string;
@@ -64,9 +68,9 @@ export abstract class BaseQuestion {
         this.reset();
     }
 
-	toggleHint() {
-		this.showHint.update(value => !value);
-	}
+    toggleHint() {
+        this.showHint.update((value) => !value);
+    }
 
     reset() {
         this.selected = [];
@@ -175,10 +179,10 @@ export class Quiz {
     index: Writable<number>;
     config: Config;
     onLast: Writable<boolean>; // index n-1
-	onIntro: Writable<boolean>; // index -1
+    onIntro: Writable<boolean>; // index -1
     onResults: Writable<boolean>; // index n
     onFirst: Writable<boolean>;
-	isStarted: Writable<boolean>;
+    isStarted: Writable<boolean>;
     isEvaluated: Writable<boolean>;
     allVisited: Writable<boolean>;
 
@@ -194,11 +198,11 @@ export class Quiz {
         // setup first question
         this.active = writable(this.questions[0]);
         this.questions[0].visited = true;
-		this.onIntro = writable(true);
-		this.isStarted = writable(false);
-		this.onFirst = writable(false);
-		this.onLast = writable(this.questions.length == 1);
-		this.onResults = writable(false);
+        this.onIntro = writable(true);
+        this.isStarted = writable(false);
+        this.onFirst = writable(false);
+        this.onLast = writable(this.questions.length == 1);
+        this.onResults = writable(false);
         this.allVisited = writable(this.questions.length == 1);
         this.isEvaluated = writable(false);
         autoBind(this);
@@ -210,10 +214,9 @@ export class Quiz {
         }
 
         this.index = writable(index);
-        if (index >= 0){
+        if (index >= 0) {
             this.jump(index);
         }
-
     }
 
     private setActive() {
@@ -232,17 +235,17 @@ export class Quiz {
     }
 
     jump(index: number): boolean {
-		if (index == -1) {
-			this.index.set(index);
-			this.onIntro.set(true);
-			this.onFirst.set(false);
-			this.onLast.set(false);
-			this.onResults.set(false);
-			return true;
-		}
+        if (index == -1) {
+            this.index.set(index);
+            this.onIntro.set(true);
+            this.onFirst.set(false);
+            this.onLast.set(false);
+            this.onResults.set(false);
+            return true;
+        }
         if (index <= this.questions.length - 1 && index >= 0) {
-			this.isStarted.set(true);
-			this.onIntro.set(false);
+            this.isStarted.set(true);
+            this.onIntro.set(false);
             // on a question
             this.index.set(index);
             this.setActive();
@@ -271,12 +274,12 @@ export class Quiz {
     }
 
     reset(): Boolean {
-		this.onIntro.set(true);
-		this.onFirst.set(false);
-		this.onLast.set(false);
+        this.onIntro.set(true);
+        this.onFirst.set(false);
+        this.onLast.set(false);
         this.onResults.set(false);
         this.allVisited.set(false);
-		this.isStarted.set(false);
+        this.isStarted.set(false);
         this.isEvaluated.set(false);
         this.questions.forEach((q) => q.reset());
         return this.jump(-1);

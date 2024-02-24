@@ -32,8 +32,8 @@
         display: flex;
         justify-content: flex-end;
     }
-	.row {
-		padding: 0;
-		margin: 0;
-	}
+    .row {
+        padding: 0;
+        margin: 0;
+    }
 </style>

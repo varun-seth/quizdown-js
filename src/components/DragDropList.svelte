@@ -249,8 +249,8 @@
     }
 
     .item:hover,
-    .item:focus{
-        background-color: rgb(0, 0,0, 0.1);
+    .item:focus {
+        background-color: rgb(0, 0, 0, 0.1);
     }
 
     .item:last-child {

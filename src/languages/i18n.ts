@@ -5,9 +5,7 @@ import fr from './fr.json';
 import es from './es.json';
 import hi from './hi.json';
 
-export default function (
-	locale: 'de' | 'en' | 'es' | 'fr' | 'hi' | null
-) {
+export default function (locale: 'de' | 'en' | 'es' | 'fr' | 'hi' | null) {
     addMessages('de', de);
     addMessages('en', en);
     addMessages('fr', fr);

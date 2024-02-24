@@ -49,8 +49,8 @@
         x="50%"
         y="50%"
         text-anchor="middle"
-		dominant-baseline="middle"
-		font-size="1.5em"
+        dominant-baseline="middle"
+        font-size="1.5em"
         fill="var(--quizdown-color-primary)"
     >
         {Math.round(100 * fraction)}%

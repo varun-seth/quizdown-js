@@ -6,6 +6,6 @@
 
 {#if show}
     <span in:fade|local="{{ duration: 400 }}" class="hint">
-	{@html hint}
+        {@html hint}
     </span>
 {/if}

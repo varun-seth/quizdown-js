@@ -1,5 +1,5 @@
 # Ignore artifacts:
-public
+public/build
 node_modules
 .vscode
 README.md

@@ -1,147 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-<head>
-    <meta charset='utf-8'>
-    <meta name='viewport' content='width=device-width,initial-scale=1'>
+        <title>Live Editor for Quiz</title>
 
-    <title>Live Editor for Quiz</title>
+        <script src="/build/quizdown.js"></script>
+        <script src="/build/extensions/quizdownKatex.js"></script>
+        <script src="/build/extensions/quizdownHighlight.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.js"></script>
 
-    <script src="/build/quizdown.js"></script>
-    <script src="/build/extensions/quizdownKatex.js"></script>
-    <script src="/build/extensions/quizdownHighlight.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.js"></script>
+        <style>
+            html,
+            body {
+                font-family: sans-serif;
+                height: 100%;
+                margin: 0;
+            }
+            #editorContainer,
+            #quizContainer {
+                height: 100%;
+                width: 50%;
+                float: left;
+            }
+            .container {
+                display: flex;
+                height: 100%;
+                overflow: hidden;
+            }
 
-    <style>
-        html, body {
-            font-family: sans-serif;
-            height: 100%;
-            margin: 0;
-        }
-        #editorContainer, #quizContainer {
-            height: 100%;
-            width: 50%;
-            float: left;
-        }
-        .container {
-            display: flex;
-            height: 100%;
-			overflow: hidden;
-        }
+            .quizdown {
+                height: 100%;
+            }
+        </style>
+    </head>
 
-		.quizdown{
-			height: 100%;
-		}
-    </style>
-</head>
+    <body>
+        <div class="container">
+            <div id="editorContainer"></div>
+            <div id="quizContainer"></div>
+        </div>
 
-<body>
-    <div class="container">
-        <div id="editorContainer"></div>
-        <div id="quizContainer" ></div>
-    </div>
+        <script>
+            require.config({
+                paths: {
+                    vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs',
+                },
+            });
+            require(['vs/editor/editor.main'], function () {
+                function getSavedContent() {
+                    // Try getting content from sessionStorage first, then localStorage
+                    var savedContent =
+                        sessionStorage.getItem('liveEditorContent');
+                    if (savedContent) {
+                        return savedContent;
+                    } else {
+                        // Default content if nothing is saved
+                        return [
+                            '## What is 2 + 2 ?',
+                            '',
+                            "MCQ's can be defined by a list of options with checkboxes.",
+                            'A Single-Choice Question has only one checkbox with the x character.',
+                            '',
+                            '- [ ] 0',
+                            '- [x] 4',
+                            '- [ ] 5',
+                            '',
+                            '## Solve for x in x ^ 2 = 4',
+                            '',
+                            'A Multiple-Choice Question has more than 1 checkboxes having the x character',
+                            '',
+                            '- [x] -2',
+                            '- [ ] 0',
+                            '- [x] 2',
+                            '',
+                            '## Sort from smallest to largest',
+                            '',
+                            'An ordered list of options are shown as a Sequence question.',
+                            'The quiz-participant must drag these options to the correct order.',
+                            '',
+                            '1. 0',
+                            '2. 1/3',
+                            '3. 2/3',
+                            '',
+                        ].join('\n');
+                    }
+                }
 
-    <script>
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs' }});
-        require(['vs/editor/editor.main'], function() {
-			function getSavedContent() {
-				// Try getting content from sessionStorage first, then localStorage
-				var savedContent = sessionStorage.getItem('liveEditorContent');
-				if (savedContent) {
-					return savedContent;
-				} else {
-					// Default content if nothing is saved
-					return [
-                    '## What is 2 + 2 ?', '',
-					'MCQ\'s can be defined by a list of options with checkboxes.',
-					'A Single-Choice Question has only one checkbox with the x character.', '',
-					'- [ ] 0', 
-					'- [x] 4',
-					'- [ ] 5',
-					'',
-					'## Solve for x in x ^ 2 = 4', '',
-					'A Multiple-Choice Question has more than 1 checkboxes having the x character', '',
-					'- [x] -2',
-					'- [ ] 0',
-					'- [x] 2', 
-					'',
-					'## Sort from smallest to largest', '',
-					'An ordered list of options are shown as a Sequence question.',
-					'The quiz-participant must drag these options to the correct order.', '',
-					'1. 0',
-					'2. 1/3',
-					'3. 2/3', 
-					'',
-                ].join('\n');
-				}
-			}
+                var editor = monaco.editor.create(
+                    document.getElementById('editorContainer'),
+                    {
+                        value: getSavedContent(),
+                        language: 'markdown',
+                        minimap: { enabled: false },
+                        // lineNumbers: 'off',
+                        glyphMargin: false,
+                        folding: false,
+                    }
+                );
 
-            var editor = monaco.editor.create(document.getElementById('editorContainer'), {
-                value: getSavedContent(),
-                language: 'markdown',
-				minimap: { enabled: false },
-				// lineNumbers: 'off',
-				glyphMargin: false,
-				folding: false
+                let renderQuizDebounceTimer;
+                editor.onDidChangeModelContent(function () {
+                    var currentPosition = editor.getPosition();
+                    var activeLineNumber = currentPosition.lineNumber;
+                    var currentContent = editor.getValue();
+                    clearTimeout(renderQuizDebounceTimer);
+                    renderQuizDebounceTimer = setTimeout(function () {
+                        renderQuiz(currentContent, activeLineNumber);
+                        sessionStorage.setItem(
+                            'liveEditorContent',
+                            currentContent
+                        );
+                    }, 100); // Wait for 1 second before rendering
+                });
+
+                // Intercept Ctrl+S and Command+S
+                editor.addCommand(
+                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
+                    function () {
+                        var content = editor.getValue();
+                        downloadContent(content, 'quiz.md');
+                    }
+                );
+
+                renderQuiz(editor.getValue());
             });
 
-			let renderQuizDebounceTimer;
-            editor.onDidChangeModelContent(function() {
-                var currentPosition = editor.getPosition();
-                var activeLineNumber = currentPosition.lineNumber;
-				var currentContent = editor.getValue();
-				clearTimeout(renderQuizDebounceTimer);
-				renderQuizDebounceTimer = setTimeout(function() {
-					renderQuiz(
-                        currentContent,
-                        activeLineNumber,
-                    );
-					sessionStorage.setItem('liveEditorContent', currentContent);
-				}, 100); // Wait for 1 second before rendering
-            });
+            function downloadContent(content, filename) {
+                var element = document.createElement('a');
+                element.setAttribute(
+                    'href',
+                    'data:text/plain;charset=utf-8,' +
+                        encodeURIComponent(content)
+                );
+                element.setAttribute('download', filename);
 
-			// Intercept Ctrl+S and Command+S
-			editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, function() {
-				var content = editor.getValue();
-				downloadContent(content, "quiz.md");
-			});
+                element.style.display = 'none';
+                document.body.appendChild(element);
 
+                element.click();
 
+                document.body.removeChild(element);
+            }
 
-            renderQuiz(editor.getValue());
-        });
+            function renderQuiz(markdown, activeLineNumber = 0) {
+                const quizContainer = document.getElementById('quizContainer');
+                quizContainer.innerHTML = ''; // Clear previous content
+                const newQuizElement = document.createElement('div');
+                newQuizElement.className = 'quizdown';
+                quizContainer.appendChild(newQuizElement);
 
-		function downloadContent(content, filename) {
-			var element = document.createElement('a');
-			element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
-			element.setAttribute('download', filename);
-
-			element.style.display = 'none';
-			document.body.appendChild(element);
-
-			element.click();
-
-			document.body.removeChild(element);
-		}
-
-
-        function renderQuiz(markdown, activeLineNumber=0) {
-            const quizContainer = document.getElementById('quizContainer');
-            quizContainer.innerHTML = ''; // Clear previous content
-            const newQuizElement = document.createElement('div');
-            newQuizElement.className = 'quizdown';
-            quizContainer.appendChild(newQuizElement);
-
-            let config = {
-                "shuffleAnswers": false,
-                "shuffleQuestions": false,
-                "primaryColor": "#316FF6",
-                "secondaryColor": "#f8f8f8",
-                "activeLineNumber": activeLineNumber,
-            };
-            quizdown.register(quizdownKatex).register(quizdownHighlight).createApp(markdown, newQuizElement, config);
-        }
-    </script>
-</body>
-
+                let config = {
+                    shuffleAnswers: false,
+                    shuffleQuestions: false,
+                    primaryColor: '#316FF6',
+                    secondaryColor: '#f8f8f8',
+                    activeLineNumber: activeLineNumber,
+                };
+                quizdown
+                    .register(quizdownKatex)
+                    .register(quizdownHighlight)
+                    .createApp(markdown, newQuizElement, config);
+            }
+        </script>
+    </body>
 </html>

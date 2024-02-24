@@ -1,7 +1,6 @@
 <script lang="ts">
     import { fade } from 'svelte/transition';
     export let update: any;
-
 </script>
 
 {#key update}
