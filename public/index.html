@@ -13,17 +13,64 @@
 	<script src="./build/extensions/quizdownKatex.js"></script>
 	<script src="./build/extensions/quizdownHighlight.js"></script>
 	<script>
-document.addEventListener('DOMContentLoaded', function() {
+
+function markdownDownload(url, fn){
+	fetch(url)
+	.then(response => response.text())
+	.then(text => fn(text))
+	.catch(error => console.error('Error fetching markdown:', error));
+}
+
+function markdownDownloadGist(url, fn) {
+	fetch(url).then(response => response.json())
+	.then(data => {
+		const files = data.files;
+		const fileKeys = Object.keys(files);
+		if (fileKeys.length === 1) {
+                // If only one file, use it directly
+                markdown = files[fileKeys[0]].content;
+            } else {
+                // If multiple files, find the first .md file
+				const mdFileKey = fileKeys.find(key => files[key].filename.toLowerCase().endsWith('.md'));
+                if (mdFileKey) {
+                    markdown = files[mdFileKey].content;
+                } else {
+                    throw new Error('Markdown file not found in Gist');
+                }
+            }
+		fn(markdown);
+	}).catch(error => console.error('Error fetching markdown:', error));
+}
+
+function init(){
+	// hide all / destroy quiz.
+	const quizContainer = document.getElementById('quizContainer');
+	quizContainer.classList.add("hidden");
+	const helpContainer = document.getElementById('helpContainer');
+	helpContainer.classList.add("hidden");
+	// delete any quiz
+	let quizElement = document.getElementById("quiz");
+	if (quizElement){
+		quizElement.remove()
+	}
 
 	// Fetch the markdown content from the provided URL
+	console.log("init");
 	const queryParams = new URLSearchParams(window.location.search);
 	const sourceUrl = queryParams.get('source') || queryParams.get('s');
+	const gistId = window.location.hash.substring(1);
 	const githubShortcut = queryParams.get('github');
 	const gistShortcut = queryParams.get('gist');
+	let downloadFn = markdownDownload;
+    id = window.location.hash.substring(1);
 
 	let urlToFetch = '';
+	if (gistId) {
+		// super shortcut. domain.com/#id
+		urlToFetch = `https://api.github.com/gists/${gistId}`;
 
-	if (githubShortcut) {
+		downloadFn = markdownDownloadGist;
+	} else if (githubShortcut) {
     // Construct the GitHub raw content URL from the githubShortcut value
     const parts = githubShortcut.split("/");
     const username = parts[0];
@@ -44,13 +91,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	if (urlToFetch) {
-	fetch(urlToFetch)
-		.then(response => response.text())
-		.then(markdown => {
+		downloadFn(urlToFetch, markdown => {
 			// Inject the markdown into the quiz container
-			const quizContainer = document.getElementById('quizContainer');
 			quizContainer.classList.remove('hidden');
 			const newQuizElement = document.createElement('div');
+			newQuizElement.id = 'quiz';
 			newQuizElement.className = 'quizdown';
 
 			quizContainer.appendChild(newQuizElement);
@@ -61,8 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				"secondaryColor": "#ffffff",
 			};
 			quizdown.register(quizdownKatex).register(quizdownHighlight).createApp(markdown, newQuizElement, config);
-		})
-		.catch(error => console.error('Error fetching markdown:', error));
+		});
 	}
 	else {
 		const helpContainer = document.getElementById('helpContainer');
@@ -92,8 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				} else if (gistMatch) {
 					// If it's a Gist URL, format it accordingly
 					const [, username, gistId] = gistMatch;
-					const formattedGistPath = `${username}/${gistId}`;
-					newUrl.searchParams.set('gist', formattedGistPath);
+					newUrl.hash = gistId;
 				} else {
 					// For non-GitHub URLs, proceed as before
 					newUrl.searchParams.set('source', url);
@@ -113,7 +156,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 
 	}
-});
+}
+
+document.addEventListener('DOMContentLoaded', init);
+window.addEventListener('hashchange', init);
 	</script>
 </head>
 
