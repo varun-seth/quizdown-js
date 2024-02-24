@@ -43,7 +43,8 @@ function createApp(rawQuizdown: string, node: Element, config: Config): App {
         });
         return app;
     } catch (e) {
-        root.innerHTML = `${e}. App could not render. Please check your quizdown syntax.`;
+        console.error(e);
+        root.innerHTML = `App could not render. Please check your quizdown syntax.`;
     }
 }
 

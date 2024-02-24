@@ -30,6 +30,7 @@ export type QuestionType =
     | 'MultipleChoice'
     | 'SingleChoice'
     | 'Sequence'
+    | 'Information'
     | 'InvalidQuestion';
 
 export abstract class BaseQuestion {
@@ -43,6 +44,8 @@ export abstract class BaseQuestion {
     readonly options: Config;
     showHint: Writable<boolean>;
     visited: boolean;
+    readonly maxScore: number;
+    index: number;
 
     constructor(
         text: string,
@@ -52,9 +55,7 @@ export abstract class BaseQuestion {
         questionType: QuestionType,
         options: Config
     ) {
-        if (answers.length === 0) {
-            throw 'no answers for question provided';
-        }
+        this.maxScore = questionType == 'Information' ? 0 : 1;
         this.text = text;
         this.explanation = explanation;
         this.hint = hint;
@@ -158,6 +159,29 @@ export class SingleChoice extends Choice {
     }
 }
 
+export class Information extends BaseQuestion {
+    constructor(
+        text: string,
+        explanation: string,
+        hint: string,
+        answers: Array<Answer>,
+        options: Config
+    ) {
+        super(text, explanation, hint, answers, 'Information', options);
+    }
+
+    isCorrect() {
+        return true;
+    }
+
+    reset() {
+        this.selected = [];
+        this.solved = false;
+        this.visited = false;
+        this.showHint.set(false);
+    }
+}
+
 export class Answer {
     html: string;
     correct: boolean;
@@ -185,6 +209,7 @@ export class Quiz {
     isStarted: Writable<boolean>;
     isEvaluated: Writable<boolean>;
     allVisited: Writable<boolean>;
+    totalPoints: number;
 
     constructor(questions: Array<BaseQuestion>, config: Config) {
         this.questions = questions;
@@ -192,12 +217,16 @@ export class Quiz {
         if (this.config.shuffleQuestions) {
             this.questions = shuffle(this.questions, this.config.nQuestions);
         }
+        let i = 0;
+        for (let question of this.questions) {
+            question.index = i;
+            i++;
+        }
         if (this.questions.length == 0) {
-            throw 'No questions for quiz provided';
+            console.warn('No questions for quiz provided');
         }
         // setup first question
-        this.active = writable(this.questions[0]);
-        this.questions[0].visited = true;
+        this.active = writable(undefined);
         this.onIntro = writable(true);
         this.isStarted = writable(false);
         this.onFirst = writable(false);
@@ -285,11 +314,19 @@ export class Quiz {
         return this.jump(-1);
     }
 
+    maxScoreTotal(): number {
+        let total = 0;
+        for (let q of this.questions) {
+            total += q.maxScore;
+        }
+        return total;
+    }
+
     evaluate(): number {
-        var points = 0;
+        let points = 0;
         for (var q of this.questions) {
             if (q.isCorrect()) {
-                points += 1;
+                points += q.maxScore;
             }
         }
         this.isEvaluated.set(true);

@@ -5,6 +5,7 @@ import {
     BaseQuestion,
     MultipleChoice,
     SingleChoice,
+    Information,
     Sequence,
     Answer,
     QuestionType,
@@ -107,10 +108,7 @@ function extractQuestions(
         let currentTokens = tokens.slice(startIdx, nextQuestionIdx);
         let questionType = determineQuestionType(currentTokens);
 
-        if (
-            questionType != 'InvalidQuestion' &&
-            questionContainsList(currentTokens)
-        ) {
+        if (questionType != 'InvalidQuestion') {
             let question = parseQuestion(currentTokens, config);
             questions.push(question);
         } else {
@@ -129,10 +127,6 @@ function extractQuestions(
     return questions;
 }
 
-function questionContainsList(tokens: marked.Token[]): boolean {
-    return tokens.some((token) => token.type === 'list');
-}
-
 function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
     let explanation = parseExplanation(tokens);
     let hint = parseHint(tokens);
@@ -148,6 +142,8 @@ function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
             return new MultipleChoice(...args);
         case 'Sequence':
             return new Sequence(...args);
+        case 'Information':
+            return new Information(...args);
     }
 }
 
@@ -172,6 +168,9 @@ function parseAnswers(tokens: marked.Token[]): Array<Answer> {
     let list = tokens.find(
         (token) => token.type == 'list'
     ) as marked.Tokens.List;
+    if (list == undefined) {
+        return [];
+    }
     let answers: Array<Answer> = [];
     list.items.forEach(function (item, i) {
         let answer = parseAnswer(item);
@@ -194,7 +193,7 @@ function determineQuestionType(tokens: marked.Token[]): QuestionType {
     ) as marked.Tokens.List;
     if (!list || !(list as marked.Tokens.List).items.length) {
         // If there's no list or the list is empty, return 'Invalid' to indicate no valid question type
-        return 'InvalidQuestion';
+        return 'Information';
     }
     let checkedItems = list.items.filter((item) => item.checked);
     let uncheckedItems = list.items.filter((item) => !item.checked);

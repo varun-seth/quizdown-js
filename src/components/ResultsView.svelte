@@ -11,7 +11,12 @@
     import { get } from 'svelte/store';
 
     let points = 0;
-    beforeUpdate(() => (points = quiz.evaluate()));
+    let total = 0;
+
+    beforeUpdate(() => {
+        points = quiz.evaluate();
+        total = quiz.maxScoreTotal();
+    });
 
     function format(n: number) {
         return n.toLocaleString('en-US', {
@@ -23,16 +28,19 @@
 <h3 style="text-align: center;">{$_('resultsTitle')}</h3>
 <div class="results-container">
     <div class="scores">
-        <ScoreBadge fraction="{points / quiz.questions.length}"></ScoreBadge>
+        <ScoreBadge fraction="{points / total}"></ScoreBadge>
 
         <h4 style="text-wrap: nowrap;">
-            {$_('score')} : {points} / {format(quiz.questions.length)}
+            {$_('score')} : {points} / {format(total)}
         </h4>
     </div>
     <div in:fade="{{ duration: 1000 }}" class="results">
         <ol>
-            {#each quiz.questions as question, i}
-                <li class="top-list-item" on:click="{() => quiz.jump(i)}">
+            {#each quiz.questions.filter((question) => question.maxScore) as question}
+                <li
+                    class="top-list-item"
+                    on:click="{() => quiz.jump(question.index)}"
+                >
                     <span class="list-question">
                         <span
                             style="padding: 5px; color: {question.solved

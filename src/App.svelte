@@ -20,6 +20,7 @@
     import Loading from './components/Loading.svelte';
     // import Modal from './components/Modal.svelte';
     import { fade } from 'svelte/transition';
+    import { beforeUpdate } from 'svelte';
 
     export let quiz: Quiz;
     // https://github.com/sveltejs/svelte/issues/4079
@@ -32,6 +33,12 @@
     $: isEvaluated = quiz.isEvaluated;
     $: isStarted = quiz.isStarted;
     $: allVisited = quiz.allVisited;
+
+    let maxScore: number;
+
+    beforeUpdate(() => {
+        maxScore = quiz.maxScoreTotal();
+    });
 
     //let game = new Linear(quiz);
 
@@ -67,7 +74,9 @@
                     {/if}
                 </span>
                 <div>
-                    Number of Questions: {quiz.questions.length}
+                    Count: {quiz.questions.length}
+                    <br />
+                    Score: {maxScore}
                 </div>
 
                 {#if quiz.config.authorName}
@@ -155,6 +164,7 @@
                 </svelte:fragment>
 
                 <Button
+                    color="{$onLast && !$isEvaluated ? 'primary' : ''}"
                     slot="right"
                     disabled="{$onResults || $onIntro}"
                     title="{$_('evaluate')}"
