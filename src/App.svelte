@@ -56,22 +56,44 @@
 </script>
 
 <div class="quizdown-content" bind:this="{node}">
-    <Card>
-        <ProgressBar value="{$index}" max="{quiz.questions.length}" />
+	<Card>
+	{#if $onIntro}
+	<div class="intro-page" style="text-align: center;">
+		<h1>Welcome to the Quiz</h1>
+		{#if quiz.config.authorName}
+		<div style="display: inline-flex; flex-direction: column;">
+			<span style="color: gray">Author</span>
+			<a href="{quiz.config.authorImageUrl}">
+				<img 
+				class="author-image"
+				alt="{quiz.config.authorName}" 
+				src="{quiz.config.authorImageUrl}"
+				/>
+			</a>
+			<a href="{quiz.config.authorUrl}">
+				{quiz.config.authorName}
+			</a>
+		</div>
+		<br/>
+		{/if}
+
+		<Button 
+			title="Start" buttonAction="{() =>quiz.jump(0)}"
+			color="primary"
+			>
+			<Icon name="play"></Icon>
+			{$_('start')}
+		</Button>
+	</div>
+	{/if}
+	{#if !$onIntro}
+		<ProgressBar value="{$index}" max="{quiz.questions.length}" />
             <Container>
                 <SmoothResize minHeight="{minHeight}">
                     <Animated update="{$index}">
-						{#if $onIntro}
-							<div class="homepage" style="text-align: center;">
-								<h1>Welcome to the Quiz</h1>
-								<Button title="Start" buttonAction="{() =>quiz.jump(0)}">
-									<Icon name="play"></Icon>
-									{$_('start')}
-								</Button>
-							</div>
-                        {:else if $onResults}
+						{#if $onResults}
                             <ResultsView quiz="{quiz}" />
-                        {:else}
+                        {:else if !$onIntro}
                             <QuestionView
                                 question="{$question}"
                             />
@@ -140,6 +162,7 @@
 		</Button
 		>
 		</Row>
+	{/if}
 	</Card>
 </div>
 
@@ -196,6 +219,21 @@
 			padding: 0;
 			margin: 0;
 		}
+	}
+
+	.author-image{
+		height: 100px;
+		width: 100px;
+		border-radius: 50%;
+		border: 2px solid gray;
+	}
+
+	.intro-page{
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-around;
+		align-items: center;
 	}
 
 </style>

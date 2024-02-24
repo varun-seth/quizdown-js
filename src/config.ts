@@ -26,6 +26,11 @@ export class Config {
     secondaryColor: string;
     textColor: string;
     locale: 'de' | 'en' | 'es' | 'fr' | null;
+	skipIntro: boolean; // an intro screen shows start button and minor description
+	authorName: string;
+	authorUrl: string;
+	authorImageUrl: string;
+	quizId: string | null;
 
     constructor(options: Config | object) {
         // handle <=v0.3.0 snake_case options for backwards compatibility
@@ -40,6 +45,11 @@ export class Config {
         this.secondaryColor = get(options['secondaryColor'], '#f2f2f2');
         this.textColor = get(options['textColor'], 'black');
         this.locale = get(options['locale'], null);
+		this.skipIntro = get(options['locale'], false);
+		this.quizId = get(options['quizId'], 'quiz-0');
+		this.authorName = get(options['authorName'], '');
+		this.authorUrl = get(options['authorUrl'], '');
+		this.authorImageUrl = get(options['authorImageUrl'], '');
     }
 }
 
