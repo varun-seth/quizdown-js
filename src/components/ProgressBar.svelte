@@ -46,8 +46,11 @@
 </script>
 
 <div class="progress" data-label="">
-    <div class="progress-slider" style="width:{progressPercent1}">
-		<div class="progress-slider-inner" style="width:{progressPercent2}"></div>
+    <div class="progress-slider {value < max - 1 ? 'progress-right-round' : ''}" style="width:{progressPercent1}">
+		<div 
+		class="progress-slider-inner {value > 0 ? 'progress-left-round' : ''} {value < max - 1 ? 'progress-right-round': ''}" 
+		style="width:{progressPercent2}">
+	</div>
 	</div>
     
 </div>
@@ -59,15 +62,25 @@
         width: 100%;
         position: relative;
 		display: flex;
+		/* background-color: color-mix(in srgb, var(--quizdown-color-primary) 10%, white 90%); */
     }
 
     .progress .progress-slider {
-        background-color: var(--quizdown-color-secondary);
+        background-color: color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
         height: 100%;
         /* display: block; */
 		display: flex;
 		flex-direction: row-reverse;
     }
+
+	.progress-right-round {
+		/* border-top-right-radius: 5px; */
+		border-bottom-right-radius: 5px;
+	}
+	.progress-left-round {
+		/* border-top-left-radius: 5px; */
+		border-bottom-left-radius: 5px;
+	}
     .progress .progress-slider-inner{
         background-color: var(--quizdown-color-primary);
 		/* background-color: white; */
