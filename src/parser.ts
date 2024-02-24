@@ -14,16 +14,19 @@ import marked from './customizedMarked';
 
 function parseQuizdown(rawQuizdown: string, globalConfig: Config): Quiz {
     let tokens = tokenize(rawQuizdown);
-    
+
     let activeQuestion: number;
 
-    if (globalConfig.activeLineNumber){
-        activeQuestion = findQuestionByLineNumber(tokens, globalConfig.activeLineNumber);
+    if (globalConfig.activeLineNumber) {
+        activeQuestion = findQuestionByLineNumber(
+            tokens,
+            globalConfig.activeLineNumber
+        );
     }
-    
+
     let quizConfig = new Config(globalConfig);
     if (activeQuestion >= 0) {
-        quizConfig.activeQuestion = (activeQuestion);
+        quizConfig.activeQuestion = activeQuestion;
     }
     if (hasQuizOptions(tokens)) {
         quizConfig = parseOptions(tokens, quizConfig);
@@ -38,7 +41,10 @@ function tokenize(rawQuizdown: string): marked.TokensList {
     return marked.lexer(htmlDecode(stripIndent(rawQuizdown)));
 }
 
-function findQuestionByLineNumber(tokens: marked.TokensList, lineNumber: number) {
+function findQuestionByLineNumber(
+    tokens: marked.TokensList,
+    lineNumber: number
+) {
     let lineCount = 1;
     let questionNumber = -1;
 
@@ -65,7 +71,10 @@ function hasQuizOptions(tokens: marked.TokensList) {
     return optionsIdx !== -1 && headingIdx > optionsIdx;
 }
 
-function findFirstHeadingIdx(tokens: marked.Token[], startIndex: number = 0): number {
+function findFirstHeadingIdx(
+    tokens: marked.Token[],
+    startIndex: number = 0
+): number {
     for (let i = startIndex; i < tokens.length; i++) {
         if (tokens[i]['type'] == 'heading') {
             return i - startIndex; // Return relative index from the start index
@@ -74,7 +83,6 @@ function findFirstHeadingIdx(tokens: marked.Token[], startIndex: number = 0): nu
     return -1; // No heading found
 }
 
-
 function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
     // type definition does not allow custom token types
     // @ts-ignore
@@ -82,25 +90,39 @@ function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
     return mergeAttributes(quizConfig, options['data']);
 }
 
-function extractQuestions(tokens: marked.Token[], config: Config): BaseQuestion[] {
+function extractQuestions(
+    tokens: marked.Token[],
+    config: Config
+): BaseQuestion[] {
     let questions: BaseQuestion[] = [];
     let startIdx = 0;
 
     while (startIdx < tokens.length) {
         let relativeNextQuestionIdx = findFirstHeadingIdx(tokens, startIdx + 1);
-        let nextQuestionIdx = relativeNextQuestionIdx !== -1 ? relativeNextQuestionIdx + startIdx + 1 : tokens.length;
+        let nextQuestionIdx =
+            relativeNextQuestionIdx !== -1
+                ? relativeNextQuestionIdx + startIdx + 1
+                : tokens.length;
 
         let currentTokens = tokens.slice(startIdx, nextQuestionIdx);
-		let questionType = determineQuestionType(currentTokens);
+        let questionType = determineQuestionType(currentTokens);
 
-        if (questionType != 'InvalidQuestion' && questionContainsList(currentTokens)) {
+        if (
+            questionType != 'InvalidQuestion' &&
+            questionContainsList(currentTokens)
+        ) {
             let question = parseQuestion(currentTokens, config);
             questions.push(question);
         } else {
-            if (config.activeLineNumber >= 0 && config.activeLineNumber >= (questions.length - 1)) {
+            if (
+                config.activeLineNumber >= 0 &&
+                config.activeLineNumber >= questions.length - 1
+            ) {
                 config.activeLineNumber -= 1;
             }
-            console.log({"skipping question without any list": currentTokens});
+            console.log({
+                'skipping question without any list': currentTokens,
+            });
         }
         startIdx = nextQuestionIdx; // Move start index forward to the next question's start or to the end of the array
     }
@@ -108,7 +130,7 @@ function extractQuestions(tokens: marked.Token[], config: Config): BaseQuestion[
 }
 
 function questionContainsList(tokens: marked.Token[]): boolean {
-    return tokens.some(token => token.type === 'list');
+    return tokens.some((token) => token.type === 'list');
 }
 
 function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
@@ -128,7 +150,6 @@ function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
             return new Sequence(...args);
     }
 }
-
 
 function parseHint(tokens: marked.Token[]): string {
     let blockquotes = tokens.filter((token) => token['type'] == 'blockquote');
@@ -168,29 +189,30 @@ function parseAnswer(item: marked.Tokens.ListItem) {
 }
 
 function determineQuestionType(tokens: marked.Token[]): QuestionType {
-    let list = tokens.find((token) => token.type == 'list') as marked.Tokens.List;
-	if (!list || !(list as marked.Tokens.List).items.length) {
+    let list = tokens.find(
+        (token) => token.type == 'list'
+    ) as marked.Tokens.List;
+    if (!list || !(list as marked.Tokens.List).items.length) {
         // If there's no list or the list is empty, return 'Invalid' to indicate no valid question type
         return 'InvalidQuestion';
     }
-    let checkedItems = list.items.filter(item => item.checked);
-    let uncheckedItems = list.items.filter(item => !item.checked);
+    let checkedItems = list.items.filter((item) => item.checked);
+    let uncheckedItems = list.items.filter((item) => !item.checked);
 
-    if (list.ordered && !list.items.some(item => item.task)) {
+    if (list.ordered && !list.items.some((item) => item.task)) {
         return 'Sequence';
-    } else if (!list.ordered && !list.items.some(item => item.task)) {
-		// Blanks
+    } else if (!list.ordered && !list.items.some((item) => item.task)) {
+        // Blanks
         return 'Sequence';
     } else if (checkedItems.length === 1) {
         return 'SingleChoice';
     } else if (checkedItems.length > 1) {
         return 'MultipleChoice';
     } else {
-		// Not even one checkbox is crossed. This is not valid.
+        // Not even one checkbox is crossed. This is not valid.
         return 'InvalidQuestion';
     }
 }
-
 
 function parseTokens(tokens: marked.Token[]): string {
     return DOMPurify.sanitize(marked.parser(tokens as marked.TokensList));
