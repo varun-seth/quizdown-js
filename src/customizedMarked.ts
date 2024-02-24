@@ -23,10 +23,6 @@ const tokenizer: marked.TokenizerObject = {
 
 // customize renderer
 const renderer: marked.RendererObject = {
-    // disable paragraph
-    paragraph(text) {
-        return text;
-    },
     //disable blockquote, we use this for hints
     blockquote(text) {
         return text;

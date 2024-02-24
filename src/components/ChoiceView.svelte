@@ -31,8 +31,9 @@
                     bind:group="{question.selected}"
                     value="{i}"
                 />
-                <span>
+                <span class="my-choice">
                     <span
+                        class="my-choice-marker"
                         style="color: {checked[i]
                             ? 'var(--quizdown-color-primary)'
                             : ''}"
@@ -56,8 +57,9 @@
                     bind:group="{question.selected[0]}"
                     value="{i}"
                 />
-                <span>
+                <span class="my-choice">
                     <span
+                        class="my-choice-marker"
                         style="color: {checked[i]
                             ? 'var(--quizdown-color-primary)'
                             : ''}"
@@ -117,5 +119,17 @@
     [type='checkbox']:checked + span,
     [type='radio']:checked + span {
         border: 3px solid var(--quizdown-color-primary);
+    }
+
+    .my-choice {
+        padding-left: 2em !important;
+    }
+    .my-choice-marker {
+        position: absolute;
+        left: 1em;
+    }
+    :global(.my-choice p) {
+        margin-block-start: 0;
+        margin-block-end: 0;
     }
 </style>

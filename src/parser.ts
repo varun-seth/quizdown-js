@@ -24,9 +24,12 @@ function parseQuizdown(rawQuizdown: string, globalConfig: Config): Quiz {
 
     if (globalConfig.activeLineNumber) {
         activeQuestion = findQuestionByLineNumber(
-            tokens.slice(firstQuestionIdx),
+            tokens,
             globalConfig.activeLineNumber
         );
+        if (title) {
+            activeQuestion -= 1;
+        }
     }
 
     let quizConfig = new Config(globalConfig);

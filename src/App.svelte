@@ -63,18 +63,18 @@
 </script>
 
 <div class="quizdown-content" bind:this="{node}">
+    <ProgressBar value="{$index}" max="{quiz.questions.length}" />
     <Card>
-        <ProgressBar value="{$index}" max="{quiz.questions.length}" />
         {#if $onIntro}
             <div class="intro-page">
-                <span>
+                <div style="width: 100%">
                     <h1 style="text-align: center;">
                         {quiz.config.title || 'Welcome to the Quiz'}
                     </h1>
                     {#if quiz.config.description}
                         <p>{@html quiz.config.description}</p>
                     {/if}
-                </span>
+                </div>
                 <div>
                     Count: {quiz.questions.length}
                     <br />
@@ -250,7 +250,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: center;
     }
 </style>
