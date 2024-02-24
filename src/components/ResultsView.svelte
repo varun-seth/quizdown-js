@@ -31,7 +31,7 @@
 		<div class="badge">
 			{Math.round(100 * points / quiz.questions.length)}%
 		</div>
-		<h4>
+		<h4 style="text-wrap: nowrap;">
 			{$_('score')} : {points} / {format(quiz.questions.length)}
 		</h4>
 	</div>
@@ -118,11 +118,15 @@
 	.results-container {
 		display: flex; 
 		flex-direction: row-reverse; 
-		align-items: center; 
+		align-items: flex-start; 
 		justify-content: space-evenly;
 	}
 	.scores {
-		display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;
+		display: flex; 
+		flex-direction: column; 
+		align-items: center; 
+		justify-content: space-evenly;
+		margin-top: 20px;
 	}
 
 	.results {
@@ -134,6 +138,10 @@
 	@media (max-width: 600px) {
 		.results-container {
 			flex-direction: column;
+			align-items: center;
+		}
+		.scores {
+			margin-top: 0;
 		}
 	}
 	
