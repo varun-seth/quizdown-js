@@ -7,12 +7,12 @@
     export let max: number;
 
     const progress1 = tweened(0, {
-        duration: 300,
-        easing: cubicIn,
+        duration: 150,
+        easing: linear,
     });
     const progress2 = tweened(1, {
-        duration: 300,
-        easing: cubicInOut,
+        duration: 150,
+        easing: linear,
     });
 	const lastValue = writable(value);
 
@@ -23,30 +23,18 @@
 		})();
 
 		if (value >= previousValue) {
-			await progress2.set(0, {duration: 200}); 
+			await progress2.set(0, {duration: 100}); 
 			progress1.set(value + 1, {duration: 200});
 			if (value < max){
 				await progress2.set(1/(value + 1), {duration: 200});
 			}
-		} else if (value < previousValue) {
-			progress2.set(0, {duration: 200});
-			await progress1.set(value + 1, {duration: 200});
+		} else {
+			progress2.set(0, {duration: 100});
+			await progress1.set(value + 1, {duration: 100});
 			progress2.set(1/(value + 1), {duration: 200});
 		}
 
-        // // Decrease progress2 to 0
-        // await progress2.set(0, {duration: 200}); 
-
-		// // Animate progress1 to increase by 1 unit
-		// progress1.set(value + 1, {duration: 200});
-
-        // // Simultaneously, grow progress2 from 0 to 1 without considering max
-		// if (value < max){
-		// 	await progress2.set( 1/(value + 1) , {duration: 200}); // Grows back to 1 unit
-		// }
-
 		lastValue.set(value);
-
     }
 
     $: if (value !== undefined && max !== undefined) {
@@ -74,16 +62,16 @@
     }
 
     .progress .progress-slider {
-        background-color: var(--quizdown-color-primary);
+        background-color: var(--quizdown-color-secondary);
         height: 100%;
         /* display: block; */
 		display: flex;
 		flex-direction: row-reverse;
     }
     .progress .progress-slider-inner{
-        /* background-color: var(--quizdown-color-primary); */
-		background-color: white;
-		opacity: 0.5;
+        background-color: var(--quizdown-color-primary);
+		/* background-color: white; */
+		opacity: 1;
         height: 100%;
         display: block;
     }
