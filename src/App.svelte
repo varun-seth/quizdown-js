@@ -87,7 +87,7 @@
 			<svelte:fragment slot="center">
 				<Button
 					title="{$_('previous')}"
-					disabled="{$onFirst || $onResults || $isEvaluated}"
+					disabled="{$onFirst}"
 					buttonAction="{quiz.previous}"
 					><Icon name="arrow-left" size="lg" /></Button
 				>
@@ -101,7 +101,7 @@
 				</span>
 
 				<Button
-					disabled="{$onLast || $onResults || $isEvaluated}"
+					disabled="{$onResults || (!$isEvaluated && $onLast) }"
 					buttonAction="{quiz.next}"
 					title="{$_('next')}"
 					><Icon name="arrow-right" size="lg" /></Button
