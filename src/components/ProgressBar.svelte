@@ -23,13 +23,20 @@
 		})();
 
 		if (value >= previousValue) {
-			await progress2.set(0, {duration: 100}); 
+			if (value > 0) {
+				await progress2.set(0, {duration: 100}); 
+			}
+			else {
+				progress2.set(1, {duration: 100}); 
+			}
 			progress1.set(value + 1, {duration: 200});
 			if (value < max){
-				await progress2.set(1/(value + 1), {duration: 200});
+				progress2.set(1/(value + 1), {duration: 200});
 			}
 		} else {
-			progress2.set(0, {duration: 100});
+			if (value >= 0) {
+				progress2.set(0, {duration: 100});
+			}
 			await progress1.set(value + 1, {duration: 100});
 			progress2.set(1/(value + 1), {duration: 200});
 		}
@@ -48,7 +55,7 @@
 <div class="progress" data-label="">
     <div class="progress-slider {value < max - 1 ? 'progress-right-round' : ''}" style="width:{progressPercent1}">
 		<div 
-		class="progress-slider-inner {value > 0 ? 'progress-left-round' : ''} {value < max - 1 ? 'progress-right-round': ''}" 
+		class="progress-slider-inner {value > 0 ? 'progress-left-round' : ''} progress-right-round" 
 		style="width:{progressPercent2}">
 	</div>
 	</div>
