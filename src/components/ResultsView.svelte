@@ -9,11 +9,6 @@
     import Loading from './Loading.svelte';
     import { get } from 'svelte/store';
 
-    let waitTime = 800;
-    if (get(quiz.isEvaluated)) {
-        // only wait longer for the first time
-        waitTime = 300;
-    }
     let points = 0;
     beforeUpdate(() => (points = quiz.evaluate()));
 
@@ -25,7 +20,6 @@
 </script>
 
 <h3 style="text-align: center;">{$_('resultsTitle')}</h3>
-<Loading ms="{waitTime}" minHeight="{150}">
 <div class="results-container">
 	<div class="scores">
 		<div class="badge">
@@ -64,7 +58,6 @@
         </ol>
     </div>
 </div>
-</Loading>
 
 <style>
     ol {

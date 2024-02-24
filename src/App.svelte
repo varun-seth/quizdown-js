@@ -58,7 +58,6 @@
 		{#if !($isEvaluated)}
         <ProgressBar value="{$index}" max="{quiz.questions.length - 1}" />
 		{/if}
-        <Loading update="{reloaded}" ms="{800}" minHeight="{minHeight}">
             <Container>
                 <SmoothResize minHeight="{minHeight}">
                     <Animated update="{$index}">
@@ -77,7 +76,6 @@
 
 
             </Container>
-        </Loading>
 
 		<Row>
 			<Button
@@ -110,12 +108,6 @@
 					title="{$_('next')}"
 					><Icon name="arrow-right" size="lg" /></Button
 				>
-
-				{#if $onLast || $allVisited}
-					<div in:fly="{{ x: 200, duration: 500 }}">
-						
-					</div>
-				{/if}
 			</svelte:fragment>
 
 		<Button
