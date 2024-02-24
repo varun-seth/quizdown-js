@@ -81,10 +81,10 @@ function init(){
 	} else if (gistShortcut) {
 		// Construct the Gist raw content URL from the gistShortcut value
 		const parts = gistShortcut.split("/");
-		const username = parts[0];
-		const gistId = parts[1];
+		const gistId = parts.pop();
 		// Gists don't have a branch name or a direct file path in the URL, so use the Gist API URL format
-		urlToFetch = `https://gist.githubusercontent.com/${username}/${gistId}/raw`;
+		urlToFetch = `https://api.github.com/gists/${gistId}`;
+		downloadFn = markdownDownloadGist;
 	} else if (sourceUrl) {
 		// Use the direct URL provided by source or s
 		urlToFetch = sourceUrl;
@@ -136,7 +136,7 @@ function init(){
 				} else if (gistMatch) {
 					// If it's a Gist URL, format it accordingly
 					const [, username, gistId] = gistMatch;
-					newUrl.hash = gistId;
+					newUrl.searchParams.set('gist', gistId);
 				} else {
 					// For non-GitHub URLs, proceed as before
 					newUrl.searchParams.set('source', url);
