@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { Quiz } from '../quiz';
     import { beforeUpdate } from 'svelte';
+	import ScoreBadge from './ScoreBadge.svelte';
 
     export let quiz: Quiz;
     import { _ } from 'svelte-i18n';
@@ -17,14 +18,16 @@
             minimumIntegerDigits: 1,
         });
     }
+
 </script>
 
 <h3 style="text-align: center;">{$_('resultsTitle')}</h3>
 <div class="results-container">
 	<div class="scores">
-		<div class="badge">
-			{Math.round(100 * points / quiz.questions.length)}%
-		</div>
+
+		<ScoreBadge fraction="{points / quiz.questions.length}">
+		</ScoreBadge>
+
 		<h4 style="text-wrap: nowrap;">
 			{$_('score')} : {points} / {format(quiz.questions.length)}
 		</h4>
@@ -97,17 +100,6 @@
         list-style-type: initial;
     }
 
-	.badge{
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		height: 3em;
-		width: 3em;
-		border: 0.15em solid var(--quizdown-color-primary);
-		font-size: 2em;
-		border-radius: 50%;
-	}
-
 	.results-container {
 		display: flex; 
 		flex-direction: row-reverse; 
@@ -139,3 +131,4 @@
 	}
 	
 </style>
+
