@@ -101,7 +101,7 @@
                 );
 
                 let renderQuizDebounceTimer;
-                editor.onDidChangeModelContent(function () {
+                function onUpdate() {
                     var currentPosition = editor.getPosition();
                     var activeLineNumber = currentPosition.lineNumber;
                     var currentContent = editor.getValue();
@@ -113,7 +113,11 @@
                             currentContent
                         );
                     }, 100); // Wait for 1 second before rendering
-                });
+                }
+
+                editor.onDidChangeModelContent(onUpdate);
+                // TODO: expose a function that shows the correct question.
+                editor.onDidChangeCursorPosition(onUpdate);
 
                 // Intercept Ctrl+S and Command+S
                 editor.addCommand(
