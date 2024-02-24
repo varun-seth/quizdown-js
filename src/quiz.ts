@@ -174,14 +174,15 @@ export class Quiz {
     active: Writable<BaseQuestion>;
     index: Writable<number>;
     config: Config;
-    onLast: Writable<boolean>;
-    onResults: Writable<boolean>;
+    onLast: Writable<boolean>; // index n-1
+	onIntro: Writable<boolean>; // index -1
+    onResults: Writable<boolean>; // index n
     onFirst: Writable<boolean>;
     isEvaluated: Writable<boolean>;
     allVisited: Writable<boolean>;
 
     constructor(questions: Array<BaseQuestion>, config: Config) {
-        this.index = writable(0);
+        this.index = writable(-1);
         this.questions = questions;
         this.config = config;
         if (this.config.shuffleQuestions) {
@@ -193,9 +194,10 @@ export class Quiz {
         // setup first question
         this.active = writable(this.questions[0]);
         this.questions[0].visited = true;
-        this.onLast = writable(this.questions.length == 1);
-        this.onResults = writable(false);
-        this.onFirst = writable(true);
+		this.onIntro = writable(true);
+		this.onFirst = writable(false);
+		this.onLast = writable(this.questions.length == 1);
+		this.onResults = writable(false);
         this.allVisited = writable(this.questions.length == 1);
         this.isEvaluated = writable(false);
         autoBind(this);
@@ -217,7 +219,16 @@ export class Quiz {
     }
 
     jump(index: number): boolean {
+		if (index == -1) {
+			this.index.set(index);
+			this.onIntro.set(true);
+			this.onFirst.set(false);
+			this.onLast.set(false);
+			this.onResults.set(false);
+			return true;
+		}
         if (index <= this.questions.length - 1 && index >= 0) {
+			this.onIntro.set(false);
             // on a question
             this.index.set(index);
             this.setActive();
@@ -246,13 +257,14 @@ export class Quiz {
     }
 
     reset(): Boolean {
-        this.onLast.set(false);
+		this.onIntro.set(true);
+		this.onFirst.set(false);
+		this.onLast.set(false);
         this.onResults.set(false);
         this.allVisited.set(false);
         this.isEvaluated.set(false);
-
         this.questions.forEach((q) => q.reset());
-        return this.jump(0);
+        return this.jump(-1);
     }
 
     evaluate(): number {

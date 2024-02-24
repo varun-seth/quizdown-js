@@ -26,6 +26,7 @@
     $: index = quiz.index;
     $: onLast = quiz.onLast;
     $: onFirst = quiz.onFirst;
+	$: onIntro = quiz.onIntro;
     $: onResults = quiz.onResults;
     $: isEvaluated = quiz.isEvaluated;
     $: allVisited = quiz.allVisited;
@@ -37,7 +38,6 @@
 
     let node: HTMLElement;
     let minHeight = 150;
-    let reloaded = false;
     // let showModal = false;
 
     // set global options
@@ -59,7 +59,12 @@
             <Container>
                 <SmoothResize minHeight="{minHeight}">
                     <Animated update="{$index}">
-                        {#if $onResults}
+						{#if $onIntro}
+							<div class="homepage" style="text-align: center;">
+								<h1>Welcome to the Quiz</h1>
+								<Button title="Start" buttonAction="{() =>quiz.jump(0)}">Start Quiz</Button>
+							</div>
+                        {:else if $onResults}
                             <ResultsView quiz="{quiz}" />
                         {:else}
                             <QuestionView
@@ -80,20 +85,19 @@
 			slot="left"
 			title="{$_('reset')}"
 			buttonAction="{() => {
-				reloaded = !reloaded;
 				quiz.reset();
 			}}"><Icon name="redo" /></Button
 			>
 			<svelte:fragment slot="center">
 				<Button
 					title="{$_('previous')}"
-					disabled="{$onFirst}"
+					disabled="{$onIntro}"
 					buttonAction="{quiz.previous}"
 					><Icon name="arrow-left" size="lg" /></Button
 				>
 
 				<span 
-				style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onResults ? 'hidden' : ''}; "
+				style="display: flex; align-items: center; text-wrap: nowrap; visibility: {($onIntro || $onResults) ? 'hidden' : ''}; "
 				>
 					{$index + 1}
 					/
