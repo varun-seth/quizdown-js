@@ -14,19 +14,46 @@ import marked from './customizedMarked';
 
 function parseQuizdown(rawQuizdown: string, globalConfig: Config): Quiz {
     let tokens = tokenize(rawQuizdown);
-    // globalConfig < quizConfig < questionConfig
-    let quizConfig = new Config(globalConfig);
+    
+    let activeQuestion: number;
 
+    if (globalConfig.activeLineNumber){
+        activeQuestion = findQuestionByLineNumber(tokens, globalConfig.activeLineNumber);
+    }
+    
+    let quizConfig = new Config(globalConfig);
+    if (activeQuestion >= 0) {
+        quizConfig.activeQuestion = (activeQuestion);
+    }
     if (hasQuizOptions(tokens)) {
         quizConfig = parseOptions(tokens, quizConfig);
     }
     let firstHeadingIdx = findFirstHeadingIdx(tokens);
     let questions = extractQuestions(tokens.slice(firstHeadingIdx), quizConfig);
+
     return new Quiz(questions, quizConfig);
 }
 
 function tokenize(rawQuizdown: string): marked.TokensList {
     return marked.lexer(htmlDecode(stripIndent(rawQuizdown)));
+}
+
+function findQuestionByLineNumber(tokens: marked.TokensList, lineNumber: number) {
+    let lineCount = 1;
+    let questionNumber = -1;
+
+    for (const token of tokens) {
+        if (token.type === 'heading') {
+            questionNumber++;
+        }
+        if (token.raw.includes('\n')) {
+            lineCount += token.raw.split('\n').length - 1;
+        }
+        if (lineCount > lineNumber) {
+            return questionNumber;
+        }
+    }
+    return questionNumber;
 }
 
 function hasQuizOptions(tokens: marked.TokensList) {
@@ -55,7 +82,7 @@ function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
     return mergeAttributes(quizConfig, options['data']);
 }
 
-function extractQuestions(tokens: marked.Token[], config: Config) {
+function extractQuestions(tokens: marked.Token[], config: Config): BaseQuestion[] {
     let questions: BaseQuestion[] = [];
     let startIdx = 0;
 
@@ -70,6 +97,9 @@ function extractQuestions(tokens: marked.Token[], config: Config) {
             let question = parseQuestion(currentTokens, config);
             questions.push(question);
         } else {
+            if (config.activeLineNumber >= 0 && config.activeLineNumber >= (questions.length - 1)) {
+                config.activeLineNumber -= 1;
+            }
             console.log({"skipping question without any list": currentTokens});
         }
         startIdx = nextQuestionIdx; // Move start index forward to the next question's start or to the end of the array

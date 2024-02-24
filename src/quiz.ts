@@ -183,7 +183,6 @@ export class Quiz {
     allVisited: Writable<boolean>;
 
     constructor(questions: Array<BaseQuestion>, config: Config) {
-        this.index = writable(-1);
         this.questions = questions;
         this.config = config;
         if (this.config.shuffleQuestions) {
@@ -203,6 +202,18 @@ export class Quiz {
         this.allVisited = writable(this.questions.length == 1);
         this.isEvaluated = writable(false);
         autoBind(this);
+
+        let index = -1;
+
+        if (config.activeQuestion != undefined && config.activeQuestion >= 0) {
+            index = config.activeQuestion;
+        }
+
+        this.index = writable(index);
+        if (index >= 0){
+            this.jump(index);
+        }
+
     }
 
     private setActive() {

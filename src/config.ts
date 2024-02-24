@@ -33,6 +33,10 @@ export class Config {
 	description: string;
 	quizId: string | null;
 
+    // editor specific
+    activeLineNumber: number;
+    activeQuestion: number;
+
     constructor(options: Config | object) {
         // handle <=v0.3.0 snake_case options for backwards compatibility
         for (const oldName in toRename) {

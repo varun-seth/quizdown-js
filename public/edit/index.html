@@ -80,19 +80,24 @@
                 value: getSavedContent(),
                 language: 'markdown',
 				minimap: { enabled: false },
-				lineNumbers: 'off',
+				// lineNumbers: 'off',
 				glyphMargin: false,
 				folding: false
             });
 
 			let renderQuizDebounceTimer;
             editor.onDidChangeModelContent(function() {
+                var currentPosition = editor.getPosition();
+                var activeLineNumber = currentPosition.lineNumber;
 				var currentContent = editor.getValue();
 				clearTimeout(renderQuizDebounceTimer);
 				renderQuizDebounceTimer = setTimeout(function() {
-					renderQuiz(currentContent);
+					renderQuiz(
+                        currentContent,
+                        activeLineNumber,
+                    );
 					sessionStorage.setItem('liveEditorContent', currentContent);
-				}, 1000); // Wait for 1 second before rendering
+				}, 100); // Wait for 1 second before rendering
             });
 
 			// Intercept Ctrl+S and Command+S
@@ -120,7 +125,7 @@
 		}
 
 
-        function renderQuiz(markdown) {
+        function renderQuiz(markdown, activeLineNumber=0) {
             const quizContainer = document.getElementById('quizContainer');
             quizContainer.innerHTML = ''; // Clear previous content
             const newQuizElement = document.createElement('div');
@@ -132,6 +137,7 @@
                 "shuffleQuestions": false,
                 "primaryColor": "#316FF6",
                 "secondaryColor": "#f8f8f8",
+                "activeLineNumber": activeLineNumber,
             };
             quizdown.register(quizdownKatex).register(quizdownHighlight).createApp(markdown, newQuizElement, config);
         }
