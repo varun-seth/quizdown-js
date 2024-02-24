@@ -178,6 +178,7 @@ export class Quiz {
 	onIntro: Writable<boolean>; // index -1
     onResults: Writable<boolean>; // index n
     onFirst: Writable<boolean>;
+	isStarted: Writable<boolean>;
     isEvaluated: Writable<boolean>;
     allVisited: Writable<boolean>;
 
@@ -195,6 +196,7 @@ export class Quiz {
         this.active = writable(this.questions[0]);
         this.questions[0].visited = true;
 		this.onIntro = writable(true);
+		this.isStarted = writable(false);
 		this.onFirst = writable(false);
 		this.onLast = writable(this.questions.length == 1);
 		this.onResults = writable(false);
@@ -228,6 +230,7 @@ export class Quiz {
 			return true;
 		}
         if (index <= this.questions.length - 1 && index >= 0) {
+			this.isStarted.set(true);
 			this.onIntro.set(false);
             // on a question
             this.index.set(index);
@@ -262,6 +265,7 @@ export class Quiz {
 		this.onLast.set(false);
         this.onResults.set(false);
         this.allVisited.set(false);
+		this.isStarted.set(false);
         this.isEvaluated.set(false);
         this.questions.forEach((q) => q.reset());
         return this.jump(-1);

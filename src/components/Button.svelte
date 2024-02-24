@@ -27,10 +27,12 @@
         text-align: center;
         transition: opacity 0.2s ease;
         text-decoration: none;
-        display: inline-block;
         cursor: pointer;
         margin: 0.2rem;
         font-size: 1em;
+		display: inline-flex;
+		gap: 8px;
+		align-items: center;
     }
 
     button:hover:not(:checked):not(:active):not(:disabled) {

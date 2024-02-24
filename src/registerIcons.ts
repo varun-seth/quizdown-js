@@ -12,6 +12,7 @@ import {
     faDotCircle,
     faCircleCheck,
     faCircleXmark,
+	faPlay,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -42,6 +43,7 @@ export default function() {
         faSquareRegular,
         faCircleRegular,
         faDotCircleRegular,
+		faPlay,
     ].filter(isIconDefinition);
 
     library.add(...icons as IconDefinition[]);

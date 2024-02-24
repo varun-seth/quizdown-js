@@ -19,6 +19,7 @@
     import Container from './components/Container.svelte';
     import Loading from './components/Loading.svelte';
     // import Modal from './components/Modal.svelte';
+    import { fade,  } from 'svelte/transition';
 
     export let quiz: Quiz;
     // https://github.com/sveltejs/svelte/issues/4079
@@ -29,6 +30,7 @@
 	$: onIntro = quiz.onIntro;
     $: onResults = quiz.onResults;
     $: isEvaluated = quiz.isEvaluated;
+	$: isStarted = quiz.isStarted;
     $: allVisited = quiz.allVisited;
 
     //let game = new Linear(quiz);
@@ -62,7 +64,10 @@
 						{#if $onIntro}
 							<div class="homepage" style="text-align: center;">
 								<h1>Welcome to the Quiz</h1>
-								<Button title="Start" buttonAction="{() =>quiz.jump(0)}">Start Quiz</Button>
+								<Button title="Start" buttonAction="{() =>quiz.jump(0)}">
+									<Icon name="play"></Icon>
+									{$_('start')}
+								</Button>
 							</div>
                         {:else if $onResults}
                             <ResultsView quiz="{quiz}" />
@@ -82,20 +87,26 @@
 
 		<Row>
 			<Button
+			disabled="{!$isStarted }"
 			slot="left"
 			title="{$_('reset')}"
 			buttonAction="{() => {
 				quiz.reset();
-			}}"><Icon name="redo" /></Button
+			}}">
+			<Icon name="redo" />
+			<span class="hidden {$onResults ? 'spawned': ''}">
+				{$_('reset')}
+			</span>
+			</Button
 			>
 			<svelte:fragment slot="center">
+				{#if $isStarted}
 				<Button
 					title="{$_('previous')}"
-					disabled="{$onIntro}"
+					disabled="{$onIntro || $onFirst}"
 					buttonAction="{quiz.previous}"
 					><Icon name="arrow-left" size="lg" /></Button
 				>
-
 				<span 
 				style="display: flex; align-items: center; text-wrap: nowrap; visibility: {($onIntro || $onResults) ? 'hidden' : ''}; "
 				>
@@ -110,18 +121,23 @@
 					title="{$_('next')}"
 					><Icon name="arrow-right" size="lg" /></Button
 				>
+				{/if}
 			</svelte:fragment>
 
 		<Button
 		slot="right"
-		disabled="{$onResults}"
+		disabled="{$onResults || $onIntro}"
 		title="{$_('evaluate')}"
 		buttonAction="{() =>
 			quiz.jump(quiz.questions.length)}"
 		><Icon
 			name="check-double"
 			size="lg"
-		/></Button
+		/>
+		<span class="hidden {($onLast && !$isEvaluated) ? 'spawned': ''}">
+			{$_('evaluate')}
+		</span>
+		</Button
 		>
 		</Row>
 	</Card>
@@ -133,6 +149,19 @@
     @import 'katex/dist/katex';
     @import '@fortawesome/fontawesome-svg-core/styles';
 
+
+	.hidden {
+		display: inline-block;
+		overflow: hidden;
+		max-width: 0;
+		transition: max-width 0.5s ease;
+		visibility: hidden;
+	}
+
+	.spawned {
+		max-width: 100px; 
+		visibility: visible;
+	}
     img {
         max-height: 400px;
         border-radius: 4px;
