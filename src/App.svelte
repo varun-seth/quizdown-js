@@ -59,11 +59,21 @@
 	<Card>
 	{#if $onIntro}
 	<div class="intro-page" style="text-align: center;">
+		<span>
 		<h1>Welcome to the Quiz</h1>
+		{#if quiz.config.description}
+		<div>{quiz.config.description}</div>
+		{/if}
+		
+		</span>
+		<div>
+			Number of Questions: {quiz.questions.length}
+		</div>
+
 		{#if quiz.config.authorName}
 		<div style="display: inline-flex; flex-direction: column;">
 			<span style="color: gray">Author</span>
-			<a href="{quiz.config.authorImageUrl}">
+			<a href="{quiz.config.authorUrl}">
 				<img 
 				class="author-image"
 				alt="{quiz.config.authorName}" 
@@ -74,7 +84,6 @@
 				{quiz.config.authorName}
 			</a>
 		</div>
-		<br/>
 		{/if}
 
 		<Button 

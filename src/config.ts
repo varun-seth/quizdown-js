@@ -30,6 +30,7 @@ export class Config {
 	authorName: string;
 	authorUrl: string;
 	authorImageUrl: string;
+	description: string;
 	quizId: string | null;
 
     constructor(options: Config | object) {
@@ -50,6 +51,7 @@ export class Config {
 		this.authorName = get(options['authorName'], '');
 		this.authorUrl = get(options['authorUrl'], '');
 		this.authorImageUrl = get(options['authorImageUrl'], '');
+		this.description = get(options['description'], '');
     }
 }
 
