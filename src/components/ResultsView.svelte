@@ -28,7 +28,7 @@
 <h3 style="text-align: center;">{$_('resultsTitle')}</h3>
 <div class="results-container">
     <div class="scores">
-        <ScoreBadge fraction="{points / total}"></ScoreBadge>
+        <ScoreBadge fraction="{total > 0 ? points / total : 1}"></ScoreBadge>
 
         <h4 style="text-wrap: nowrap;">
             {$_('score')} : {points} / {format(total)}

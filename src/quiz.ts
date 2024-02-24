@@ -29,6 +29,7 @@ function shuffle(array: Array<any>, n: number | undefined): Array<any> {
 export type QuestionType =
     | 'MultipleChoice'
     | 'SingleChoice'
+    | 'NoChoiceQuestion'
     | 'Sequence'
     | 'Information'
     | 'InvalidQuestion';
@@ -53,9 +54,10 @@ export abstract class BaseQuestion {
         hint: string,
         answers: Array<Answer>,
         questionType: QuestionType,
-        options: Config
+        options: Config,
+        maxScore: number = 1
     ) {
-        this.maxScore = questionType == 'Information' ? 0 : 1;
+        this.maxScore = maxScore;
         this.text = text;
         this.explanation = explanation;
         this.hint = hint;
@@ -159,6 +161,18 @@ export class SingleChoice extends Choice {
     }
 }
 
+export class NoChoiceQuestion extends Choice {
+    constructor(
+        text: string,
+        explanation: string,
+        hint: string,
+        answers: Array<Answer>,
+        options: Config
+    ) {
+        super(text, explanation, hint, answers, 'NoChoiceQuestion', options, 0);
+    }
+}
+
 export class Information extends BaseQuestion {
     constructor(
         text: string,
@@ -167,18 +181,10 @@ export class Information extends BaseQuestion {
         answers: Array<Answer>,
         options: Config
     ) {
-        super(text, explanation, hint, answers, 'Information', options);
+        super(text, explanation, hint, answers, 'Information', options, 0);
     }
-
     isCorrect() {
         return true;
-    }
-
-    reset() {
-        this.selected = [];
-        this.solved = false;
-        this.visited = false;
-        this.showHint.set(false);
     }
 }
 

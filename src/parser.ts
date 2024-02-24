@@ -5,6 +5,7 @@ import {
     BaseQuestion,
     MultipleChoice,
     SingleChoice,
+    NoChoiceQuestion,
     Information,
     Sequence,
     Answer,
@@ -109,7 +110,7 @@ function extractQuestions(
         let questionType = determineQuestionType(currentTokens);
 
         if (questionType != 'InvalidQuestion') {
-            let question = parseQuestion(currentTokens, config);
+            let question = parseQuestion(questionType, currentTokens, config);
             questions.push(question);
         } else {
             if (
@@ -118,21 +119,21 @@ function extractQuestions(
             ) {
                 config.activeLineNumber -= 1;
             }
-            console.log({
-                'skipping question without any list': currentTokens,
-            });
         }
         startIdx = nextQuestionIdx; // Move start index forward to the next question's start or to the end of the array
     }
     return questions;
 }
 
-function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
+function parseQuestion(
+    questionType: QuestionType,
+    tokens: marked.Token[],
+    config: Config
+): BaseQuestion {
     let explanation = parseExplanation(tokens);
     let hint = parseHint(tokens);
     let heading = parseHeading(tokens);
     let answers = parseAnswers(tokens);
-    let questionType = determineQuestionType(tokens);
     let questionConfig = new Config(config);
     const args = [heading, explanation, hint, answers, questionConfig] as const;
     switch (questionType) {
@@ -142,6 +143,8 @@ function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
             return new MultipleChoice(...args);
         case 'Sequence':
             return new Sequence(...args);
+        case 'NoChoiceQuestion':
+            return new NoChoiceQuestion(...args);
         case 'Information':
             return new Information(...args);
     }
@@ -208,8 +211,8 @@ function determineQuestionType(tokens: marked.Token[]): QuestionType {
     } else if (checkedItems.length > 1) {
         return 'MultipleChoice';
     } else {
-        // Not even one checkbox is crossed. This is not valid.
-        return 'InvalidQuestion';
+        // helpful in editor when writing question.
+        return 'NoChoiceQuestion';
     }
 }
 
