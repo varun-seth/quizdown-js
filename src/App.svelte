@@ -57,6 +57,7 @@
 
 <div class="quizdown-content" bind:this="{node}">
     <Card>
+        <ProgressBar value="{$index}" max="{quiz.questions.length}" />
         {#if $onIntro}
             <div class="intro-page" style="text-align: center;">
                 <span>
@@ -96,7 +97,6 @@
             </div>
         {/if}
         {#if !$onIntro}
-            <ProgressBar value="{$index}" max="{quiz.questions.length}" />
             <Container>
                 <SmoothResize {minHeight}>
                     <Animated update="{$index}">

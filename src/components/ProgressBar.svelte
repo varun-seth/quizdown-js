@@ -2,6 +2,7 @@
     import { tweened } from 'svelte/motion';
     import { linear, cubicIn, cubicInOut } from 'svelte/easing';
     import { writable } from 'svelte/store';
+    import { onMount } from 'svelte';
 
     export let value: number;
     export let max: number;
@@ -16,13 +17,20 @@
     });
     const lastValue = writable(value);
 
+    onMount(() => {
+        updateProgress(value, max);
+    });
+
     async function updateProgress(value: number, max: number) {
         let previousValue;
         lastValue.subscribe(($lastValue) => {
             previousValue = $lastValue;
         })();
 
-        if (value >= previousValue) {
+        if (value == previousValue) {
+            return;
+        } else if (value > previousValue) {
+            //
             if (value > 0) {
                 await progress2.set(0, { duration: 100 });
             } else {
