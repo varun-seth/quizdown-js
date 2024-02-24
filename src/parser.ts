@@ -17,11 +17,14 @@ import marked from './customizedMarked';
 function parseQuizdown(rawQuizdown: string, globalConfig: Config): Quiz {
     let tokens = tokenize(rawQuizdown);
 
+    let { title, description, firstQuestionIdx } =
+        extractTitleAndDescription(tokens);
+
     let activeQuestion: number;
 
     if (globalConfig.activeLineNumber) {
         activeQuestion = findQuestionByLineNumber(
-            tokens,
+            tokens.slice(firstQuestionIdx),
             globalConfig.activeLineNumber
         );
     }
@@ -30,11 +33,22 @@ function parseQuizdown(rawQuizdown: string, globalConfig: Config): Quiz {
     if (activeQuestion >= 0) {
         quizConfig.activeQuestion = activeQuestion;
     }
+
     if (hasQuizOptions(tokens)) {
         quizConfig = parseOptions(tokens, quizConfig);
     }
-    let firstHeadingIdx = findFirstHeadingIdx(tokens);
-    let questions = extractQuestions(tokens.slice(firstHeadingIdx), quizConfig);
+
+    let questions = extractQuestions(
+        tokens.slice(firstQuestionIdx),
+        quizConfig
+    );
+
+    if (title) {
+        quizConfig.title = title;
+    }
+    if (description) {
+        quizConfig.description = description;
+    }
 
     return new Quiz(questions, quizConfig);
 }
@@ -43,10 +57,7 @@ function tokenize(rawQuizdown: string): marked.TokensList {
     return marked.lexer(htmlDecode(stripIndent(rawQuizdown)));
 }
 
-function findQuestionByLineNumber(
-    tokens: marked.TokensList,
-    lineNumber: number
-) {
+function findQuestionByLineNumber(tokens: marked.Token[], lineNumber: number) {
     let lineCount = 1;
     let questionNumber = -1;
 
@@ -73,16 +84,48 @@ function hasQuizOptions(tokens: marked.TokensList) {
     return optionsIdx !== -1 && headingIdx > optionsIdx;
 }
 
-function findFirstHeadingIdx(
+function findNextHeadingIdx(
     tokens: marked.Token[],
     startIndex: number = 0
 ): number {
     for (let i = startIndex; i < tokens.length; i++) {
         if (tokens[i]['type'] == 'heading') {
-            return i - startIndex; // Return relative index from the start index
+            return i;
         }
     }
-    return -1; // No heading found
+    return -1;
+}
+
+function extractTitleAndDescription(tokens) {
+    let title: string;
+    let description: string;
+    let firstHeadingIndex = findNextHeadingIdx(tokens, 0);
+    let descriptionTokens = [];
+    let firstQuestionIdx = -1;
+
+    if (firstHeadingIndex !== -1 && tokens[firstHeadingIndex].depth === 1) {
+        title = tokens[firstHeadingIndex].text;
+
+        let nextQuestionIdx = findNextHeadingIdx(tokens, firstHeadingIndex + 1);
+
+        if (nextQuestionIdx !== -1) {
+            firstQuestionIdx = nextQuestionIdx;
+
+            // Collect tokens for description between the title and the next question
+            descriptionTokens = tokens.slice(
+                firstHeadingIndex + 1,
+                firstQuestionIdx
+            );
+        } else {
+            // If no next question, all remaining tokens are part of description
+            descriptionTokens = tokens.slice(firstHeadingIndex + 1);
+        }
+        description = parseTokens(descriptionTokens);
+    } else {
+        firstQuestionIdx = firstHeadingIndex;
+    }
+
+    return { title, description, firstQuestionIdx };
 }
 
 function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
@@ -100,11 +143,11 @@ function extractQuestions(
     let startIdx = 0;
 
     while (startIdx < tokens.length) {
-        let relativeNextQuestionIdx = findFirstHeadingIdx(tokens, startIdx + 1);
-        let nextQuestionIdx =
-            relativeNextQuestionIdx !== -1
-                ? relativeNextQuestionIdx + startIdx + 1
-                : tokens.length;
+        let nextQuestionIdx = findNextHeadingIdx(tokens, startIdx + 1);
+
+        if (nextQuestionIdx == -1) {
+            nextQuestionIdx = tokens.length;
+        }
 
         let currentTokens = tokens.slice(startIdx, nextQuestionIdx);
         let questionType = determineQuestionType(currentTokens);

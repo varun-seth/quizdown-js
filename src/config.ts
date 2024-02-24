@@ -27,6 +27,7 @@ export class Config {
     textColor: string;
     locale: 'de' | 'en' | 'es' | 'fr' | null;
     skipIntro: boolean; // an intro screen shows start button and minor description
+    title: string;
     authorName: string;
     authorUrl: string;
     authorImageUrl: string;
@@ -55,6 +56,7 @@ export class Config {
         this.authorName = get(options['authorName'], '');
         this.authorUrl = get(options['authorUrl'], '');
         this.authorImageUrl = get(options['authorImageUrl'], '');
+        this.title = get(options['title'], '');
         this.description = get(options['description'], '');
     }
 }

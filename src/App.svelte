@@ -66,11 +66,13 @@
     <Card>
         <ProgressBar value="{$index}" max="{quiz.questions.length}" />
         {#if $onIntro}
-            <div class="intro-page" style="text-align: center;">
+            <div class="intro-page">
                 <span>
-                    <h1>Welcome to the Quiz</h1>
+                    <h1 style="text-align: center;">
+                        {quiz.config.title || 'Welcome to the Quiz'}
+                    </h1>
                     {#if quiz.config.description}
-                        <div>{quiz.config.description}</div>
+                        <p>{@html quiz.config.description}</p>
                     {/if}
                 </span>
                 <div>
