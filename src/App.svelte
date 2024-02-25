@@ -55,15 +55,25 @@
         let secondaryColor: string = quiz.config.secondaryColor;
         let textColor: string = quiz.config.textColor;
 
-        node.style.setProperty('--quizdown-color-primary', primaryColor);
-        node.style.setProperty('--quizdown-color-secondary', secondaryColor);
-        node.style.setProperty('--quizdown-color-text', textColor);
+        document.documentElement.style.setProperty(
+            '--quizdown-color-primary',
+            primaryColor
+        );
+        document.documentElement.style.setProperty(
+            '--quizdown-color-secondary',
+            secondaryColor
+        );
+        document.documentElement.style.setProperty(
+            '--quizdown-color-text',
+            textColor
+        );
         node.style.minHeight = `${minHeight}px`;
     });
 </script>
 
+<ProgressBar value="{$index}" max="{quiz.questions.length}" />
+
 <div class="quizdown-content" bind:this="{node}">
-    <ProgressBar value="{$index}" max="{quiz.questions.length}" />
     <Card>
         {#if $onIntro}
             <div class="intro-page">

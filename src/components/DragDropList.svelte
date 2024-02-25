@@ -243,14 +243,14 @@
         user-select: none;
         margin: 5px;
         padding: 0;
-        background-color: var(--quizdown-color-secondary);
         border: 3px solid transparent;
         color: var(--quizdown-color-text);
     }
 
     .item:hover,
     .item:focus {
-        background-color: rgb(0, 0, 0, 0.1);
+        border: 3px dashed
+            color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
     }
 
     .item:last-child {
@@ -303,7 +303,6 @@
         left: 0;
         opacity: 0;
         border: 3px solid var(--quizdown-color-primary);
-        background-color: var(--quizdown-color-secondary);
     }
 
     #ghost * {

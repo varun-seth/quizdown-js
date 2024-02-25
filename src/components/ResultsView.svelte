@@ -88,7 +88,6 @@
 
     .top-list-item:hover {
         cursor: pointer;
-        background-color: var(--quizdown-color-secondary);
     }
 
     .list-question {
