@@ -11,7 +11,7 @@ import {
     Answer,
     QuestionType,
 } from './quiz';
-import { Config, mergeAttributes } from './config';
+import { Config, mergeAttributes, standardizeNames } from './config';
 import marked from './customizedMarked';
 
 function parseQuizdown(rawQuizdown: string, globalConfig: Config): Quiz {
@@ -133,6 +133,7 @@ function extractTitleAndDescription(tokens) {
 }
 
 function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
+    // This function parses front-matter from the markdown.
     // type definition does not allow custom token types
     // @ts-ignore
     let options = tokens.find((token) => token.type == 'options');
@@ -140,6 +141,7 @@ function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
     if (data['description']) {
         data['description'] = DOMPurify.sanitize(data['description']);
     }
+    standardizeNames(data);
     return mergeAttributes(quizConfig, data);
 }
 

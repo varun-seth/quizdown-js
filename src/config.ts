@@ -5,6 +5,7 @@ function get(attr, def) {
 function renameProp(oldprop: string, newprop: string, obj: object) {
     if (oldprop in obj) {
         obj[newprop] = obj[oldprop];
+        delete obj[oldprop]; // Delete the original property
     }
 }
 
@@ -17,8 +18,15 @@ const toRename = {
     text_color: 'textColor',
     author_name: 'authorName',
     author_url: 'authorUrl',
-    author_image_url: 'author_image_url',
+    author_image_url: 'authorImageUrl',
 };
+
+export function standardizeNames(options: object) {
+    /* Renames the underscore variables to camelCase versions */
+    for (const oldName in toRename) {
+        renameProp(oldName, toRename[oldName], options);
+    }
+}
 
 export class Config {
     startOnLoad: boolean;
@@ -43,9 +51,7 @@ export class Config {
 
     constructor(options: Config | object) {
         // handle <=v0.3.0 snake_case options for backwards compatibility
-        for (const oldName in toRename) {
-            renameProp(oldName, toRename[oldName], options);
-        }
+
         this.startOnLoad = get(options['startOnLoad'], true);
         this.shuffleAnswers = get(options['shuffleAnswers'], true);
         this.shuffleQuestions = get(options['shuffleQuestions'], false);
