@@ -15,6 +15,9 @@ const toRename = {
     primary_color: 'primaryColor',
     secondary_color: 'secondaryColor',
     text_color: 'textColor',
+    author_name: 'authorName',
+    author_url: 'authorUrl',
+    author_image_url: 'author_image_url',
 };
 
 export class Config {

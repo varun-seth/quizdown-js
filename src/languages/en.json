@@ -2,11 +2,13 @@
     "next": "Next",
     "previous": "Previous",
     "evaluate": "Evaluate",
-	"start": "Start the Quiz",
+    "start": "Start",
     "reset": "Reset",
     "hint": "Show hint",
     "resultsTitle": "Results",
-	"score": "Score",
+    "score": "Score",
+    "points": "Points",
+    "count": "Count",
     "resultsText": "You have answered {points} out of {total} questions correctly!",
     "questionLetter": "Q"
 }

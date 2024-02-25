@@ -33,12 +33,13 @@ function parseQuizdown(rawQuizdown: string, globalConfig: Config): Quiz {
     }
 
     let quizConfig = new Config(globalConfig);
-    if (activeQuestion >= 0) {
-        quizConfig.activeQuestion = activeQuestion;
-    }
 
     if (hasQuizOptions(tokens)) {
         quizConfig = parseOptions(tokens, quizConfig);
+    }
+
+    if (activeQuestion >= 0) {
+        quizConfig.activeQuestion = activeQuestion;
     }
 
     let questions = extractQuestions(
@@ -135,7 +136,11 @@ function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
     // type definition does not allow custom token types
     // @ts-ignore
     let options = tokens.find((token) => token.type == 'options');
-    return mergeAttributes(quizConfig, options['data']);
+    let data = options['data'];
+    if (data['description']) {
+        data['description'] = DOMPurify.sanitize(data['description']);
+    }
+    return mergeAttributes(quizConfig, data);
 }
 
 function extractQuestions(

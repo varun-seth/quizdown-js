@@ -19,7 +19,7 @@
     @media (min-width: 600px) {
         .card {
             margin: 20px;
-            height: calc(100% - 40px);
+            height: calc(100% - 40px - 0.4em);
             border-radius: 5px;
         }
     }

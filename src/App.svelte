@@ -77,44 +77,58 @@
     <Card>
         {#if $onIntro}
             <div class="intro-page">
-                <div style="width: 100%">
+                <span style="">
                     <h1 style="text-align: center;">
                         {quiz.config.title || 'Welcome to the Quiz'}
                     </h1>
                     {#if quiz.config.description}
                         <p>{@html quiz.config.description}</p>
                     {/if}
-                </div>
+                </span>
                 <div>
-                    Count: {quiz.questions.length}
+                    {$_('count')}: {quiz.questions.length}
                     <br />
-                    Score: {maxScore}
+                    {$_('points')}: {maxScore}
                 </div>
 
                 {#if quiz.config.authorName}
-                    <div style="display: inline-flex; flex-direction: column;">
+                    <div
+                        style="display: inline-flex; flex-direction: column; align-items: center"
+                    >
                         <span style="color: gray">Author</span>
-                        <a href="{quiz.config.authorUrl}">
-                            <img
-                                class="author-image"
-                                alt="{quiz.config.authorName}"
-                                src="{quiz.config.authorImageUrl}"
-                            />
-                        </a>
-                        <a href="{quiz.config.authorUrl}">
-                            {quiz.config.authorName}
-                        </a>
+                        {#if quiz.config.authorImageUrl}
+                            <a
+                                href="{quiz.config.authorUrl
+                                    ? quiz.config.authorUrl
+                                    : quiz.config.authorImageUrl}"
+                                target="_blank"
+                            >
+                                <img
+                                    class="author-image"
+                                    alt="{quiz.config.authorName ||
+                                        'Author Image'}"
+                                    src="{quiz.config.authorImageUrl}"
+                                />
+                            </a>
+                        {/if}
+                        {#if quiz.config.authorUrl}
+                            <a href="{quiz.config.authorUrl}" target="_blank">
+                                {quiz.config.authorName}
+                            </a>
+                        {/if}
                     </div>
                 {/if}
 
-                <Button
-                    title="Start"
-                    buttonAction="{() => quiz.jump(0)}"
-                    color="primary"
-                >
-                    <Icon name="play"></Icon>
-                    {$_('start')}
-                </Button>
+                <span style="margin-top: 2em; margin-bottom: 2em;">
+                    <Button
+                        title="Start"
+                        buttonAction="{() => quiz.jump(0)}"
+                        color="primary"
+                    >
+                        <Icon name="play"></Icon>
+                        {$_('start')}
+                    </Button>
+                </span>
             </div>
         {/if}
         {#if !$onIntro}

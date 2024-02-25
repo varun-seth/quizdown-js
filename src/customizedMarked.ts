@@ -12,10 +12,16 @@ const tokenizer: marked.TokenizerObject = {
         );
         const cap = regex.exec(src);
         if (cap) {
+            let data = {};
+            try {
+                data = parseYaml(cap[3], {});
+            } catch (error) {
+                console.error('Error parsing YAML frontmatter:', error.message);
+            }
             return {
                 type: 'options',
                 raw: cap[0],
-                data: parseYaml(cap[3], {}),
+                data: data,
             };
         }
     },

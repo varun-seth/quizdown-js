@@ -31,21 +31,17 @@ function createApp(rawQuizdown: string, node: Element, config: Config): App {
     } else {
         root = node.attachShadow({ mode: 'open' });
     }
-    try {
-        let quiz = parseQuizdown(rawQuizdown, config);
-        let app = new App({
-            // https://github.com/sveltejs/svelte/pull/5870
-            target: root,
-            intro: false,
-            props: {
-                quiz: quiz,
-            },
-        });
-        return app;
-    } catch (e) {
-        console.error(e);
-        root.innerHTML = `App could not render. Please check your quizdown syntax.`;
-    }
+
+    let quiz = parseQuizdown(rawQuizdown, config);
+    let app = new App({
+        // https://github.com/sveltejs/svelte/pull/5870
+        target: root,
+        intro: false,
+        props: {
+            quiz: quiz,
+        },
+    });
+    return app;
 }
 
 function init(config: object = {}): void {
