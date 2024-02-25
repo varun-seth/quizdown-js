@@ -8,7 +8,7 @@
         border-radius: 0 0 4px 4px; */
         display: flex;
         flex-direction: column;
-        height: 100%;
+        height: calc(100% - 0.4em);
         margin: auto;
         max-width: 1200px;
         overflow: hidden;

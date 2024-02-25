@@ -1,4 +1,8 @@
-<div class="container">
+<script>
+    export let additionalClasses = '';
+</script>
+
+<div class="container {additionalClasses}">
     <slot />
 </div>
 

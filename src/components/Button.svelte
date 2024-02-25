@@ -34,6 +34,7 @@
         border: 1px solid transparent;
         line-height: 1;
         text-align: center;
+        text-wrap: nowrap;
         transition: opacity 0.2s ease;
         text-decoration: none;
         cursor: pointer;

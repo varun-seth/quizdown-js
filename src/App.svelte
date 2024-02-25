@@ -76,7 +76,7 @@
 <div class="quizdown-content" bind:this="{node}">
     <Card>
         {#if $onIntro}
-            <div class="intro-page">
+            <Container additionalClasses="intro-page">
                 <span style="">
                     <h1 style="text-align: center;">
                         {quiz.config.title || 'Welcome to the Quiz'}
@@ -116,6 +116,9 @@
                                 {quiz.config.authorName}
                             </a>
                         {/if}
+                        {#if !quiz.config.authorUrl && quiz.config.authorName}
+                            {quiz.config.authorName}
+                        {/if}
                     </div>
                 {/if}
 
@@ -129,7 +132,7 @@
                         {$_('start')}
                     </Button>
                 </span>
-            </div>
+            </Container>
         {/if}
         {#if !$onIntro}
             <Container>
@@ -216,6 +219,7 @@
     @import '@fortawesome/fontawesome-svg-core/styles';
 
     .hidden {
+        position: absolute;
         display: inline-block;
         overflow: hidden;
         max-width: 0;
@@ -224,6 +228,10 @@
     }
 
     .spawned {
+        position: inherit;
+        /* padding required for hindi */
+        padding-top: 2px;
+        padding-bottom: 2px;
         max-width: 100px;
         visibility: visible;
     }

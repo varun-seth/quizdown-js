@@ -12,6 +12,7 @@
 
 <style>
     .row {
+        text-wrap: nowrap;
         padding-top: 2em;
         display: flex;
     }
