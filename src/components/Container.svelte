@@ -4,9 +4,9 @@
 
 <style>
     .container {
-		padding: 2px 16px;
+        padding: 2px 16px;
 
-		flex-grow: 1;
-		overflow-y: auto;
+        flex-grow: 1;
+        overflow-y: auto;
     }
 </style>

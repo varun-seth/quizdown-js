@@ -34,7 +34,7 @@
         justify-content: center;
         align-items: center;
         text-align: center;
-		flex-grow: 1;
-		overflow-y: auto;
+        flex-grow: 1;
+        overflow-y: auto;
     }
 </style>

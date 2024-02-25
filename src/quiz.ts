@@ -26,7 +26,13 @@ function shuffle(array: Array<any>, n: number | undefined): Array<any> {
 }
 
 // we need to reference the classes in the svelte app despite minifaction of class names
-export type QuestionType = 'MultipleChoice' | 'SingleChoice' | 'Sequence' | 'InvalidQuestion';
+export type QuestionType =
+    | 'MultipleChoice'
+    | 'SingleChoice'
+    | 'NoChoiceQuestion'
+    | 'Sequence'
+    | 'Information'
+    | 'InvalidQuestion';
 
 export abstract class BaseQuestion {
     readonly text: string;
@@ -39,6 +45,8 @@ export abstract class BaseQuestion {
     readonly options: Config;
     showHint: Writable<boolean>;
     visited: boolean;
+    readonly maxScore: number;
+    index: number;
 
     constructor(
         text: string,
@@ -46,11 +54,10 @@ export abstract class BaseQuestion {
         hint: string,
         answers: Array<Answer>,
         questionType: QuestionType,
-        options: Config
+        options: Config,
+        maxScore: number = 1
     ) {
-        if (answers.length === 0) {
-            throw 'no answers for question provided';
-        }
+        this.maxScore = maxScore;
         this.text = text;
         this.explanation = explanation;
         this.hint = hint;
@@ -64,9 +71,9 @@ export abstract class BaseQuestion {
         this.reset();
     }
 
-	toggleHint() {
-		this.showHint.update(value => !value);
-	}
+    toggleHint() {
+        this.showHint.update((value) => !value);
+    }
 
     reset() {
         this.selected = [];
@@ -154,6 +161,33 @@ export class SingleChoice extends Choice {
     }
 }
 
+export class NoChoiceQuestion extends Choice {
+    constructor(
+        text: string,
+        explanation: string,
+        hint: string,
+        answers: Array<Answer>,
+        options: Config
+    ) {
+        super(text, explanation, hint, answers, 'NoChoiceQuestion', options, 0);
+    }
+}
+
+export class Information extends BaseQuestion {
+    constructor(
+        text: string,
+        explanation: string,
+        hint: string,
+        answers: Array<Answer>,
+        options: Config
+    ) {
+        super(text, explanation, hint, answers, 'Information', options, 0);
+    }
+    isCorrect() {
+        return true;
+    }
+}
+
 export class Answer {
     html: string;
     correct: boolean;
@@ -174,31 +208,50 @@ export class Quiz {
     active: Writable<BaseQuestion>;
     index: Writable<number>;
     config: Config;
-    onLast: Writable<boolean>;
-    onResults: Writable<boolean>;
+    onLast: Writable<boolean>; // index n-1
+    onIntro: Writable<boolean>; // index -1
+    onResults: Writable<boolean>; // index n
     onFirst: Writable<boolean>;
+    isStarted: Writable<boolean>;
     isEvaluated: Writable<boolean>;
     allVisited: Writable<boolean>;
+    totalPoints: number;
 
     constructor(questions: Array<BaseQuestion>, config: Config) {
-        this.index = writable(0);
         this.questions = questions;
         this.config = config;
         if (this.config.shuffleQuestions) {
             this.questions = shuffle(this.questions, this.config.nQuestions);
         }
+        let i = 0;
+        for (let question of this.questions) {
+            question.index = i;
+            i++;
+        }
         if (this.questions.length == 0) {
-            throw 'No questions for quiz provided';
+            console.warn('No questions for quiz provided');
         }
         // setup first question
-        this.active = writable(this.questions[0]);
-        this.questions[0].visited = true;
+        this.active = writable(undefined);
+        this.onIntro = writable(true);
+        this.isStarted = writable(false);
+        this.onFirst = writable(false);
         this.onLast = writable(this.questions.length == 1);
         this.onResults = writable(false);
-        this.onFirst = writable(true);
         this.allVisited = writable(this.questions.length == 1);
         this.isEvaluated = writable(false);
         autoBind(this);
+
+        let index = -1;
+
+        if (config.activeQuestion != undefined && config.activeQuestion >= 0) {
+            index = config.activeQuestion;
+        }
+
+        this.index = writable(index);
+        if (index >= 0) {
+            this.jump(index);
+        }
     }
 
     private setActive() {
@@ -217,7 +270,17 @@ export class Quiz {
     }
 
     jump(index: number): boolean {
+        if (index == -1) {
+            this.index.set(index);
+            this.onIntro.set(true);
+            this.onFirst.set(false);
+            this.onLast.set(false);
+            this.onResults.set(false);
+            return true;
+        }
         if (index <= this.questions.length - 1 && index >= 0) {
+            this.isStarted.set(true);
+            this.onIntro.set(false);
             // on a question
             this.index.set(index);
             this.setActive();
@@ -246,20 +309,30 @@ export class Quiz {
     }
 
     reset(): Boolean {
+        this.onIntro.set(true);
+        this.onFirst.set(false);
         this.onLast.set(false);
         this.onResults.set(false);
         this.allVisited.set(false);
+        this.isStarted.set(false);
         this.isEvaluated.set(false);
-
         this.questions.forEach((q) => q.reset());
-        return this.jump(0);
+        return this.jump(-1);
+    }
+
+    maxScoreTotal(): number {
+        let total = 0;
+        for (let q of this.questions) {
+            total += q.maxScore;
+        }
+        return total;
     }
 
     evaluate(): number {
-        var points = 0;
+        let points = 0;
         for (var q of this.questions) {
             if (q.isCorrect()) {
-                points += 1;
+                points += q.maxScore;
             }
         }
         this.isEvaluated.set(true);

@@ -1,70 +1,78 @@
 <script lang="ts">
     import type { BaseQuestion } from '../quiz';
     export let question: BaseQuestion;
-	import Icon from './Icon.svelte';
-	let checked = {};
+    import Icon from './Icon.svelte';
+    let checked = {};
 
-	$: {
-		checked = {};
+    $: {
+        checked = {};
         if (question.questionType === 'MultipleChoice') {
-            question.selected.forEach(s => {
+            question.selected.forEach((s) => {
                 checked[s] = true;
             });
         } else {
             // For single choice, ensure only one can be checked
-            const selectedValue = question.selected.length ? question.selected[0] : null;
+            const selectedValue = question.selected.length
+                ? question.selected[0]
+                : null;
             if (selectedValue !== null) {
                 checked[selectedValue] = true;
             }
         }
     }
-
-
 </script>
 
 <fieldset>
     {#if question.questionType === 'MultipleChoice'}
         {#each question.answers as answer, i}
             <label style="position: relative">
-				
                 <input
                     type="checkbox"
                     bind:group="{question.selected}"
                     value="{i}"
                 />
-                <span>
-					<span style="color: {checked[i] ? 'var(--quizdown-color-primary)' : ''}">
-					{#if checked[i]}
-					<Icon name="check-square" ></Icon>
-					{/if}
-					{#if !checked[i]}
-					<Icon name="square" solid={false} ></Icon>
-					{/if}
-					</span>
-					{@html answer.html}
-				</span>
+                <span class="my-choice">
+                    <span
+                        class="my-choice-marker"
+                        style="color: {checked[i]
+                            ? 'var(--quizdown-color-primary)'
+                            : ''}"
+                    >
+                        {#if checked[i]}
+                            <Icon name="check-square"></Icon>
+                        {/if}
+                        {#if !checked[i]}
+                            <Icon name="square" solid="{false}"></Icon>
+                        {/if}
+                    </span>
+                    {@html answer.html}
+                </span>
             </label>
         {/each}
     {:else}
         {#each question.answers as answer, i}
             <label style="position: relative">
-				
                 <input
                     type="radio"
                     bind:group="{question.selected[0]}"
                     value="{i}"
                 />
-                <span>
-					<span style="color: {checked[i] ? 'var(--quizdown-color-primary)' : ''}">
-					{#if checked[i]}
-					<Icon name="dot-circle" solid="{true}" ></Icon>
-					{/if}
-					{#if !checked[i]}
-					<Icon name="circle" solid="{false}" ></Icon>
-					{/if}
-					</span>
-					{@html answer.html}
-				</span>
+                <span class="my-choice">
+                    <span
+                        class="my-choice-marker"
+                        style="color: {checked[i]
+                            ? 'var(--quizdown-color-primary)'
+                            : ''}"
+                    >
+                        {#if checked[i]}
+                            <Icon name="dot-circle" solid="{true}"></Icon>
+                        {/if}
+                        {#if !checked[i]}
+                            <Icon name="circle" solid="{false}"></Icon>
+                        {/if}
+                    </span>
+                    {@html answer.html}
+                </span>
             </label>
         {/each}
     {/if}
@@ -92,7 +100,6 @@
     [type='checkbox'] + span,
     [type='radio'] + span {
         transition-duration: 0.3s;
-        background-color: var(--quizdown-color-secondary);
         color: var(--quizdown-color-text);
         display: block;
         padding: 0.5rem;
@@ -105,11 +112,24 @@
     [type='checkbox']:focus + span,
     [type='radio']:hover + span,
     [type='radio']:focus + span {
-        background-color: rgb(0, 0,0, 0.1);
+        border: 3px dashed
+            color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
     }
 
     [type='checkbox']:checked + span,
     [type='radio']:checked + span {
         border: 3px solid var(--quizdown-color-primary);
+    }
+
+    .my-choice {
+        padding-left: 2em !important;
+    }
+    .my-choice-marker {
+        position: absolute;
+        left: 1em;
+    }
+    :global(.my-choice p) {
+        margin-block-start: 0;
+        margin-block-end: 0;
     }
 </style>

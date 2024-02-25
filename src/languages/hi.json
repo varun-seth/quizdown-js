@@ -1,0 +1,11 @@
+{
+    "next": "अगला",
+    "previous": "पिछला",
+    "evaluate": "मूल्यांकन करें",
+    "reset": "फिर से!",
+    "hint": "संकेत",
+    "resultsTitle": "परिणाम",
+    "score": "अंक",
+    "resultsText": "आपने {total} में से {points} प्रश्नों के उत्तर सही दिए हैं!",
+    "questionLetter": "प्र"
+}

@@ -1,10 +1,19 @@
 <script lang="ts">
-    export let buttonAction = () => alert('Life has never Svelte better');
+    export let buttonAction = () => {};
     export let disabled = false;
     export let title = '';
+    export let color = '';
+
+    // Reactive statement to dynamically set classes based on `color` value
+    $: primaryClass = color == 'primary';
 </script>
 
-<button title="{title}" disabled="{disabled}" on:click="{buttonAction}">
+<button
+    class:primary="{primaryClass}"
+    {title}
+    {disabled}
+    on:click="{buttonAction}"
+>
     <slot />
 </button>
 
@@ -27,15 +36,32 @@
         text-align: center;
         transition: opacity 0.2s ease;
         text-decoration: none;
-        display: inline-block;
         cursor: pointer;
         margin: 0.2rem;
         font-size: 1em;
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .primary {
+        background-color: var(--quizdown-color-primary);
+        color: white;
     }
 
     button:hover:not(:checked):not(:active):not(:disabled) {
-		/*reducing brightness also impacts colored icons*/
-		/*replacing background-color instead*/
-        background-color: rgb(0, 0,0, 0.1);
+        /*reducing brightness also impacts colored icons*/
+        /*replacing background-color instead*/
+        background-color: rgb(0, 0, 0, 0.1);
+    }
+
+    button:hover:not(:checked):not(:active):not(:disabled).primary {
+        filter: brightness(110%);
+        background-color: var(--quizdown-color-primary);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition:
+            filter 0.3s ease,
+            box-shadow 0.3s ease,
+            transform 0.3s ease;
     }
 </style>

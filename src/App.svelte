@@ -19,6 +19,8 @@
     import Container from './components/Container.svelte';
     import Loading from './components/Loading.svelte';
     // import Modal from './components/Modal.svelte';
+    import { fade } from 'svelte/transition';
+    import { beforeUpdate } from 'svelte';
 
     export let quiz: Quiz;
     // https://github.com/sveltejs/svelte/issues/4079
@@ -26,9 +28,17 @@
     $: index = quiz.index;
     $: onLast = quiz.onLast;
     $: onFirst = quiz.onFirst;
+    $: onIntro = quiz.onIntro;
     $: onResults = quiz.onResults;
     $: isEvaluated = quiz.isEvaluated;
+    $: isStarted = quiz.isStarted;
     $: allVisited = quiz.allVisited;
+
+    let maxScore: number;
+
+    beforeUpdate(() => {
+        maxScore = quiz.maxScoreTotal();
+    });
 
     //let game = new Linear(quiz);
 
@@ -37,7 +47,6 @@
 
     let node: HTMLElement;
     let minHeight = 150;
-    let reloaded = false;
     // let showModal = false;
 
     // set global options
@@ -46,91 +55,158 @@
         let secondaryColor: string = quiz.config.secondaryColor;
         let textColor: string = quiz.config.textColor;
 
-        node.style.setProperty('--quizdown-color-primary', primaryColor);
-        node.style.setProperty('--quizdown-color-secondary', secondaryColor);
-        node.style.setProperty('--quizdown-color-text', textColor);
+        document.documentElement.style.setProperty(
+            '--quizdown-color-primary',
+            primaryColor
+        );
+        document.documentElement.style.setProperty(
+            '--quizdown-color-secondary',
+            secondaryColor
+        );
+        document.documentElement.style.setProperty(
+            '--quizdown-color-text',
+            textColor
+        );
         node.style.minHeight = `${minHeight}px`;
     });
 </script>
 
+<ProgressBar value="{$index}" max="{quiz.questions.length}" />
+
 <div class="quizdown-content" bind:this="{node}">
     <Card>
-		{#if !($isEvaluated)}
-        <ProgressBar value="{$index}" max="{quiz.questions.length - 1}" />
-		{/if}
-        <Loading update="{reloaded}" ms="{800}" minHeight="{minHeight}">
+        {#if $onIntro}
+            <div class="intro-page">
+                <span style="">
+                    <h1 style="text-align: center;">
+                        {quiz.config.title || 'Welcome to the Quiz'}
+                    </h1>
+                    {#if quiz.config.description}
+                        <p>{@html quiz.config.description}</p>
+                    {/if}
+                </span>
+                <div>
+                    {$_('count')}: {quiz.questions.length}
+                    <br />
+                    {$_('points')}: {maxScore}
+                </div>
+
+                {#if quiz.config.authorName}
+                    <div
+                        style="display: inline-flex; flex-direction: column; align-items: center"
+                    >
+                        <span style="color: gray">Author</span>
+                        {#if quiz.config.authorImageUrl}
+                            <a
+                                href="{quiz.config.authorUrl
+                                    ? quiz.config.authorUrl
+                                    : quiz.config.authorImageUrl}"
+                                target="_blank"
+                            >
+                                <img
+                                    class="author-image"
+                                    alt="{quiz.config.authorName ||
+                                        'Author Image'}"
+                                    src="{quiz.config.authorImageUrl}"
+                                />
+                            </a>
+                        {/if}
+                        {#if quiz.config.authorUrl}
+                            <a href="{quiz.config.authorUrl}" target="_blank">
+                                {quiz.config.authorName}
+                            </a>
+                        {/if}
+                    </div>
+                {/if}
+
+                <span style="margin-top: 2em; margin-bottom: 2em;">
+                    <Button
+                        title="Start"
+                        buttonAction="{() => quiz.jump(0)}"
+                        color="primary"
+                    >
+                        <Icon name="play"></Icon>
+                        {$_('start')}
+                    </Button>
+                </span>
+            </div>
+        {/if}
+        {#if !$onIntro}
             <Container>
-                <SmoothResize minHeight="{minHeight}">
+                <SmoothResize {minHeight}>
                     <Animated update="{$index}">
                         {#if $onResults}
-                            <ResultsView quiz="{quiz}" />
-                        {:else}
-                            <QuestionView
-                                question="{$question}"
-                            />
+                            <ResultsView {quiz} />
+                        {:else if !$onIntro}
+                            <QuestionView question="{$question}" />
                         {/if}
                     </Animated>
                 </SmoothResize>
 
                 <!-- <Modal show="{showModal}">Are you sure?</Modal> -->
-
-
-
             </Container>
-        </Loading>
 
-		<Row>
-			<Button
-			slot="left"
-			title="{$_('reset')}"
-			buttonAction="{() => {
-				reloaded = !reloaded;
-				quiz.reset();
-			}}"><Icon name="redo" /></Button
-			>
-			<svelte:fragment slot="center">
-				<Button
-					title="{$_('previous')}"
-					disabled="{$onFirst || $onResults || $isEvaluated}"
-					buttonAction="{quiz.previous}"
-					><Icon name="arrow-left" size="lg" /></Button
-				>
+            <Row>
+                <Button
+                    disabled="{!$isStarted}"
+                    slot="left"
+                    title="{$_('reset')}"
+                    buttonAction="{() => {
+                        quiz.reset();
+                    }}"
+                >
+                    <Icon name="redo" />
+                    <span class="hidden {$onResults ? 'spawned' : ''}">
+                        {$_('reset')}
+                    </span>
+                </Button>
+                <svelte:fragment slot="center">
+                    {#if $isStarted}
+                        <Button
+                            title="{$_('previous')}"
+                            disabled="{$onIntro || $onFirst}"
+                            buttonAction="{quiz.previous}"
+                            ><Icon name="arrow-left" size="lg" /></Button
+                        >
+                        <span
+                            style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onIntro ||
+                            $onResults
+                                ? 'hidden'
+                                : ''}; "
+                        >
+                            {$index + 1}
+                            /
+                            {quiz.questions.length}
+                        </span>
 
-				<span 
-				style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onResults ? 'hidden' : ''}; "
-				>
-					{$index + 1}
-					/
-					{quiz.questions.length}
-				</span>
+                        <Button
+                            disabled="{$onResults ||
+                                (!$isEvaluated && $onLast)}"
+                            buttonAction="{quiz.next}"
+                            title="{$_('next')}"
+                            ><Icon name="arrow-right" size="lg" /></Button
+                        >
+                    {/if}
+                </svelte:fragment>
 
-				<Button
-					disabled="{$onLast || $onResults || $isEvaluated}"
-					buttonAction="{quiz.next}"
-					title="{$_('next')}"
-					><Icon name="arrow-right" size="lg" /></Button
-				>
-
-				{#if $onLast || $allVisited}
-					<div in:fly="{{ x: 200, duration: 500 }}">
-						
-					</div>
-				{/if}
-			</svelte:fragment>
-
-		<Button
-		slot="right"
-		disabled="{$onResults}"
-		title="{$_('evaluate')}"
-		buttonAction="{() =>
-			quiz.jump(quiz.questions.length)}"
-		><Icon
-			name="check-double"
-			size="lg"
-		/></Button
-		>
-		</Row>
-	</Card>
+                <Button
+                    color="{$onLast && !$isEvaluated ? 'primary' : ''}"
+                    slot="right"
+                    disabled="{$onResults || $onIntro}"
+                    title="{$_('evaluate')}"
+                    buttonAction="{() => quiz.jump(quiz.questions.length)}"
+                    ><Icon name="check-double" size="lg" />
+                    <span
+                        class="hidden {$onLast && !$isEvaluated
+                            ? 'spawned'
+                            : ''}"
+                    >
+                        {$_('evaluate')}
+                    </span>
+                </Button>
+            </Row>
+        {/if}
+    </Card>
 </div>
 
 <!-- global styles applied to all elements in the app -->
@@ -139,6 +215,18 @@
     @import 'katex/dist/katex';
     @import '@fortawesome/fontawesome-svg-core/styles';
 
+    .hidden {
+        display: inline-block;
+        overflow: hidden;
+        max-width: 0;
+        transition: max-width 0.5s ease;
+        visibility: hidden;
+    }
+
+    .spawned {
+        max-width: 100px;
+        visibility: visible;
+    }
     img {
         max-height: 400px;
         border-radius: 4px;
@@ -164,15 +252,29 @@
     .quizdown-content {
         padding: 0;
         max-width: 800px;
-		height: 100%;
-		margin: auto;
+        height: 100%;
+        margin: auto;
     }
-	/* Smaller screens */
-	@media (max-width: 600px) {
-		.quizdown-content {
-			padding: 0;
-			margin: 0;
-		}
-	}
+    /* Smaller screens */
+    @media (max-width: 600px) {
+        .quizdown-content {
+            padding: 0;
+            margin: 0;
+        }
+    }
 
+    .author-image {
+        height: 100px;
+        width: 100px;
+        border-radius: 50%;
+        border: 2px solid gray;
+    }
+
+    .intro-page {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
 </style>

@@ -5,6 +5,8 @@ import {
     BaseQuestion,
     MultipleChoice,
     SingleChoice,
+    NoChoiceQuestion,
+    Information,
     Sequence,
     Answer,
     QuestionType,
@@ -14,19 +16,67 @@ import marked from './customizedMarked';
 
 function parseQuizdown(rawQuizdown: string, globalConfig: Config): Quiz {
     let tokens = tokenize(rawQuizdown);
-    // globalConfig < quizConfig < questionConfig
+
+    let { title, description, firstQuestionIdx } =
+        extractTitleAndDescription(tokens);
+
+    let activeQuestion: number;
+
+    if (globalConfig.activeLineNumber) {
+        activeQuestion = findQuestionByLineNumber(
+            tokens,
+            globalConfig.activeLineNumber
+        );
+        if (title) {
+            activeQuestion -= 1;
+        }
+    }
+
     let quizConfig = new Config(globalConfig);
 
     if (hasQuizOptions(tokens)) {
         quizConfig = parseOptions(tokens, quizConfig);
     }
-    let firstHeadingIdx = findFirstHeadingIdx(tokens);
-    let questions = extractQuestions(tokens.slice(firstHeadingIdx), quizConfig);
+
+    if (activeQuestion >= 0) {
+        quizConfig.activeQuestion = activeQuestion;
+    }
+
+    let questions = extractQuestions(
+        tokens.slice(firstQuestionIdx),
+        quizConfig
+    );
+
+    if (title) {
+        quizConfig.title = title;
+    }
+    if (description) {
+        quizConfig.description = description;
+    }
+
     return new Quiz(questions, quizConfig);
 }
 
 function tokenize(rawQuizdown: string): marked.TokensList {
     return marked.lexer(htmlDecode(stripIndent(rawQuizdown)));
+}
+
+function findQuestionByLineNumber(tokens: marked.Token[], lineNumber: number) {
+    let lineCount = 1;
+    let questionNumber = -1;
+
+    for (const token of tokens) {
+        if (token.type === 'heading') {
+            questionNumber++;
+        }
+        if (token.raw.includes('\n')) {
+            lineCount += token.raw.split('\n').length - 1;
+        }
+        if (lineCount > lineNumber) {
+            return questionNumber;
+        }
+    }
+    return questionNumber;
 }
 
 function hasQuizOptions(tokens: marked.TokensList) {
@@ -38,55 +88,103 @@ function hasQuizOptions(tokens: marked.TokensList) {
     return optionsIdx !== -1 && headingIdx > optionsIdx;
 }
 
-function findFirstHeadingIdx(tokens: marked.Token[], startIndex: number = 0): number {
+function findNextHeadingIdx(
+    tokens: marked.Token[],
+    startIndex: number = 0
+): number {
     for (let i = startIndex; i < tokens.length; i++) {
         if (tokens[i]['type'] == 'heading') {
-            return i - startIndex; // Return relative index from the start index
+            return i;
         }
     }
-    return -1; // No heading found
+    return -1;
 }
 
+function extractTitleAndDescription(tokens) {
+    let title: string;
+    let description: string;
+    let firstHeadingIndex = findNextHeadingIdx(tokens, 0);
+    let descriptionTokens = [];
+    let firstQuestionIdx = -1;
+
+    if (firstHeadingIndex !== -1 && tokens[firstHeadingIndex].depth === 1) {
+        title = tokens[firstHeadingIndex].text;
+
+        let nextQuestionIdx = findNextHeadingIdx(tokens, firstHeadingIndex + 1);
+
+        if (nextQuestionIdx !== -1) {
+            firstQuestionIdx = nextQuestionIdx;
+
+            // Collect tokens for description between the title and the next question
+            descriptionTokens = tokens.slice(
+                firstHeadingIndex + 1,
+                firstQuestionIdx
+            );
+        } else {
+            // If no next question, all remaining tokens are part of description
+            descriptionTokens = tokens.slice(firstHeadingIndex + 1);
+        }
+        description = parseTokens(descriptionTokens);
+    } else {
+        firstQuestionIdx = firstHeadingIndex;
+    }
+
+    return { title, description, firstQuestionIdx };
+}
 
 function parseOptions(tokens: marked.Token[], quizConfig: Config): Config {
     // type definition does not allow custom token types
     // @ts-ignore
     let options = tokens.find((token) => token.type == 'options');
-    return mergeAttributes(quizConfig, options['data']);
+    let data = options['data'];
+    if (data['description']) {
+        data['description'] = DOMPurify.sanitize(data['description']);
+    }
+    return mergeAttributes(quizConfig, data);
 }
 
-function extractQuestions(tokens: marked.Token[], config: Config) {
+function extractQuestions(
+    tokens: marked.Token[],
+    config: Config
+): BaseQuestion[] {
     let questions: BaseQuestion[] = [];
     let startIdx = 0;
 
     while (startIdx < tokens.length) {
-        let relativeNextQuestionIdx = findFirstHeadingIdx(tokens, startIdx + 1);
-        let nextQuestionIdx = relativeNextQuestionIdx !== -1 ? relativeNextQuestionIdx + startIdx + 1 : tokens.length;
+        let nextQuestionIdx = findNextHeadingIdx(tokens, startIdx + 1);
+
+        if (nextQuestionIdx == -1) {
+            nextQuestionIdx = tokens.length;
+        }
 
         let currentTokens = tokens.slice(startIdx, nextQuestionIdx);
-		let questionType = determineQuestionType(currentTokens);
+        let questionType = determineQuestionType(currentTokens);
 
-        if (questionType != 'InvalidQuestion' && questionContainsList(currentTokens)) {
-            let question = parseQuestion(currentTokens, config);
+        if (questionType != 'InvalidQuestion') {
+            let question = parseQuestion(questionType, currentTokens, config);
             questions.push(question);
         } else {
-            console.log({"skipping question without any list": currentTokens});
+            if (
+                config.activeLineNumber >= 0 &&
+                config.activeLineNumber >= questions.length - 1
+            ) {
+                config.activeLineNumber -= 1;
+            }
         }
         startIdx = nextQuestionIdx; // Move start index forward to the next question's start or to the end of the array
     }
     return questions;
 }
 
-function questionContainsList(tokens: marked.Token[]): boolean {
-    return tokens.some(token => token.type === 'list');
-}
-
-function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
+function parseQuestion(
+    questionType: QuestionType,
+    tokens: marked.Token[],
+    config: Config
+): BaseQuestion {
     let explanation = parseExplanation(tokens);
     let hint = parseHint(tokens);
     let heading = parseHeading(tokens);
     let answers = parseAnswers(tokens);
-    let questionType = determineQuestionType(tokens);
     let questionConfig = new Config(config);
     const args = [heading, explanation, hint, answers, questionConfig] as const;
     switch (questionType) {
@@ -96,9 +194,12 @@ function parseQuestion(tokens: marked.Token[], config: Config): BaseQuestion {
             return new MultipleChoice(...args);
         case 'Sequence':
             return new Sequence(...args);
+        case 'NoChoiceQuestion':
+            return new NoChoiceQuestion(...args);
+        case 'Information':
+            return new Information(...args);
     }
 }
-
 
 function parseHint(tokens: marked.Token[]): string {
     let blockquotes = tokens.filter((token) => token['type'] == 'blockquote');
@@ -121,6 +222,9 @@ function parseAnswers(tokens: marked.Token[]): Array<Answer> {
     let list = tokens.find(
         (token) => token.type == 'list'
     ) as marked.Tokens.List;
+    if (list == undefined) {
+        return [];
+    }
     let answers: Array<Answer> = [];
     list.items.forEach(function (item, i) {
         let answer = parseAnswer(item);
@@ -138,29 +242,30 @@ function parseAnswer(item: marked.Tokens.ListItem) {
 }
 
 function determineQuestionType(tokens: marked.Token[]): QuestionType {
-    let list = tokens.find((token) => token.type == 'list') as marked.Tokens.List;
-	if (!list || !(list as marked.Tokens.List).items.length) {
+    let list = tokens.find(
+        (token) => token.type == 'list'
+    ) as marked.Tokens.List;
+    if (!list || !(list as marked.Tokens.List).items.length) {
         // If there's no list or the list is empty, return 'Invalid' to indicate no valid question type
-        return 'InvalidQuestion';
+        return 'Information';
     }
-    let checkedItems = list.items.filter(item => item.checked);
-    let uncheckedItems = list.items.filter(item => !item.checked);
+    let checkedItems = list.items.filter((item) => item.checked);
+    let uncheckedItems = list.items.filter((item) => !item.checked);
 
-    if (list.ordered && !list.items.some(item => item.task)) {
+    if (list.ordered && !list.items.some((item) => item.task)) {
         return 'Sequence';
-    } else if (!list.ordered && !list.items.some(item => item.task)) {
-		// Blanks
+    } else if (!list.ordered && !list.items.some((item) => item.task)) {
+        // Blanks
         return 'Sequence';
     } else if (checkedItems.length === 1) {
         return 'SingleChoice';
     } else if (checkedItems.length > 1) {
         return 'MultipleChoice';
     } else {
-		// Not even one checkbox is crossed. This is not valid.
-        return 'InvalidQuestion';
+        // helpful in editor when writing question.
+        return 'NoChoiceQuestion';
     }
 }
-
 
 function parseTokens(tokens: marked.Token[]): string {
     return DOMPurify.sanitize(marked.parser(tokens as marked.TokensList));

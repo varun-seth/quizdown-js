@@ -1,246 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-<head>
-	<meta charset='utf-8'>
-	<meta name='viewport' content='width=device-width,initial-scale=1'>
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+        <title>Quiz</title>
 
-	<title>Quiz</title>
+        <script src="./build/quizdown.js"></script>
+        <script src="./build/extensions/quizdownKatex.js"></script>
+        <script src="./build/extensions/quizdownHighlight.js"></script>
+        <script>
+            function markdownDownload(url, fn) {
+                fetch(url)
+                    .then((response) => response.text())
+                    .then((text) => fn(text))
+                    .catch((error) =>
+                        console.error('Error fetching markdown:', error)
+                    );
+            }
 
-	<script src="./build/quizdown.js"></script>
-	<script src="./build/extensions/quizdownKatex.js"></script>
-	<script src="./build/extensions/quizdownHighlight.js"></script>
-	<script>
-document.addEventListener('DOMContentLoaded', function() {
+            function markdownDownloadGist(url, fn) {
+                fetch(url)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        const files = data.files;
+                        const fileKeys = Object.keys(files);
+                        if (fileKeys.length === 1) {
+                            // If only one file, use it directly
+                            markdown = files[fileKeys[0]].content;
+                        } else {
+                            // If multiple files, find the first .md file
+                            const mdFileKey = fileKeys.find((key) =>
+                                files[key].filename
+                                    .toLowerCase()
+                                    .endsWith('.md')
+                            );
+                            if (mdFileKey) {
+                                markdown = files[mdFileKey].content;
+                            } else {
+                                throw new Error(
+                                    'Markdown file not found in Gist'
+                                );
+                            }
+                        }
+                        let params = {};
+                        if (data['owner']) {
+                            params['authorName'] = data['owner']['login'];
+                            params['authorImageUrl'] =
+                                data['owner']['avatar_url'];
+                            params['authorUrl'] = data['owner']['html_url'];
+                        }
+                        params['description'] = data['description'];
+                        fn(markdown, params);
+                    })
+                    .catch((error) =>
+                        console.error('Error fetching markdown:', error)
+                    );
+            }
 
-	// Fetch the markdown content from the provided URL
-	const queryParams = new URLSearchParams(window.location.search);
-	const sourceUrl = queryParams.get('source') || queryParams.get('s');
-	const githubShortcut = queryParams.get('github');
-	const gistShortcut = queryParams.get('gist');
+            function init() {
+                // hide all / destroy quiz.
+                const quizContainer = document.getElementById('quizContainer');
+                quizContainer.classList.add('hidden');
+                const helpContainer = document.getElementById('helpContainer');
+                helpContainer.classList.add('hidden');
+                // delete any quiz
+                let quizElement = document.getElementById('quiz');
+                if (quizElement) {
+                    quizElement.remove();
+                }
 
-	let urlToFetch = '';
+                // Fetch the markdown content from the provided URL
+                console.log('init');
+                const queryParams = new URLSearchParams(window.location.search);
+                const sourceUrl =
+                    queryParams.get('source') || queryParams.get('s');
+                const gistId = window.location.hash.substring(1);
+                const githubShortcut = queryParams.get('github');
+                const gistShortcut = queryParams.get('gist');
+                let downloadFn = markdownDownload;
 
-	if (githubShortcut) {
-    // Construct the GitHub raw content URL from the githubShortcut value
-    const parts = githubShortcut.split("/");
-    const username = parts[0];
-    const projectname = parts[1];
-    const branchname = parts[2];
-    const filepath = parts.slice(3).join('/');
-    urlToFetch = `https://raw.githubusercontent.com/${username}/${projectname}/${branchname}/${filepath}`;
-	} else if (gistShortcut) {
-		// Construct the Gist raw content URL from the gistShortcut value
-		const parts = gistShortcut.split("/");
-		const username = parts[0];
-		const gistId = parts[1];
-		// Gists don't have a branch name or a direct file path in the URL, so use the Gist API URL format
-		urlToFetch = `https://gist.githubusercontent.com/${username}/${gistId}/raw`;
-	} else if (sourceUrl) {
-		// Use the direct URL provided by source or s
-		urlToFetch = sourceUrl;
-	}
+                let authorName;
+                let authorUrl;
+                let authorImageUrl;
 
-	if (urlToFetch) {
-	fetch(urlToFetch)
-		.then(response => response.text())
-		.then(markdown => {
-			// Inject the markdown into the quiz container
-			const quizContainer = document.getElementById('quizContainer');
-			quizContainer.classList.remove('hidden');
-			const newQuizElement = document.createElement('div');
-			newQuizElement.className = 'quizdown';
+                let urlToFetch = '';
+                if (gistId) {
+                    // super shortcut. domain.com/#id
+                    urlToFetch = `https://api.github.com/gists/${gistId}`;
 
-			quizContainer.appendChild(newQuizElement);
-			let config = {
-				"shuffleAnswers": false,
-				"shuffleQuestions": false,
-				"primaryColor": "#1b73e8",
-				"secondaryColor": "#ffffff",
-			};
-			quizdown.register(quizdownKatex).register(quizdownHighlight).createApp(markdown, newQuizElement, config);
-		})
-		.catch(error => console.error('Error fetching markdown:', error));
-	}
-	else {
-		const helpContainer = document.getElementById('helpContainer');
-		helpContainer.classList.remove('hidden');
-		const submitButton = document.getElementById('submitButton');
+                    downloadFn = markdownDownloadGist;
+                } else if (githubShortcut) {
+                    // Construct the GitHub raw content URL from the githubShortcut value
+                    const parts = githubShortcut.split('/');
+                    const username = parts[0];
+                    const projectname = parts[1];
+                    const branchname = parts[2];
+                    const filepath = parts.slice(3).join('/');
+                    urlToFetch = `https://raw.githubusercontent.com/${username}/${projectname}/${branchname}/${filepath}`;
+                } else if (gistShortcut) {
+                    // Construct the Gist raw content URL from the gistShortcut value
+                    const parts = gistShortcut.split('/');
+                    const gistId = parts.pop();
+                    // Gists don't have a branch name or a direct file path in the URL, so use the Gist API URL format
+                    urlToFetch = `https://api.github.com/gists/${gistId}`;
+                    downloadFn = markdownDownloadGist;
+                } else if (sourceUrl) {
+                    // Use the direct URL provided by source or s
+                    urlToFetch = sourceUrl;
+                }
 
-		// Add click event listener to the button
-		submitButton.addEventListener('click', function() {
-			const url = urlInput.value;
-			
-			// Check if URL is not empty
-			if (url.trim() !== '') {
-				const githubPattern = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/;
-				const gistPattern = /^https:\/\/gist\.github\.com\/([^\/]+)\/([0-9a-fA-F]+)$/;
-				
+                if (urlToFetch) {
+                    downloadFn(urlToFetch, (markdown, params) => {
+                        if (!params) {
+                            params = {};
+                        }
+                        // Inject the markdown into the quiz container
+                        quizContainer.classList.remove('hidden');
+                        const newQuizElement = document.createElement('div');
+                        newQuizElement.id = 'quiz';
+                        newQuizElement.className = 'quizdown';
 
-				const githubMatch = url.match(githubPattern);
-				const gistMatch = url.match(gistPattern);
+                        quizContainer.appendChild(newQuizElement);
+                        let config = {
+                            shuffleAnswers: false,
+                            shuffleQuestions: false,
+                            primaryColor: '#1b73e8',
+                            secondaryColor: '#ffffff',
+                        };
+                        Object.assign(config, params);
+                        quizdown
+                            .register(quizdownKatex)
+                            .register(quizdownHighlight)
+                            .createApp(markdown, newQuizElement, config);
+                    });
+                } else {
+                    const helpContainer =
+                        document.getElementById('helpContainer');
+                    helpContainer.classList.remove('hidden');
+                    const submitButton =
+                        document.getElementById('submitButton');
 
-				const newUrl = new URL(window.location.href);
+                    // Add click event listener to the button
+                    submitButton.addEventListener('click', function () {
+                        const url = urlInput.value;
 
-				if (githubMatch) {
-					// If it's a GitHub URL, format it accordingly
-					const [, username, reponame, branch, filepath] = githubMatch;
-					const formattedGithubPath = `${username}/${reponame}/${branch}/${filepath}`;
-					newUrl.searchParams.set('github', formattedGithubPath);
-				} else if (gistMatch) {
-					// If it's a Gist URL, format it accordingly
-					const [, username, gistId] = gistMatch;
-					const formattedGistPath = `${username}/${gistId}`;
-					newUrl.searchParams.set('gist', formattedGistPath);
-				} else {
-					// For non-GitHub URLs, proceed as before
-					newUrl.searchParams.set('source', url);
-				}
-				
-				helpContainer.classList.add('hidden');
-				window.location.href = newUrl.toString();
-			} else {
-				console.log('No URL entered');
-			}
-		});
+                        // Check if URL is not empty
+                        if (url.trim() !== '') {
+                            const githubPattern =
+                                /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/;
+                            const gistPattern =
+                                /^https:\/\/gist\.github\.com\/([^\/]+)\/([0-9a-fA-F]+)$/;
 
-		urlInput.addEventListener('keypress', function(e) {
-			if (e.key === 'Enter') {
-				submitButton.click();
-			}
-		});
+                            const githubMatch = url.match(githubPattern);
+                            const gistMatch = url.match(gistPattern);
 
-	}
-});
-	</script>
-</head>
+                            const newUrl = new URL(window.location.href);
 
-<style>
-	html {
-		font-family: sans-serif;
-	}
+                            if (githubMatch) {
+                                // If it's a GitHub URL, format it accordingly
+                                const [, username, reponame, branch, filepath] =
+                                    githubMatch;
+                                const formattedGithubPath = `${username}/${reponame}/${branch}/${filepath}`;
+                                newUrl.searchParams.set(
+                                    'github',
+                                    formattedGithubPath
+                                );
+                            } else if (gistMatch) {
+                                // If it's a Gist URL, format it accordingly
+                                const [, username, gistId] = gistMatch;
+                                newUrl.searchParams.set('gist', gistId);
+                            } else {
+                                // For non-GitHub URLs, proceed as before
+                                newUrl.searchParams.set('source', url);
+                            }
 
-	html, body, .container {
-		height: 100%;
-		margin: 0;
-		padding: 0;
-	}
+                            helpContainer.classList.add('hidden');
+                            window.location.href = newUrl.toString();
+                        } else {
+                            console.log('No URL entered');
+                        }
+                    });
 
-	body {
-		font-size: 1.1em;
-		line-height: 1.5;
-	}
-	.quizdown {
-		height: 100%;
-	}
-	
-	#quizContainer {
-		overflow: hidden;
-	}
+                    urlInput.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') {
+                            submitButton.click();
+                        }
+                    });
+                }
+            }
 
-	#help {
-		display:  flex;
-		flex-direction: column;
-		align-items: center;
-		max-width: 800px;
-		padding: 20px;
-		margin: auto;
-	}
-	.hidden {
-		display: none!important;
-	}
+            document.addEventListener('DOMContentLoaded', init);
+            window.addEventListener('hashchange', init);
+        </script>
+    </head>
 
-	.url-input {
-		padding: 10px; 
-		width: 100%; 
-		margin-bottom: 10px; 
-		border-radius: 5px; 
-		border: 1px solid #ccc;
-	}
-	.submit-button {
-		padding: 10px 20px; 
-		border: none; 
-		border-radius: 5px; 
-		cursor: pointer; 
-		background-color: #007BFF; 
-		color: white; 
-		font-weight: bold;
-	}
+    <style>
+        html {
+            font-family: sans-serif;
+        }
 
-	/* Smaller screens */
-	@media (max-width: 600px) {
-		body {
-			margin: 0px;
-		}
-	}
+        html,
+        body,
+        .container {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-	table, tbody, th, td, tr {
-		border-collapse: collapse;
-		margin: 10px;
-		padding: 5px;
-	}
+        body {
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        .quizdown {
+            height: 100%;
+        }
 
-</style>
+        #quizContainer {
+            overflow: hidden;
+        }
 
-<body>
-	<div class="container hidden" id="quizContainer" >
-	</div>
-	<div class="container hidden" id="helpContainer">
-	<div id="help">
-		<input class="url-input" type="text" 
-		placeholder="Enter the URL of a markdown file that contains the quiz."
-		id="urlInput"
-		>
-		<button class="submit-button" id="submitButton">
-		GO
-		</button>
-		<br>
-		<div>
-			Use <a href="/live.html">live editor</a> to create your own questions in markdown format
-		</div>
-		<br>
+        #help {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+            padding: 20px;
+            margin: auto;
+        }
+        .hidden {
+            display: none !important;
+        }
 
-		Following are some samples input files and their output quizzes.
-		<table>
-			<tr>
-				<th>
-					Sample File	
-				</th>
-				<th>
-					Output Quiz
-				</th>
-			</tr>
-			<tr>
-				<td>
-					<a href="maths.md">maths.md</a>
-				</td>
-				<td>
-					<a href="/?s=maths.md">Maths Quiz</a>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<a href="python.md">python.md</a>
-				</td>
-				<td>
-					<a href="/?s=python.md">Python Quiz</a>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<a href="sample.md">sample.md</a>
-				</td>
-				<td>
-					<a href="/?s=sample.md">Sample Quiz</a>
-				</td>
-			</tr>
-		</table>		
-		Native github and gist urls are supported.
-		The github repository must be public. But the gist can be hidden.
-	</div>
-	</div>
-</body>
+        .url-input {
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .submit-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
 
+        /* Smaller screens */
+        @media (max-width: 600px) {
+            body {
+                margin: 0px;
+            }
+        }
+
+        table,
+        tbody,
+        th,
+        td,
+        tr {
+            border-collapse: collapse;
+            margin: 10px;
+            padding: 5px;
+        }
+    </style>
+
+    <body>
+        <div class="container hidden" id="quizContainer"></div>
+        <div class="container hidden" id="helpContainer">
+            <div id="help">
+                <input
+                    class="url-input"
+                    type="text"
+                    placeholder="Enter the URL of a markdown file that contains the quiz."
+                    id="urlInput"
+                />
+                <button class="submit-button" id="submitButton">GO</button>
+                <br />
+                <div>
+                    Use <a href="/live.html">live editor</a> to create your own
+                    questions in markdown format
+                </div>
+                <br />
+
+                Following are some samples input files and their output quizzes.
+                <table>
+                    <tr>
+                        <th>Sample File</th>
+                        <th>Output Quiz</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="maths.md">maths.md</a>
+                        </td>
+                        <td>
+                            <a href="/?s=maths.md">Maths Quiz</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="python.md">python.md</a>
+                        </td>
+                        <td>
+                            <a href="/?s=python.md">Python Quiz</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="sample.md">sample.md</a>
+                        </td>
+                        <td>
+                            <a href="/?s=sample.md">Sample Quiz</a>
+                        </td>
+                    </tr>
+                </table>
+                Native github and gist urls are supported. The github repository
+                must be public. But the gist can be hidden.
+            </div>
+        </div>
+    </body>
 </html>

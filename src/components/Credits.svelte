@@ -8,12 +8,12 @@
 <style>
     .credits a {
         opacity: 0.5;
-		color: gray;
+        color: gray;
         text-decoration: none;
     }
 
     .credits a:hover {
-		opacity: 1;
+        opacity: 1;
         text-decoration: underline;
     }
 

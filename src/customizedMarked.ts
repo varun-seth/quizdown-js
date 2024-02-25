@@ -12,10 +12,16 @@ const tokenizer: marked.TokenizerObject = {
         );
         const cap = regex.exec(src);
         if (cap) {
+            let data = {};
+            try {
+                data = parseYaml(cap[3], {});
+            } catch (error) {
+                console.error('Error parsing YAML frontmatter:', error.message);
+            }
             return {
                 type: 'options',
                 raw: cap[0],
-                data: parseYaml(cap[3], {}),
+                data: data,
             };
         }
     },
@@ -23,10 +29,6 @@ const tokenizer: marked.TokenizerObject = {
 
 // customize renderer
 const renderer: marked.RendererObject = {
-    // disable paragraph
-    paragraph(text) {
-        return text;
-    },
     //disable blockquote, we use this for hints
     blockquote(text) {
         return text;
