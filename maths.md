@@ -1,12 +1,18 @@
 # Math Quiz
 
-## Sort the following numbers in ascending order
+## Solve the expression
 
-> An ascending order starts from the smallest values and increases till the largest.
+$$
+\sqrt{\frac{9}{16}}
+$$
 
-1. 0
-2. 1/3
-3. 2/3
+> Also check out $\sqrt{x+2}$!
+
+1. [x] Try out: $x=0.75$
+2. [ ] $x=0.5$ could also *be correct*!
+3. [ ] perhaps $x=1$?
+4. [ ] $x=1.5$
+
 
 ## Solve for $x$ in the equation $x^2 = 4$
 
@@ -17,6 +23,15 @@
 3. [x] $x=-2$
 4. [ ] No real solution.
 
+
+## Sort the following numbers in ascending order
+
+> An ascending order starts from the smallest values and increases till the largest.
+
+1. 0
+2. 1/3
+3. 2/3
+
 ## What is $\log_2(64)$
 
 > $\log_b (n) = p \implies b ^ p = n$
@@ -25,6 +40,7 @@
 - [ ] 4
 - [x] 6
 - [ ] 8
+
 
 ## Solve for $x$ in $x^2 - 5x + 6 = 0$.
 
@@ -51,11 +67,3 @@
 - [ ] $2x + C$
 - [x] $x^2 + C$
 
-
-## Invalid question
-
-This is an invalid question because none of the boxes are checked.
-- [ ] Wrong
-- [ ] Also Wrong
-- [ ] Wronger
-- [ ] None of the above.
