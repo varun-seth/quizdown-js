@@ -99,7 +99,6 @@
 
     [type='checkbox'] + span,
     [type='radio'] + span {
-        transition-duration: 0.3s;
         color: var(--quizdown-color-text);
         display: block;
         padding: 0.5rem;
@@ -112,8 +111,15 @@
     [type='checkbox']:focus + span,
     [type='radio']:hover + span,
     [type='radio']:focus + span {
-        border: 3px dashed
+        border: 3px solid
             color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
+    }
+
+    [type='checkbox']:hover + span .my-choice-marker,
+    [type='checkbox']:focus + span .my-choice-marker,
+    [type='radio']:hover + span .my-choice-marker,
+    [type='radio']:focus + span .my-choice-marker {
+        color: var(--quizdown-color-primary);
     }
 
     [type='checkbox']:checked + span,

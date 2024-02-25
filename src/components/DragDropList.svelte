@@ -249,7 +249,7 @@
 
     .item:hover,
     .item:focus {
-        border: 3px dashed
+        border: 3px solid
             color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
     }
 
