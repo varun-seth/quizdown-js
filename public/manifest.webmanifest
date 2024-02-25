@@ -1,0 +1,24 @@
+{
+    "background_color": "white",
+    "theme_color": "white",
+    "description": "Quizhub - Make interactive quizzes and share with everyone! Supports Markdown Language, Multiple Choice Questions, Single Choice Questions, Sequence arrangement etc.",
+    "display": "fullscreen",
+    "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "128x128 512x512 1024x1024",
+            "type": "image/png",
+            "comment": "For Chrome (android)"
+        },
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any",
+            "comment": "For all without mentioning sizes"
+        }
+    ],
+    "name": "QuizHub",
+    "short_name": "QuizHub",
+    "start_url": "index.html"
+}
