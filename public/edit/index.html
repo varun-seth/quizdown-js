@@ -35,7 +35,7 @@
             }
 
             .toolbar {
-                background: rgb(248, 248, 248);
+                background: color-mix(in srgb, var(--quizdown-color-primary) 20%, white 80%);
                 height: 48px;
                 display: flex;
                 justify-content: space-between; /* Align items to the start and end */
@@ -68,55 +68,12 @@
                 },
             });
             require(['vs/editor/editor.main'], function () {
-                function getSavedContent() {
-                    // Try getting content from sessionStorage first, then localStorage
-                    var savedContent =
-                        sessionStorage.getItem('liveEditorContent');
-                    if (savedContent) {
-                        return savedContent;
-                    } else {
-                        // Default content if nothing is saved
-                        return [
-                            '# Quiz Name',
-                            '',
-                            'This is a basic Quiz',
-                            '',
-                            '## What is 2 + 2 ?',
-                            '',
-                            "MCQ's can be defined by a list of options with checkboxes.",
-                            'A Single-Choice Question has only one checkbox with the x character.',
-                            '',
-                            '- [ ] 0',
-                            '- [x] 4',
-                            '- [ ] 5',
-                            '',
-                            '## Solve for x in x ^ 2 = 4',
-                            '',
-                            'A Multiple-Choice Question has more than 1 checkboxes having the x character',
-                            '',
-                            '- [x] -2',
-                            '- [ ] 0',
-                            '- [x] 2',
-                            '',
-                            '## Sort from smallest to largest',
-                            '',
-                            'An ordered list of options are shown as a Sequence question.',
-                            'The quiz-participant must drag these options to the correct order.',
-                            '',
-                            '1. 0',
-                            '2. 1/3',
-                            '3. 2/3',
-                            '',
-                        ].join('\n');
-                    }
-                }
-
                 const toolbarElement = document.getElementById('toolbar');
 
                 const myToolbar = quizdown.createToolbar(toolbarElement); // Assuming this is your toolbar instance
                 myToolbar.fetchContent();
 
-                var editor = monaco.editor.create(
+                let editor = monaco.editor.create(
                     document.getElementById('editorContainer'),
                     {
                         value: myToolbar.getContent(),
@@ -135,16 +92,13 @@
 
                 let renderQuizDebounceTimer;
                 function onUpdate() {
-                    var currentPosition = editor.getPosition();
-                    var activeLineNumber = currentPosition.lineNumber;
-                    var currentContent = editor.getValue();
+                    let currentPosition = editor.getPosition();
+                    let activeLineNumber = currentPosition.lineNumber;
+                    let currentContent = editor.getValue();
+                    myToolbar.onTextChange(currentContent);
                     clearTimeout(renderQuizDebounceTimer);
                     renderQuizDebounceTimer = setTimeout(function () {
                         renderQuiz(currentContent, activeLineNumber);
-                        sessionStorage.setItem(
-                            'liveEditorContent',
-                            currentContent
-                        );
                     }, 400); // Wait for 1 second before rendering
                 }
 
@@ -156,7 +110,7 @@
                 editor.addCommand(
                     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
                     function () {
-                        var content = editor.getValue();
+                        let content = editor.getValue();
                         downloadContent(content, 'quiz.md');
                     }
                 );
@@ -165,7 +119,7 @@
             });
 
             function downloadContent(content, filename) {
-                var element = document.createElement('a');
+                let element = document.createElement('a');
                 element.setAttribute(
                     'href',
                     'data:text/plain;charset=utf-8,' +

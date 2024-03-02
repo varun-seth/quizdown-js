@@ -10,7 +10,11 @@
     // Function to fetch and set initial content
     export function fetchContent() {
         // Simulate fetching content (replace with actual storage fetch)
-        content.set('Initial content from storage');
+        let contentNew = sessionStorage.getItem('liveEditorContent');
+        if (!contentNew) {
+            contentNew = defaultText;
+        }
+        content.set(contentNew);
     }
 
     // Expose content for initial fetch
@@ -18,7 +22,6 @@
         return get(content);
     }
 
-    // Placeholder for onTextChange registration
     let callOutsideOnInternalChange = null;
 
     export function registerTextChange(callback) {
@@ -26,7 +29,12 @@
     }
 
     export function onTextChange(text) {
+        if (get(content) == text) {
+            return;
+        }
         content.set(text);
+        sessionStorage.setItem('liveEditorContent', text);
+        console.log('Updated content');
     }
 
     // Simulate calling the registered callback on content change
@@ -35,7 +43,7 @@
             callOutsideOnInternalChange(get(content));
 </script>
 
-<span>
+<span style="padding-left: 10px">
     <Button
         title="Start"
         buttonAction="{() => {
@@ -44,7 +52,7 @@
             callOutsideOnInternalChange(defaultText);
         }}"
     >
-        New
+        Sample
     </Button>
 
     <Button
@@ -57,9 +65,4 @@
     >
         Empty
     </Button>
-</span>
-
-<!-- Right sided buttons -->
-<span>
-    <Button>Login</Button>
 </span>
