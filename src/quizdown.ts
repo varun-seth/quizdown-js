@@ -3,6 +3,7 @@ import parseQuizdown from './parser.js';
 import { Config } from './config.js';
 import marked from './customizedMarked.js';
 import type { Quiz } from './quiz';
+import Toolbar from './Toolbar.svelte';
 
 export interface Quizdown {
     register(extension: QuizdownExtension): Quizdown;
@@ -10,6 +11,7 @@ export interface Quizdown {
     parseQuizdown(rawQuizdown: string, config: Config): Quiz;
     init(config: object): void;
     getMarkedParser(): typeof marked;
+    createToolbar(node: Element): Toolbar;
 }
 
 export interface QuizdownExtension {
@@ -66,12 +68,31 @@ function getMarkedParser(): typeof marked {
     return marked;
 }
 
+function createToolbar(node: Element): Toolbar {
+    node.innerHTML = '';
+    let root: ShadowRoot;
+    if (!!node.shadowRoot) {
+        //clear root if it allready exists
+        root = node.shadowRoot;
+        root.innerHTML = '';
+    } else {
+        root = node.attachShadow({ mode: 'open' });
+    }
+
+    let toolbar = new Toolbar({
+        target: root,
+        props: {},
+    });
+    return toolbar;
+}
+
 let quizdown: Quizdown = {
     init,
     register,
     parseQuizdown,
     createApp,
     getMarkedParser,
+    createToolbar,
 };
 
 export default quizdown;

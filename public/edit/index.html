@@ -24,6 +24,8 @@
                 font-family: sans-serif;
                 height: 100%;
                 margin: 0;
+                display: flex;
+                flex-direction: column; /
             }
             #editorContainer,
             #quizContainer {
@@ -31,9 +33,18 @@
                 width: 50%;
                 float: left;
             }
+
+            .toolbar {
+                background: rgb(248, 248, 248);
+                height: 48px;
+                display: flex;
+                justify-content: space-between; /* Align items to the start and end */
+                align-items: center; /* Center items vertically */
+
+            }
             .container {
                 display: flex;
-                height: 100%;
+                height: calc(100% - 48px);
                 overflow: hidden;
             }
 
@@ -44,6 +55,7 @@
     </head>
 
     <body>
+        <div id="toolbar" class="toolbar"></div>
         <div class="container">
             <div id="editorContainer"></div>
             <div id="quizContainer"></div>
@@ -99,10 +111,15 @@
                     }
                 }
 
+                const toolbarElement = document.getElementById('toolbar');
+
+                const myToolbar = quizdown.createToolbar(toolbarElement); // Assuming this is your toolbar instance
+                myToolbar.fetchContent();
+
                 var editor = monaco.editor.create(
                     document.getElementById('editorContainer'),
                     {
-                        value: getSavedContent(),
+                        value: myToolbar.getContent(),
                         language: 'markdown',
                         minimap: { enabled: false },
                         // lineNumbers: 'off',
@@ -110,6 +127,11 @@
                         folding: false,
                     }
                 );
+
+                myToolbar.registerTextChange((newContent) => {
+                    // Logic to update Monaco editor or perform other actions
+                    editor.getModel().setValue(newContent);
+                });
 
                 let renderQuizDebounceTimer;
                 function onUpdate() {
