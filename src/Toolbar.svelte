@@ -6,12 +6,18 @@
     import { onMount } from 'svelte';
 
     const clientId = process.env.CLIENT_ID;
+    const apiKey = process.env.API_KEY;
     export const userInfo = writable(null);
+    const accessToken = writable('');
 
     onMount(() => {
         const storedUserInfo = localStorage.getItem('google_info');
         if (storedUserInfo) {
             userInfo.set(JSON.parse(storedUserInfo));
+        }
+        const storedAccessToken = localStorage.getItem('google_token');
+        if (storedAccessToken) {
+            accessToken.set(JSON.parse(storedAccessToken));
         }
     });
 
@@ -88,13 +94,69 @@
     $: content,
         callOutsideOnInternalChange &&
             callOutsideOnInternalChange(get(content));
+
+    function openGooglePicker() {
+        let currentAccesstoken = get(accessToken);
+        if (!currentAccesstoken) {
+            handleSignIn();
+            return;
+        }
+
+        // TODO: handle expiry
+
+        // Ensure the Picker API is loaded
+        gapi.load('picker', () => {
+            var view = new google.picker.DocsView(google.picker.ViewId.DOCS)
+                .setQuery('*.md') // Markdown files.
+                .setIncludeFolders(true) // This shows folders in the picker
+                .setMode(google.picker.DocsViewMode.RECENTS)
+                .setOwnedByMe(true) // This limits to files owned by the user.
+                .setSelectFolderEnabled(false); // Set to true if you want users to be able to select folders.
+
+            const picker = new google.picker.PickerBuilder()
+                .addView(view) // Use the view defined above
+                .setOAuthToken(currentAccesstoken.token)
+                .setDeveloperKey(apiKey)
+                .setCallback(pickerCallback)
+                .build();
+
+            picker.setVisible(true);
+        });
+    }
+
+    function pickerCallback(data) {
+        if (
+            data[google.picker.Response.ACTION] === google.picker.Action.PICKED
+        ) {
+            const doc = data[google.picker.Response.DOCUMENTS][0];
+            const fileId = doc[google.picker.Document.ID];
+
+            // Update URL with the selected file ID
+            const currentUrl = window.location.href.split('?')[0];
+            const newUrl = `${currentUrl}?gdrive=${fileId}`;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+
+            // Optionally, load or manipulate the selected file using its file ID
+            console.log('Selected file ID: ', fileId);
+        }
+    }
+
 </script>
 
 <span style="padding-left: 10px">
     <Button
         title="Start"
         buttonAction="{() => {
-            console.log('calling callback');
+            content.set('');
+            callOutsideOnInternalChange('');
+        }}"
+    >
+        New
+    </Button>
+
+    <Button
+        title="Start"
+        buttonAction="{() => {
             content.set(defaultText);
             callOutsideOnInternalChange(defaultText);
         }}"
@@ -102,16 +164,7 @@
         Sample
     </Button>
 
-    <Button
-        title="Start"
-        buttonAction="{() => {
-            console.log('calling callback');
-            content.set('');
-            callOutsideOnInternalChange('');
-        }}"
-    >
-        Empty
-    </Button>
+    <Button buttonAction="{openGooglePicker}">Open</Button>
 </span>
 
 <!-- Right sided buttons -->
