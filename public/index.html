@@ -236,6 +236,7 @@
             max-width: 800px;
             padding: 20px;
             margin: auto;
+            gap: 20px;
         }
         .hidden {
             display: none !important;
@@ -244,7 +245,6 @@
         .url-input {
             padding: 10px;
             width: 100%;
-            margin-bottom: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
         }
@@ -274,31 +274,76 @@
             margin: 10px;
             padding: 5px;
         }
+        a:link,
+        a:visited {
+            color: #007bff; /* Or any color of your choice */
+        }
     </style>
 
     <body>
         <div class="container hidden" id="quizContainer"></div>
         <div class="container hidden" id="helpContainer">
             <div id="help">
-                <input
-                    class="url-input"
-                    type="text"
-                    placeholder="Enter the URL of a markdown file that contains the quiz."
-                    id="urlInput"
-                />
-                <button class="submit-button" id="submitButton">GO</button>
-                <br />
                 <div>
-                    <a href="/edit/">
-                        <button class="submit-button">
-                            Try Live Editor
-                        </button></a
+                    <a
+                        href="https://quizhub.in"
+                        style="
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 10px;
+                            width: 100%;
+                            justify-content: center;
+                            text-decoration: none;
+                            color: #007bff;
+                        "
                     >
-                    to create your own questions in markdown format
+                        <img src="/icon.svg" style="height: 32px" />
+                        <h1>QuizHub</h1>
+                    </a>
                 </div>
+
+                <h2 style="font-weight: 400">
+                    Create quizzes and share with everyone!
+                </h2>
+
+                <a href="/edit/">
+                    <button class="submit-button">
+                        <div
+                            style="
+                                font-weight: 400;
+                                font-size: 1.5em;
+                                padding: 10px;
+                            "
+                        >
+                            Try QuizHub Editor
+                        </div>
+                    </button>
+                </a>
+
                 <br />
 
-                Following are some samples input files and their output quizzes.
+                You can also load a quiz using the URL of your existing Quiz
+                (markdown file).
+                <br />
+                <div
+                    style="
+                        display: flex;
+                        width: 100%;
+                        align-items: center;
+                        max-width: 480px;
+                    "
+                >
+                    <input
+                        class="url-input"
+                        type="text"
+                        placeholder="Enter the URL of a markdown file that contains the quiz."
+                        id="urlInput"
+                    />
+                    <button class="submit-button" id="submitButton">GO</button>
+                </div>
+                <br />
+                Following are some sample markdown files and their output
+                quizzes.
                 <table>
                     <tr>
                         <th>Sample File</th>
