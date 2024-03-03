@@ -10,6 +10,12 @@
     export const userInfo = writable(null);
     const accessToken = writable('');
 
+    let fileId = null;
+    let filename = writable('');
+
+    // Store for toolbar content
+    export const content = writable('');
+
     onMount(() => {
         const storedUserInfo = localStorage.getItem('google_info');
         if (storedUserInfo) {
@@ -19,7 +25,52 @@
         if (storedAccessToken) {
             accessToken.set(JSON.parse(storedAccessToken));
         }
+
+        const queryParams = new URLSearchParams(window.location.search);
+        fileId = queryParams.get('gdrive');
+        if (fileId) {
+            // Proceed to make an API call to get the file
+            getFileDetails(fileId);
+        } else {
+            fetchStorageContent();
+        }
     });
+
+    async function getFileDetails(fileId) {
+        let currentAccesstoken = get(accessToken);
+        if (!currentAccesstoken) {
+            // handleSignIn();
+            return;
+        }
+
+        const headers = new Headers({
+            Authorization: `Bearer ${currentAccesstoken.token}`,
+        });
+
+        const contentResponse = await fetch(
+            `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+            { headers }
+        );
+        if (contentResponse.ok) {
+            let fileContentText = await contentResponse.text();
+            content.set(fileContentText);
+            callOutsideOnInternalChange(fileContentText);
+        } else {
+            console.error('Failed to fetch file content');
+        }
+
+        const metadataResponse = await fetch(
+            `https://www.googleapis.com/drive/v3/files/${fileId}?fields=name`,
+            { headers }
+        );
+        if (metadataResponse.ok) {
+            const metadata = await metadataResponse.json();
+            let nameText = metadata.name;
+            filename.set(nameText);
+        } else {
+            console.error('Failed to fetch file metadata');
+        }
+    }
 
     function handleAccessToken(response) {
         const tokenInfo = {
@@ -35,7 +86,10 @@
         google.accounts.oauth2
             .initTokenClient({
                 client_id: clientId,
-                scope: 'email profile https://www.googleapis.com/auth/drive.file',
+                scope:
+                    'email profile https://www.googleapis.com/auth/drive.file ' +
+                    'https://www.googleapis.com/auth/drive.metadata ' +
+                    'https://www.googleapis.com/auth/drive',
                 callback: handleAccessToken,
             })
             .requestAccessToken(); // This opens the popup
@@ -57,11 +111,8 @@
             });
     }
 
-    // Store for toolbar content
-    export const content = writable('');
-
     // Function to fetch and set initial content
-    export function fetchContent() {
+    function fetchStorageContent() {
         // Simulate fetching content (replace with actual storage fetch)
         let contentNew = sessionStorage.getItem('liveEditorContent');
         if (!contentNew) {
@@ -86,8 +137,10 @@
             return;
         }
         content.set(text);
-        sessionStorage.setItem('liveEditorContent', text);
-        console.log('Updated content');
+        if (!fileId) {
+            sessionStorage.setItem('liveEditorContent', text);
+            console.log('Updated content');
+        }
     }
 
     // Simulate calling the registered callback on content change
@@ -109,15 +162,17 @@
             var view = new google.picker.DocsView(google.picker.ViewId.DOCS)
                 .setQuery('*.md') // Markdown files.
                 .setIncludeFolders(true) // This shows folders in the picker
-                .setMode(google.picker.DocsViewMode.RECENTS)
+                .setMode(google.picker.DocsViewMode.LIST) // Set the view mode to LIST instead of GRID
                 .setOwnedByMe(true) // This limits to files owned by the user.
                 .setSelectFolderEnabled(false); // Set to true if you want users to be able to select folders.
 
             const picker = new google.picker.PickerBuilder()
-                .addView(view) // Use the view defined above
+                .addView(view)
                 .setOAuthToken(currentAccesstoken.token)
                 .setDeveloperKey(apiKey)
                 .setCallback(pickerCallback)
+                .setInitialView(view)
+                .setTitle('Select a Quiz file (markdown files end with .md)')
                 .build();
 
             picker.setVisible(true);
@@ -141,14 +196,56 @@
         }
     }
 
+    async function createFileInDrive() {
+        let currentAccesstoken = get(accessToken);
+        if (!currentAccesstoken) {
+            content.set('');
+            callOutsideOnInternalChange('');
+            return;
+        }
+        // TODO: Check access token expiry
+        // TODO: Check if curent file is saved, show confirmation.
+
+        const fileMetadata = {
+            name: 'Quiz.md',
+            mimeType: 'text/markdown',
+        };
+
+        const response = await fetch(
+            'https://www.googleapis.com/drive/v3/files',
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${currentAccesstoken.token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(fileMetadata),
+            }
+        );
+
+        const file = await response.json();
+
+        if (file.id) {
+            // Update URL with file ID
+            const currentUrl = window.location.href.split('?')[0];
+            const newUrl = `${currentUrl}?gdrive=${file.id}`;
+            // window.history.pushState({ path: newUrl }, '', newUrl);
+
+            window.open(newUrl, '_blank');
+
+            return file.id; // Return the file ID
+        } else {
+            console.error('Failed to create file in Drive');
+            return null;
+        }
+    }
 </script>
 
 <span style="padding-left: 10px">
     <Button
         title="Start"
         buttonAction="{() => {
-            content.set('');
-            callOutsideOnInternalChange('');
+            createFileInDrive();
         }}"
     >
         New
@@ -166,6 +263,10 @@
 
     <Button buttonAction="{openGooglePicker}">Open</Button>
 </span>
+
+{#if $filename}
+    {$filename}
+{/if}
 
 <!-- Right sided buttons -->
 <span style="padding-right: 10px">
