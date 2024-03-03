@@ -14,6 +14,7 @@
     let filename = writable('');
 
     let isLoading = false;
+    let isSaving = false;
 
     // Store for toolbar content
     export const content = writable('');
@@ -92,10 +93,9 @@
         google.accounts.oauth2
             .initTokenClient({
                 client_id: clientId,
-                scope:
-                    'email profile https://www.googleapis.com/auth/drive.file ' +
-                    'https://www.googleapis.com/auth/drive.metadata ' +
-                    'https://www.googleapis.com/auth/drive',
+                scope: 'email profile https://www.googleapis.com/auth/drive.file ',
+                // 'https://www.googleapis.com/auth/drive.metadata ' +
+                // 'https://www.googleapis.com/auth/drive',
                 callback: handleAccessToken,
             })
             .requestAccessToken(); // This opens the popup
@@ -199,10 +199,12 @@
 
             // Optionally, load or manipulate the selected file using its file ID
             console.log('Selected file ID: ', fileId);
+            // TODO: reset the state instead of reloading.
+            window.location.reload();
         }
     }
 
-    async function createFileInDrive() {
+    async function createFileInDrive(newWindow = true, callbackFn) {
         let currentAccesstoken = get(accessToken);
         if (!currentAccesstoken) {
             content.set('');
@@ -211,9 +213,10 @@
         }
         // TODO: Check access token expiry
         // TODO: Check if curent file is saved, show confirmation.
+        let name = 'Quiz.md';
 
         const fileMetadata = {
-            name: 'Quiz.md',
+            name: name,
             mimeType: 'text/markdown',
         };
 
@@ -229,15 +232,32 @@
             }
         );
 
+        if (response.status === 401) {
+            handleSignIn();
+        } else if (!response.ok) {
+            // Handle other errors
+            throw new Error(
+                `HTTP error! status: ${response.status}, statusText: ${response.statusText}`
+            );
+        }
+
         const file = await response.json();
 
         if (file.id) {
             // Update URL with file ID
             const currentUrl = window.location.href.split('?')[0];
             const newUrl = `${currentUrl}?gdrive=${file.id}`;
-            // window.history.pushState({ path: newUrl }, '', newUrl);
 
-            window.open(newUrl, '_blank');
+            if (newWindow) {
+                window.open(newUrl, '_blank');
+            } else {
+                filename.set(name);
+                window.history.pushState({ path: newUrl }, '', newUrl);
+            }
+
+            if (callbackFn) {
+                callbackFn(file.id);
+            }
 
             return file.id; // Return the file ID
         } else {
@@ -245,13 +265,88 @@
             return null;
         }
     }
+
+    async function saveFileToDrive(
+        fileId,
+        accessToken,
+        newContent,
+        callbackOnSaved
+    ) {
+        isSaving = true;
+        const url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`;
+
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: new Headers({
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'text/plain', // Adjust based on the file type you're updating
+            }),
+            body: newContent, // The new content of the file
+        });
+
+        if (response.ok) {
+            isSaving = false;
+            const result = await response.json();
+            console.log('File updated successfully:', result);
+            if (callbackOnSaved) {
+                callbackOnSaved(result);
+            }
+            return result;
+        } else {
+            isSaving = false;
+            console.error('Failed to update the file:', response.statusText);
+            throw new Error('Failed to update the file');
+        }
+    }
+
+    export function save() {
+        let currentAccesstoken = get(accessToken);
+        if (!currentAccesstoken) {
+            console.log('Downloading');
+            downloadContent(get(content), 'Quiz.md');
+            return true;
+        }
+
+        if (fileId) {
+            saveFileToDrive(fileId, currentAccesstoken.token, get(content));
+        } else {
+            createFileInDrive(false, (fileId) => {
+                // try saving again.
+                saveFileToDrive(
+                    fileId,
+                    currentAccesstoken.token,
+                    get(content),
+                    (result) => {
+                        sessionStorage.setItem('liveEditorContent', '');
+                    }
+                );
+            });
+        }
+        return true;
+    }
+
+    function downloadContent(content, filename) {
+        let element = document.createElement('a');
+        element.setAttribute(
+            'href',
+            'data:text/plain;charset=utf-8,' + encodeURIComponent(content)
+        );
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
 </script>
 
 <span style="padding-left: 10px">
     <Button
         title="Start"
         buttonAction="{() => {
-            createFileInDrive();
+            createFileInDrive(true);
         }}"
     >
         New
@@ -275,11 +370,22 @@
 {/if}
 
 {#if $filename}
-    {$filename}
+    <a href="https://drive.google.com/file/d/{fileId}/view" target="_blank">
+        {$filename}
+    </a>
 {/if}
 
 <!-- Right sided buttons -->
-<span style="padding-right: 10px">
+<span style="padding-right: 10px; display:inline-flex; gap: 10px;">
+    <Button buttonAction="{save}">
+        {#if isSaving}
+            Saving
+            <div class="spinner"></div>
+        {:else}
+            Save
+        {/if}
+    </Button>
+
     {#if $userInfo}
         <div class="user-info">
             <img
@@ -311,10 +417,10 @@
 
     .spinner {
         border: 4px solid rgba(0, 0, 0, 0.1);
-        width: 36px;
-        height: 36px;
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
-        border-left-color: #09f;
+        border-left-color: var(--quizdown-color-primary);
         animation: spin 1s ease infinite;
     }
 

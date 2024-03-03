@@ -116,30 +116,12 @@
                 editor.addCommand(
                     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
                     function () {
-                        let content = editor.getValue();
-                        downloadContent(content, 'quiz.md');
+                        myToolbar.save();
                     }
                 );
 
                 renderQuiz(editor.getValue());
             });
-
-            function downloadContent(content, filename) {
-                let element = document.createElement('a');
-                element.setAttribute(
-                    'href',
-                    'data:text/plain;charset=utf-8,' +
-                        encodeURIComponent(content)
-                );
-                element.setAttribute('download', filename);
-
-                element.style.display = 'none';
-                document.body.appendChild(element);
-
-                element.click();
-
-                document.body.removeChild(element);
-            }
 
             function renderQuiz(markdown, activeLineNumber = 0) {
                 const quizContainer = document.getElementById('quizContainer');
