@@ -15,6 +15,7 @@
 
     let isLoading = false;
     let isSaving = false;
+    let isSharing = false;
 
     // Store for toolbar content
     export const content = writable('');
@@ -42,7 +43,7 @@
     async function getFileDetails(fileId) {
         let currentAccesstoken = get(accessToken);
         if (!currentAccesstoken) {
-            // handleSignIn();
+            alert('Login required to get file details');
             return;
         }
 
@@ -56,12 +57,20 @@
             `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
             { headers }
         );
+
+        if (contentResponse.status == 401) {
+            alert('Please login again');
+            return;
+        }
+
         if (contentResponse.ok) {
             let fileContentText = await contentResponse.text();
             content.set(fileContentText);
             callOutsideOnInternalChange(fileContentText);
         } else {
+            alert('Failed to load.');
             console.error('Failed to fetch file content');
+            return;
         }
 
         const metadataResponse = await fetch(
@@ -89,14 +98,23 @@
         fetchUserProfile(response.access_token);
     }
 
-    function handleSignIn() {
+    function handleSignIn(signInCallback) {
+        if (!signInCallback) {
+            signInCallback = handleAccessToken;
+        } else {
+            let newSignInCallback = (response) => {
+                handleAccessToken(response);
+                signInCallback(response);
+            };
+            signInCallback = newSignInCallback;
+        }
         google.accounts.oauth2
             .initTokenClient({
                 client_id: clientId,
                 scope: 'email profile https://www.googleapis.com/auth/drive.file ',
                 // 'https://www.googleapis.com/auth/drive.metadata ' +
                 // 'https://www.googleapis.com/auth/drive',
-                callback: handleAccessToken,
+                callback: signInCallback,
             })
             .requestAccessToken(); // This opens the popup
     }
@@ -157,7 +175,7 @@
     function openGooglePicker() {
         let currentAccesstoken = get(accessToken);
         if (!currentAccesstoken) {
-            handleSignIn();
+            alert('Please login to open files from Google Drive');
             return;
         }
 
@@ -244,6 +262,7 @@
         const file = await response.json();
 
         if (file.id) {
+            fileId = file.id;
             // Update URL with file ID
             const currentUrl = window.location.href.split('?')[0];
             const newUrl = `${currentUrl}?gdrive=${file.id}`;
@@ -299,6 +318,59 @@
         }
     }
 
+    function share() {
+        let currentAccesstoken = get(accessToken);
+        if (!currentAccesstoken) {
+            alert('Please login before sharing');
+            return true;
+        }
+        if (!fileId) {
+            alert('Please save before sharing');
+            return true;
+        }
+
+        shareFile(fileId, currentAccesstoken.token, (result) => {
+            const currentUrl = window.location.origin;
+            const newUrl = `${currentUrl}?gdrive=${fileId}`;
+
+            window.open(newUrl, '_blank');
+        });
+    }
+
+    async function shareFile(fileId, accessToken, afterShareFn) {
+        isSharing = true;
+        const url = `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            }),
+            body: JSON.stringify({
+                role: 'reader',
+                type: 'anyone',
+            }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('File made public successfully:', result);
+            if (afterShareFn) {
+                afterShareFn(result);
+            }
+            isSharing = false;
+            return result;
+        } else {
+            console.error(
+                'Failed to make the file public:',
+                response.statusText
+            );
+            isSharing = false;
+            throw new Error('Failed to make the file public');
+        }
+    }
+
     export function save() {
         let currentAccesstoken = get(accessToken);
         if (!currentAccesstoken) {
@@ -342,7 +414,12 @@
     }
 </script>
 
-<span style="padding-left: 10px">
+<span style="padding-left: 10px; display: inline-flex">
+    <a href="/">
+        <Button>
+            <img src="/icon.svg" alt="quiz home" style="height: 16px;" />
+        </Button>
+    </a>
     <Button
         title="Start"
         buttonAction="{() => {
@@ -383,6 +460,15 @@
             <div class="spinner"></div>
         {:else}
             Save
+        {/if}
+    </Button>
+
+    <Button buttonAction="{share}">
+        {#if isSharing}
+            Sharing
+            <div class="spinner"></div>
+        {:else}
+            Share & Launch
         {/if}
     </Button>
 
