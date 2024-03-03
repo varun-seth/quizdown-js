@@ -3,8 +3,17 @@
     import Icon from './components/Icon.svelte';
     import defaultText from './toolbarDefaultText';
     import { writable, get } from 'svelte/store';
+    import { onMount } from 'svelte';
 
     const clientId = process.env.CLIENT_ID;
+    export const userInfo = writable(null);
+
+    onMount(() => {
+        const storedUserInfo = localStorage.getItem('google_info');
+        if (storedUserInfo) {
+            userInfo.set(JSON.parse(storedUserInfo));
+        }
+    });
 
     function handleAccessToken(response) {
         const tokenInfo = {
@@ -35,6 +44,7 @@
             .then((response) => response.json())
             .then((data) => {
                 localStorage.setItem('google_info', JSON.stringify(data));
+                userInfo.set(data);
             })
             .catch((error) => {
                 console.error('Error fetching user information:', error);
@@ -106,7 +116,32 @@
 
 <!-- Right sided buttons -->
 <span style="padding-right: 10px">
-    <Button buttonAction="{handleSignIn}">Login</Button>
+    {#if $userInfo}
+        <div class="user-info">
+            <img
+                class="user-image"
+                src="{$userInfo.picture}"
+                alt="{$userInfo.name}"
+            />
+            <span>{$userInfo.name}</span>
+        </div>
+    {:else}
+        <Button buttonAction="{handleSignIn}">Login</Button>
+    {/if}
 
     <div id="signinDiv"></div>
 </span>
+
+<style>
+    .user-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        max-width: 150px;
+    }
+    .user-image {
+        height: 32px;
+        border-radius: 16px;
+    }
+</style>
