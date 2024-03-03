@@ -4,6 +4,43 @@
     import defaultText from './toolbarDefaultText';
     import { writable, get } from 'svelte/store';
 
+    const clientId = process.env.CLIENT_ID;
+
+    function handleAccessToken(response) {
+        const tokenInfo = {
+            expires_in: response.expires_in,
+            expires: new Date().getTime() + response.expires_in * 1000,
+            token: response.access_token,
+        };
+        localStorage.setItem('google_token', JSON.stringify(tokenInfo));
+        fetchUserProfile(response.access_token);
+    }
+
+    function handleSignIn() {
+        google.accounts.oauth2
+            .initTokenClient({
+                client_id: clientId,
+                scope: 'email profile https://www.googleapis.com/auth/drive.file',
+                callback: handleAccessToken,
+            })
+            .requestAccessToken(); // This opens the popup
+    }
+
+    function fetchUserProfile(accessToken) {
+        fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                localStorage.setItem('google_info', JSON.stringify(data));
+            })
+            .catch((error) => {
+                console.error('Error fetching user information:', error);
+            });
+    }
+
     // Store for toolbar content
     export const content = writable('');
 
@@ -65,4 +102,11 @@
     >
         Empty
     </Button>
+</span>
+
+<!-- Right sided buttons -->
+<span style="padding-right: 10px">
+    <Button buttonAction="{handleSignIn}">Login</Button>
+
+    <div id="signinDiv"></div>
 </span>

@@ -8,6 +8,7 @@ import typescript from '@rollup/plugin-typescript';
 import analyze from 'rollup-plugin-analyzer';
 import versionInjector from 'rollup-plugin-version-injector';
 import json from '@rollup/plugin-json';
+import replace from '@rollup/plugin-replace';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -67,6 +68,10 @@ function make_config(input, output, name, extra_plugins) {
 }
 
 let svelte_plugins = [
+    replace({
+        preventAssignment: true,
+        'process.env.CLIENT_ID': JSON.stringify(process.env.CLIENT_ID),
+    }),
     svelte({
         preprocess: sveltePreprocess({
             sourceMap: !production,
