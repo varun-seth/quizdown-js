@@ -13,6 +13,8 @@
     let fileId = null;
     let filename = writable('');
 
+    let isLoading = false;
+
     // Store for toolbar content
     export const content = writable('');
 
@@ -47,6 +49,8 @@
             Authorization: `Bearer ${currentAccesstoken.token}`,
         });
 
+        isLoading = true;
+
         const contentResponse = await fetch(
             `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
             { headers }
@@ -70,6 +74,8 @@
         } else {
             console.error('Failed to fetch file metadata');
         }
+
+        isLoading = false;
     }
 
     function handleAccessToken(response) {
@@ -264,6 +270,10 @@
     <Button buttonAction="{openGooglePicker}">Open</Button>
 </span>
 
+{#if isLoading}
+    <div class="spinner"></div>
+{/if}
+
 {#if $filename}
     {$filename}
 {/if}
@@ -297,5 +307,23 @@
     .user-image {
         height: 32px;
         border-radius: 16px;
+    }
+
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border-left-color: #09f;
+        animation: spin 1s ease infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
     }
 </style>
