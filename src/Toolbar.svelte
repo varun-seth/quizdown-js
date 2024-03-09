@@ -25,6 +25,16 @@
     // Store for toolbar content
     export const content = writable('');
 
+    function markdownDownload(url, fn, errorFn) {
+        fetch(url)
+            .then((response) => response.text())
+            .then((text) => fn(text))
+            .catch((error) => {
+                console.error('Error fetching markdown:', error);
+                errorFn(error);
+            });
+    }
+
     onMount(() => {
         document.documentElement.style.setProperty(
             '--toolbar-color-primary',
@@ -45,9 +55,19 @@
         if (fileId) {
             // Proceed to make an API call to get the file
             getFileDetails();
-        } else {
-            fetchStorageContent();
+            return;
         }
+
+        const sourceUrl = queryParams.get('source') || queryParams.get('s');
+        if (sourceUrl) {
+            markdownDownload(sourceUrl, (text) => {
+                content.set(text);
+                callOutsideOnInternalChange(text);
+            });
+            return;
+        }
+
+        fetchStorageContent();
     });
 
     let renameDebounceTimer;
@@ -221,6 +241,7 @@
             contentNew = defaultText;
         }
         content.set(contentNew);
+        callOutsideOnInternalChange(contentNew);
     }
 
     // Expose content for initial fetch
@@ -228,7 +249,7 @@
         return get(content);
     }
 
-    let callOutsideOnInternalChange = null;
+    let callOutsideOnInternalChange = (text) => {};
 
     export function registerTextChange(callback) {
         callOutsideOnInternalChange = callback;

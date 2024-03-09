@@ -79,21 +79,39 @@
 
                 const myToolbar = quizdown.createToolbar(toolbarElement); // Assuming this is your toolbar instance
 
-                let editor = monaco.editor.create(
-                    document.getElementById('editorContainer'),
-                    {
-                        value: myToolbar.getContent(),
-                        language: 'markdown',
-                        minimap: { enabled: false },
-                        // lineNumbers: 'off',
-                        glyphMargin: false,
-                        folding: false,
-                    }
-                );
+                let editor;
 
                 myToolbar.registerTextChange((newContent) => {
-                    // Logic to update Monaco editor or perform other actions
-                    editor.getModel().setValue(newContent);
+                    if (!editor) {
+                        console.log('Creating editor');
+                        editor = monaco.editor.create(
+                            document.getElementById('editorContainer'),
+                            {
+                                value: newContent,
+                                language: 'markdown',
+                                minimap: { enabled: false },
+                                // lineNumbers: 'off',
+                                glyphMargin: false,
+                                folding: false,
+                            }
+                        );
+                        editor.onDidChangeModelContent(onUpdate);
+                        // TODO: expose a function that shows the correct question.
+                        editor.onDidChangeCursorPosition(onUpdate);
+
+                        // Intercept Ctrl+S and Command+S
+                        editor.addCommand(
+                            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
+                            function () {
+                                myToolbar.save();
+                            }
+                        );
+
+                        renderQuiz(newContent);
+                    } else {
+                        // Logic to update Monaco editor or perform other actions
+                        editor.getModel().setValue(newContent);
+                    }
                 });
 
                 let renderQuizDebounceTimer;
@@ -108,20 +126,6 @@
                         myToolbar.onTextChange(currentContent);
                     }, 400); // Wait for 1 second before rendering
                 }
-
-                editor.onDidChangeModelContent(onUpdate);
-                // TODO: expose a function that shows the correct question.
-                editor.onDidChangeCursorPosition(onUpdate);
-
-                // Intercept Ctrl+S and Command+S
-                editor.addCommand(
-                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
-                    function () {
-                        myToolbar.save();
-                    }
-                );
-
-                renderQuiz(editor.getValue());
             });
 
             function renderQuiz(markdown, activeLineNumber = 0) {
@@ -134,7 +138,7 @@
                 let config = {
                     shuffleAnswers: false,
                     shuffleQuestions: false,
-                    primaryColor: '#316FF6',
+                    primaryColor: '#1b73e8',
                     secondaryColor: '#f8f8f8',
                     activeLineNumber: activeLineNumber,
                 };
