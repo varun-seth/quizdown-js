@@ -5,9 +5,12 @@
     import { writable, get } from 'svelte/store';
     import { onMount } from 'svelte';
 
+    const TOKEN_KEY = 'google_token';
+    const USER_KEY = 'google_user';
+
     const clientId = process.env.CLIENT_ID;
     const apiKey = process.env.API_KEY;
-    export const userInfo = writable(null);
+    const userInfo = writable(null);
     const accessToken = writable('');
 
     let fileId = null;
@@ -21,11 +24,11 @@
     export const content = writable('');
 
     onMount(() => {
-        const storedUserInfo = localStorage.getItem('google_info');
+        const storedUserInfo = localStorage.getItem(USER_KEY);
         if (storedUserInfo) {
             userInfo.set(JSON.parse(storedUserInfo));
         }
-        const storedAccessToken = localStorage.getItem('google_token');
+        const storedAccessToken = localStorage.getItem(TOKEN_KEY);
         if (storedAccessToken) {
             accessToken.set(JSON.parse(storedAccessToken));
         }
@@ -40,10 +43,17 @@
         }
     });
 
+    function logout() {
+        localStorage.removeItem(USER_KEY);
+        userInfo.set(null);
+        localStorage.removeItem(TOKEN_KEY);
+        accessToken.set(null);
+    }
+
     async function getFileDetails(fileId) {
         let currentAccesstoken = get(accessToken);
         if (!currentAccesstoken) {
-            alert('Login required to get file details');
+            alert('Login required to Edit file');
             return;
         }
 
@@ -59,6 +69,7 @@
         );
 
         if (contentResponse.status == 401) {
+            logout();
             alert('Please login again');
             return;
         }
@@ -94,27 +105,19 @@
             expires: new Date().getTime() + response.expires_in * 1000,
             token: response.access_token,
         };
-        localStorage.setItem('google_token', JSON.stringify(tokenInfo));
+        localStorage.setItem(TOKEN_KEY, JSON.stringify(tokenInfo));
+        accessToken.set(tokenInfo);
         fetchUserProfile(response.access_token);
     }
 
-    function handleSignIn(signInCallback) {
-        if (!signInCallback) {
-            signInCallback = handleAccessToken;
-        } else {
-            let newSignInCallback = (response) => {
-                handleAccessToken(response);
-                signInCallback(response);
-            };
-            signInCallback = newSignInCallback;
-        }
+    function handleSignIn() {
         google.accounts.oauth2
             .initTokenClient({
                 client_id: clientId,
                 scope: 'email profile https://www.googleapis.com/auth/drive.file ',
                 // 'https://www.googleapis.com/auth/drive.metadata ' +
                 // 'https://www.googleapis.com/auth/drive',
-                callback: signInCallback,
+                callback: handleAccessToken,
             })
             .requestAccessToken(); // This opens the popup
     }
@@ -127,7 +130,7 @@
         })
             .then((response) => response.json())
             .then((data) => {
-                localStorage.setItem('google_info', JSON.stringify(data));
+                localStorage.setItem(USER_KEY, JSON.stringify(data));
                 userInfo.set(data);
             })
             .catch((error) => {
@@ -251,7 +254,9 @@
         );
 
         if (response.status === 401) {
-            handleSignIn();
+            logout();
+            alert('Please login again');
+            return;
         } else if (!response.ok) {
             // Handle other errors
             throw new Error(
@@ -439,7 +444,9 @@
         Sample
     </Button>
 
-    <Button buttonAction="{openGooglePicker}">Open</Button>
+    {#if $userInfo}
+        <Button buttonAction="{openGooglePicker}">Open</Button>
+    {/if}
 </span>
 
 {#if isLoading}
@@ -473,6 +480,8 @@
     </Button>
 
     {#if $userInfo}
+        <Button buttonAction="{logout}">Logout</Button>
+
         <div class="user-info">
             <img
                 class="user-image"

@@ -87,6 +87,7 @@
                 const gistId = window.location.hash.substring(1);
                 const githubShortcut = queryParams.get('github');
                 const gistShortcut = queryParams.get('gist');
+                const gdrive = queryParams.get('gdrive');
                 let downloadFn = markdownDownload;
 
                 let authorName;
@@ -94,6 +95,13 @@
                 let authorImageUrl;
 
                 let urlToFetch = '';
+                if (gdrive) {
+                    let fetcherElement = document.createElement('span');
+                    urlToFetch = `${gdrive}`;
+                    fetcher = quizdown.createFetcher(fetcherElement);
+                    downloadFn = fetcher.gdriveFetch;
+                    // const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+                }
                 if (gistId) {
                     // super shortcut. domain.com/#id
                     urlToFetch = `https://api.github.com/gists/${gistId}`;
