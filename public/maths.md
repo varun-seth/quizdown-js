@@ -1,5 +1,8 @@
 # Math Quiz
 
+Basic Math questions. These questions have been taken from 11-12th standard CBSE textbooks.
+
+
 ## Solve the expression
 
 $$

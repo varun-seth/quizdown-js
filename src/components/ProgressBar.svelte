@@ -67,7 +67,7 @@
         <div
             class="progress-slider-inner {value > 0
                 ? 'progress-left-round'
-                : ''} progress-right-round"
+                : ''}  {value < max - 1 ? 'progress-right-round' : ''}"
             style="width:{progressPercent2}"
         ></div>
     </div>

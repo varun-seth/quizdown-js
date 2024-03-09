@@ -148,7 +148,7 @@
             let message = await contentResponse.text();
             console.error(message);
             alert(
-                'Failed to load this content. Maybe this file was not created by QuizHub or modified by another application'
+                'Failed to load this content. Maybe this file was modified by another application'
             );
             fileId = null;
             return;

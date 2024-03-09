@@ -77,6 +77,15 @@
     <Card>
         {#if $onIntro}
             <Container additionalClasses="intro-page">
+                <a href="/" title="home">
+                    <Button title="home">
+                        <img
+                            src="/icon.svg"
+                            style="height: 48px"
+                            alt="home icon"
+                        />
+                    </Button>
+                </a>
                 <span style="">
                     <h1 style="text-align: center;">
                         {quiz.config.title || 'Welcome to the Quiz'}
@@ -272,8 +281,8 @@
     }
 
     .author-image {
-        height: 100px;
-        width: 100px;
+        height: 64px;
+        width: 64px;
         border-radius: 50%;
         border: 2px solid gray;
     }
