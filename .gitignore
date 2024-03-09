@@ -20,3 +20,4 @@ public/build/*
 githubgist.json
 TODO.md
 icon-*.png
+!icon-mac.png
