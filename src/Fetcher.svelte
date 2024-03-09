@@ -1,7 +1,7 @@
 <script>
     // This will be replaced at build time with the actual value
     const apiKey = process.env.API_KEY;
-    export function gdriveFetch(fileId, callbackFn) {
+    export function gdriveFetch(fileId, callbackFn, errorFn) {
         const metadataUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=owners,name,description&key=${apiKey}`;
         const contentUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
 
@@ -9,7 +9,7 @@
         fetch(metadataUrl)
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error('Failed to fetch metadata');
+                    throw Error(response.statusText);
                 }
                 return response.json();
             })
@@ -46,7 +46,7 @@
                 fetch(contentUrl)
                     .then((response) => {
                         if (!response.ok) {
-                            throw new Error('Failed to fetch file content');
+                            throw Error(response.statusText);
                         }
                         return response.text();
                     })
@@ -55,6 +55,12 @@
                         callbackFn(text, params);
                     });
             })
-            .catch((error) => console.error('Error:', error));
+            .catch((error) => {
+                if (errorFn) {
+                    errorFn(error);
+                } else {
+                    console.error(error);
+                }
+            });
     }
 </script>

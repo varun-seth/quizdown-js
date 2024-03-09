@@ -19,18 +19,30 @@
         <script src="./build/extensions/quizdownKatex.js"></script>
         <script src="./build/extensions/quizdownHighlight.js"></script>
         <script>
-            function markdownDownload(url, fn) {
+            function markdownDownload(url, fn, errorFn) {
                 fetch(url)
-                    .then((response) => response.text())
-                    .then((text) => fn(text))
-                    .catch((error) =>
-                        console.error('Error fetching markdown:', error)
-                    );
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw Error(response.statusText);
+                        }
+                        return response.text();
+                    })
+                    .then((text) => {
+                        fn(text);
+                    })
+                    .catch((error) => {
+                        errorFn(error);
+                    });
             }
 
-            function markdownDownloadGist(url, fn) {
+            function markdownDownloadGist(url, fn, errorFn) {
                 fetch(url)
-                    .then((response) => response.json())
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw Error(response.statusText);
+                        }
+                        return response.json();
+                    })
                     .then((data) => {
                         const files = data.files;
                         const fileKeys = Object.keys(files);
@@ -62,9 +74,13 @@
                         params['description'] = data['description'];
                         fn(markdown, params);
                     })
-                    .catch((error) =>
-                        console.error('Error fetching markdown:', error)
-                    );
+                    .catch((error) => {
+                        if (errorFn) {
+                            errorFn(error);
+                        } else {
+                            console.error(error);
+                        }
+                    });
             }
 
             function init() {
@@ -127,29 +143,43 @@
                 }
 
                 if (urlToFetch) {
-                    downloadFn(urlToFetch, (markdown, params) => {
-                        if (!params) {
-                            params = {};
-                        }
-                        // Inject the markdown into the quiz container
-                        quizContainer.classList.remove('hidden');
-                        const newQuizElement = document.createElement('div');
-                        newQuizElement.id = 'quiz';
-                        newQuizElement.className = 'quizdown';
+                    downloadFn(
+                        urlToFetch,
+                        (markdown, params) => {
+                            if (!params) {
+                                params = {};
+                            }
+                            // Inject the markdown into the quiz container
+                            quizContainer.classList.remove('hidden');
+                            const newQuizElement =
+                                document.createElement('div');
+                            newQuizElement.id = 'quiz';
+                            newQuizElement.className = 'quizdown';
 
-                        quizContainer.appendChild(newQuizElement);
-                        let config = {
-                            shuffleAnswers: false,
-                            shuffleQuestions: false,
-                            primaryColor: '#1b73e8',
-                            secondaryColor: '#ffffff',
-                        };
-                        Object.assign(config, params);
-                        quizdown
-                            .register(quizdownKatex)
-                            .register(quizdownHighlight)
-                            .createApp(markdown, newQuizElement, config);
-                    });
+                            quizContainer.appendChild(newQuizElement);
+                            let config = {
+                                shuffleAnswers: false,
+                                shuffleQuestions: false,
+                                primaryColor: '#1b73e8',
+                                secondaryColor: '#ffffff',
+                            };
+                            Object.assign(config, params);
+                            quizdown
+                                .register(quizdownKatex)
+                                .register(quizdownHighlight)
+                                .createApp(markdown, newQuizElement, config);
+                        },
+                        (error) => {
+                            // if (error && error.)
+                            console.error({ error });
+                            if (typeof error == 'string') {
+                                document.body.innerText = error;
+                            } else {
+                                document.body.innerText =
+                                    'Some unknown error has ocurred. Please contact the developer.';
+                            }
+                        }
+                    );
                 } else {
                     const helpContainer =
                         document.getElementById('helpContainer');
@@ -157,14 +187,24 @@
                     const submitButton =
                         document.getElementById('submitButton');
 
-                    downloadFn('/demo.md', (markdown, params) => {
-                        const quizDemo = document.getElementById('quizDemo');
+                    markdownDownload(
+                        '/demo.md',
+                        (markdown, params) => {
+                            if (!markdown) {
+                                return;
+                            }
+                            const quizDemo =
+                                document.getElementById('quizDemo');
 
-                        quizdown
-                            .register(quizdownKatex)
-                            .register(quizdownHighlight)
-                            .createApp(markdown, quizDemo, params);
-                    });
+                            quizdown
+                                .register(quizdownKatex)
+                                .register(quizdownHighlight)
+                                .createApp(markdown, quizDemo, params);
+                        },
+                        (error) => {
+                            console.error({ error });
+                        }
+                    );
 
                     // Add click event listener to the button
                     submitButton.addEventListener('click', function () {
