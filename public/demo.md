@@ -3,43 +3,43 @@
 A small demonstration of the powers! 
 
 ## Basics
- 
->Hint is created from quotetext like: `> Hello` 
+
+> Hints are hidden by default.
 
 1. [ ] Each Question has a title and a list of options
 
-2. [ ] Correct option(s) have checked `[x]` prefix 
+2. [ ] Correct option(s) have a checked `[x]` prefix 
 
-3. [ ] Incorrect options(s) have unchecked `[ ]` prefix. 
+3. [ ] Incorrect options(s) have an unchecked `[ ]` prefix. 
 
 
 ## Latex
 
-Latex is rendered by dollar-signs `$` equation `$` 
+Latex is rendered by dollar enclosed equation `$` ... `$` 
 
 1. [ ] Mass–energy equivalence: $E = mc^2$ 
 
-1. [ ] Pythagorean Theorem: $a^2 + b^2 = c^2$ 
+2. [ ] Pythagorean Theorem: $a^2 + b^2 = c^2$ 
 
-1. [ ] Quadratic Formula: $x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}$
+3. [ ] Quadratic Formula: $x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}$
 
 
 ## Codeblocks
 
-Syntax highlighted code is supported by backticks 
+Syntax is highlighted for text within backticks.
 
 1. [ ] 
     ```python
     print("Hello Python!")
     ```
 
-1. [ ]  
-   ```sql
+2. [ ] 
+    ```sql
     SELECT 'Hello SQL!' 
     ```
 
-2. [ ] 
-   ```js
+3. [ ] 
+    ```js
     console.log("Hello, Javascript!")
     ```
 
@@ -48,7 +48,7 @@ Syntax highlighted code is supported by backticks
 How many options can be correct in a single-choice question?
 
 - [x] Only one option is correct.
-- [ ] Multiple answers can be correct.
+- [ ] Multiple options can be correct.
 - [ ] None of the above.
 
 ## Sequence Question
