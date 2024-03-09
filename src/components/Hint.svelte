@@ -5,7 +5,17 @@
 </script>
 
 {#if show}
-    <span in:fade|local="{{ duration: 400 }}" class="hint">
+    <span
+        style="display: flex"
+        in:fade|local="{{ duration: 400 }}"
+        class="hint"
+    >
         {@html hint}
     </span>
 {/if}
+
+<style>
+    :global(.hint > p) {
+        margin: auto;
+    }
+</style>
