@@ -295,6 +295,10 @@
             margin: 10px;
             padding: 5px;
         }
+        tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
         a:link,
         a:visited {
             color: #007bff; /* Or any color of your choice */
@@ -305,6 +309,15 @@
             width: 100%;
             border-radius: 5px;
         }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            text-decoration: none;
+            color: #007bff;
+        }
     </style>
 
     <body>
@@ -312,18 +325,7 @@
         <div class="container hidden" id="helpContainer">
             <div id="help">
                 <div>
-                    <a
-                        href="https://quizhub.in"
-                        style="
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 10px;
-                            width: 100%;
-                            justify-content: center;
-                            text-decoration: none;
-                            color: #007bff;
-                        "
-                    >
+                    <a href="https://quizhub.in" class="logo">
                         <img src="/icon.svg" style="height: 32px" />
                         <h1>QuizHub.in</h1>
                     </a>
@@ -353,11 +355,11 @@
                     </button>
                 </a>
 
-                <hr />
+                <br />
 
                 <div id="quizDemo"></div>
 
-                <hr />
+                <br />
 
                 You can also load a quiz using the URL of your existing markdown
                 file.

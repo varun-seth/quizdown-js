@@ -32,7 +32,7 @@
 {/if}
 
 {#if question.hint}
-    <div style="display: inline-flex">
+    <div style="display: inline-flex;">
         <Button
             size="large"
             title="{$_('hint')}"
