@@ -32,10 +32,13 @@
 {/if}
 
 {#if question.hint}
-    <div>
-        <Button title="{$_('hint')}" buttonAction="{question.toggleHint}"
+    <div style="display: inline-flex">
+        <Button
+            size="large"
+            title="{$_('hint')}"
+            buttonAction="{question.toggleHint}"
             ><span
-                style="color: {$showHint
+                style="color: {!$showHint
                     ? 'var(--quizdown-color-primary)'
                     : ''}"
             >

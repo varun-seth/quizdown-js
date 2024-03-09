@@ -4,78 +4,66 @@
     import Icon from './Icon.svelte';
     let checked = {};
 
-    $: {
-        checked = {};
-        if (question.questionType === 'MultipleChoice') {
-            question.selected.forEach((s) => {
-                checked[s] = true;
-            });
+    // Function to handle checkbox changes
+    function handleCheckboxChange(i) {
+        if (question.questionType === 'SingleChoice') {
+            // Clear all selections for SingleChoice questions
+            question.selected = question.selected[0] === i ? [] : [i];
         } else {
-            // For single choice, ensure only one can be checked
-            const selectedValue = question.selected.length
-                ? question.selected[0]
-                : null;
-            if (selectedValue !== null) {
-                checked[selectedValue] = true;
+            // Toggle selection for MultipleChoice questions
+            const index = question.selected.indexOf(i);
+            if (index > -1) {
+                question.selected.splice(index, 1); // Remove if exists
+            } else {
+                question.selected.push(i); // Add if not exists
             }
         }
+    }
+
+    // Watch for changes in selection to update the checked state
+    $: {
+        checked = {};
+        question.selected.forEach((s) => {
+            checked[s] = true;
+        });
     }
 </script>
 
 <fieldset>
-    {#if question.questionType === 'MultipleChoice'}
-        {#each question.answers as answer, i}
-            <label style="position: relative">
-                <input
-                    type="checkbox"
-                    bind:group="{question.selected}"
-                    value="{i}"
-                />
-                <span class="my-choice">
-                    <span
-                        class="my-choice-marker"
-                        style="color: {checked[i]
-                            ? 'var(--quizdown-color-primary)'
-                            : ''}"
-                    >
+    {#each question.answers as answer, i}
+        <label style="position: relative">
+            <input
+                type="checkbox"
+                bind:checked="{checked[i]}"
+                on:click="{() => handleCheckboxChange(i)}"
+            />
+            <span
+                class="my-choice {question.questionType === 'MultipleChoice'
+                    ? 'my-choice-multi'
+                    : 'my-choice-single'}"
+            >
+                <span
+                    class="my-choice-marker"
+                    style="color: {checked[i]
+                        ? 'var(--quizdown-color-primary)'
+                        : ''}"
+                >
+                    {#if question.questionType === 'MultipleChoice'}
                         {#if checked[i]}
                             <Icon name="check-square"></Icon>
-                        {/if}
-                        {#if !checked[i]}
+                        {:else}
                             <Icon name="square" solid="{false}"></Icon>
                         {/if}
-                    </span>
-                    {@html answer.html}
+                    {:else if checked[i]}
+                        <Icon name="dot-circle" solid="{true}"></Icon>
+                    {:else}
+                        <Icon name="circle" solid="{false}"></Icon>
+                    {/if}
                 </span>
-            </label>
-        {/each}
-    {:else}
-        {#each question.answers as answer, i}
-            <label style="position: relative">
-                <input
-                    type="radio"
-                    bind:group="{question.selected[0]}"
-                    value="{i}"
-                />
-                <span class="my-choice">
-                    <span
-                        class="my-choice-marker"
-                        style="color: {checked[i]
-                            ? 'var(--quizdown-color-primary)'
-                            : ''}"
-                    >
-                        {#if checked[i]}
-                            <Icon name="dot-circle" solid="{true}"></Icon>
-                        {/if}
-                        {#if !checked[i]}
-                            <Icon name="circle" solid="{false}"></Icon>
-                        {/if}
-                    </span>
-                    {@html answer.html}
-                </span>
-            </label>
-        {/each}
-    {/if}
+                {@html answer.html}
+            </span>
+        </label>
+    {/each}
 </fieldset>
 
 <style>
@@ -83,22 +71,12 @@
         border: 0;
     }
 
-    [type='checkbox'],
-    [type='radio'] {
+    [type='checkbox'] {
         position: absolute;
         opacity: 0;
     }
 
-    [type='radio'] + span {
-        border-radius: 0.5em;
-    }
-
     [type='checkbox'] + span {
-        border-radius: 2px;
-    }
-
-    [type='checkbox'] + span,
-    [type='radio'] + span {
         color: var(--quizdown-color-text);
         display: block;
         padding: 0.5rem;
@@ -108,31 +86,41 @@
     }
 
     [type='checkbox']:hover + span,
-    [type='checkbox']:focus + span,
-    [type='radio']:hover + span,
-    [type='radio']:focus + span {
+    [type='checkbox']:focus + span {
         border: 3px solid
             color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
     }
 
+    [type='checkbox']:not(:hover) + span .my-choice-marker,
+    [type='checkbox']:not(:focus) + span .my-choice-marker {
+        color: gray;
+    }
+
     [type='checkbox']:hover + span .my-choice-marker,
-    [type='checkbox']:focus + span .my-choice-marker,
-    [type='radio']:hover + span .my-choice-marker,
-    [type='radio']:focus + span .my-choice-marker {
+    [type='checkbox']:focus + span .my-choice-marker {
         color: var(--quizdown-color-primary);
     }
 
-    [type='checkbox']:checked + span,
-    [type='radio']:checked + span {
+    [type='checkbox']:checked + span {
         border: 3px solid var(--quizdown-color-primary);
     }
 
     .my-choice {
-        padding-left: 2em !important;
+        padding-left: 2.4rem !important;
+        position: relative;
+    }
+
+    .my-choice-single {
+        border-radius: 2rem;
+    }
+    .my-choice-multi {
+        border-radius: 0.2rem;
     }
     .my-choice-marker {
         position: absolute;
-        left: 1em;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
     }
     :global(.my-choice p) {
         margin-block-start: 0;
