@@ -2,7 +2,7 @@
     // This will be replaced at build time with the actual value
     const apiKey = process.env.API_KEY;
     export function gdriveFetch(fileId, callbackFn) {
-        const metadataUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=owners&key=${apiKey}`;
+        const metadataUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=owners,name,description&key=${apiKey}`;
         const contentUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
 
         // Fetch file metadata
@@ -16,6 +16,18 @@
             .then((metadata) => {
                 // Extract parameters from metadata
                 const params = {};
+                let newName = metadata.name;
+
+                if (newName) {
+                    if (newName.endsWith('.md')) {
+                        // Remove the last 3 characters (".md") from the string
+                        newName = newName.slice(0, -3);
+                    }
+                    params['title'] = newName;
+                }
+                if (metadata.description) {
+                    params['description'] = metadata.description;
+                }
                 if (metadata.owners && metadata.owners.length > 0) {
                     if (metadata.owners.length > 1) {
                         console.warn(
