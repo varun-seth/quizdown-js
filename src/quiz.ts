@@ -188,7 +188,8 @@ export class Information extends BaseQuestion {
         super(text, explanation, hint, answers, 'Information', options, 0);
     }
     isCorrect() {
-        return true;
+        this.solved = true;
+        return this.solved;
     }
 }
 
