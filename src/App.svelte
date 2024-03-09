@@ -3,7 +3,6 @@
     import ProgressBar from './components/ProgressBar.svelte';
     import { onMount } from 'svelte';
     import registerLanguages from './languages/i18n';
-    import Card from './components/Card.svelte';
     import Credits from './components/Credits.svelte';
     import SmoothResize from './components/SmoothResize.svelte';
     import QuestionView from './components/QuestionView.svelte';
@@ -74,153 +73,147 @@
 <ProgressBar value="{$index}" max="{quiz.questions.length}" />
 
 <div class="quizdown-content" bind:this="{node}">
-    <Card>
-        {#if $onIntro}
-            <Container additionalClasses="intro-page">
-                <a href="/" title="home">
-                    <Button title="home" size="large">
-                        <span style="color: var(--quizdown-color-primary)">
-                            <Icon name="lightbulb" size="2x"></Icon>
-                        </span>
-                    </Button>
-                </a>
-                <span style="">
-                    <h1 style="text-align: center;">
-                        {quiz.config.title || 'Welcome to the Quiz'}
-                    </h1>
-                    {#if quiz.config.description}
-                        <p>{@html quiz.config.description}</p>
-                    {/if}
-                </span>
-                <div>
-                    {$_('count')}: {quiz.questions.length}
-                    <br />
-                    {$_('points')}: {maxScore}
-                </div>
-
-                {#if quiz.config.authorName}
-                    <div
-                        style="display: inline-flex; flex-direction: column; align-items: center"
-                    >
-                        {#if quiz.config.authorImageUrl}
-                            <a
-                                href="{quiz.config.authorUrl
-                                    ? quiz.config.authorUrl
-                                    : quiz.config.authorImageUrl}"
-                                target="_blank"
-                            >
-                                <img
-                                    class="author-image"
-                                    alt="{quiz.config.authorName ||
-                                        'Author Image'}"
-                                    src="{quiz.config.authorImageUrl}"
-                                />
-                            </a>
-                        {/if}
-                        {#if quiz.config.authorUrl}
-                            <a href="{quiz.config.authorUrl}" target="_blank">
-                                {quiz.config.authorName}
-                            </a>
-                        {/if}
-                        {#if !quiz.config.authorUrl && quiz.config.authorName}
-                            {quiz.config.authorName}
-                        {/if}
-                    </div>
+    {#if $onIntro}
+        <Container additionalClasses="intro-page">
+            <a href="/" title="home">
+                <Button title="home" size="large">
+                    <span style="color: var(--quizdown-color-primary)">
+                        <Icon name="lightbulb" size="2x"></Icon>
+                    </span>
+                </Button>
+            </a>
+            <span style="">
+                <h1 style="text-align: center;">
+                    {quiz.config.title || 'Welcome to the Quiz'}
+                </h1>
+                {#if quiz.config.description}
+                    <p>{@html quiz.config.description}</p>
                 {/if}
+            </span>
+            <div>
+                {$_('count')}: {quiz.questions.length}
+                <br />
+                {$_('points')}: {maxScore}
+            </div>
 
-                <span style="margin-top: 2em; margin-bottom: 2em;">
+            {#if quiz.config.authorName}
+                <div
+                    style="display: inline-flex; flex-direction: column; align-items: center"
+                >
+                    {#if quiz.config.authorImageUrl}
+                        <a
+                            href="{quiz.config.authorUrl
+                                ? quiz.config.authorUrl
+                                : quiz.config.authorImageUrl}"
+                            target="_blank"
+                        >
+                            <img
+                                class="author-image"
+                                alt="{quiz.config.authorName || 'Author Image'}"
+                                src="{quiz.config.authorImageUrl}"
+                            />
+                        </a>
+                    {/if}
+                    {#if quiz.config.authorUrl}
+                        <a href="{quiz.config.authorUrl}" target="_blank">
+                            {quiz.config.authorName}
+                        </a>
+                    {/if}
+                    {#if !quiz.config.authorUrl && quiz.config.authorName}
+                        {quiz.config.authorName}
+                    {/if}
+                </div>
+            {/if}
+
+            <span style="margin-top: 2em; margin-bottom: 2em;">
+                <Button
+                    size="large"
+                    title="Start"
+                    buttonAction="{() => quiz.jump(0)}"
+                    color="primary"
+                >
+                    <Icon name="play"></Icon>
+                    {$_('start')}
+                </Button>
+            </span>
+        </Container>
+    {/if}
+    {#if !$onIntro}
+        <Container>
+            <SmoothResize {minHeight}>
+                <Animated update="{$index}">
+                    {#if $onResults}
+                        <ResultsView {quiz} />
+                    {:else if !$onIntro}
+                        <QuestionView question="{$question}" />
+                    {/if}
+                </Animated>
+            </SmoothResize>
+
+            <!-- <Modal show="{showModal}">Are you sure?</Modal> -->
+        </Container>
+
+        <Row>
+            <Button
+                size="large"
+                disabled="{!$isStarted}"
+                slot="left"
+                title="{$_('reset')}"
+                buttonAction="{() => {
+                    quiz.reset();
+                }}"
+            >
+                <Icon name="redo" />
+                <span class="hidden {$onResults ? 'spawned' : ''}">
+                    {$_('reset')}
+                </span>
+            </Button>
+            <svelte:fragment slot="center">
+                {#if $isStarted}
                     <Button
                         size="large"
-                        title="Start"
-                        buttonAction="{() => quiz.jump(0)}"
-                        color="primary"
+                        title="{$_('previous')}"
+                        disabled="{$onIntro || $onFirst}"
+                        buttonAction="{quiz.previous}"
+                        ><Icon name="arrow-left" size="lg" /></Button
                     >
-                        <Icon name="play"></Icon>
-                        {$_('start')}
-                    </Button>
-                </span>
-            </Container>
-        {/if}
-        {#if !$onIntro}
-            <Container>
-                <SmoothResize {minHeight}>
-                    <Animated update="{$index}">
-                        {#if $onResults}
-                            <ResultsView {quiz} />
-                        {:else if !$onIntro}
-                            <QuestionView question="{$question}" />
-                        {/if}
-                    </Animated>
-                </SmoothResize>
-
-                <!-- <Modal show="{showModal}">Are you sure?</Modal> -->
-            </Container>
-
-            <Row>
-                <Button
-                    size="large"
-                    disabled="{!$isStarted}"
-                    slot="left"
-                    title="{$_('reset')}"
-                    buttonAction="{() => {
-                        quiz.reset();
-                    }}"
-                >
-                    <Icon name="redo" />
-                    <span class="hidden {$onResults ? 'spawned' : ''}">
-                        {$_('reset')}
-                    </span>
-                </Button>
-                <svelte:fragment slot="center">
-                    {#if $isStarted}
-                        <Button
-                            size="large"
-                            title="{$_('previous')}"
-                            disabled="{$onIntro || $onFirst}"
-                            buttonAction="{quiz.previous}"
-                            ><Icon name="arrow-left" size="lg" /></Button
-                        >
-                        <span
-                            style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onIntro ||
-                            $onResults
-                                ? 'hidden'
-                                : ''}; "
-                        >
-                            {$index + 1}
-                            /
-                            {quiz.questions.length}
-                        </span>
-
-                        <Button
-                            size="large"
-                            disabled="{$onResults ||
-                                (!$isEvaluated && $onLast)}"
-                            buttonAction="{quiz.next}"
-                            title="{$_('next')}"
-                            ><Icon name="arrow-right" size="lg" /></Button
-                        >
-                    {/if}
-                </svelte:fragment>
-
-                <Button
-                    size="large"
-                    color="{$onLast && !$isEvaluated ? 'primary' : ''}"
-                    slot="right"
-                    disabled="{$onResults || $onIntro}"
-                    title="{$_('evaluate')}"
-                    buttonAction="{() => quiz.jump(quiz.questions.length)}"
-                    ><Icon name="check-double" size="lg" />
                     <span
-                        class="hidden {$onLast && !$isEvaluated
-                            ? 'spawned'
-                            : ''}"
+                        style="display: flex; align-items: center; text-wrap: nowrap; visibility: {$onIntro ||
+                        $onResults
+                            ? 'hidden'
+                            : ''}; "
                     >
-                        {$_('evaluate')}
+                        {$index + 1}
+                        /
+                        {quiz.questions.length}
                     </span>
-                </Button>
-            </Row>
-        {/if}
-    </Card>
+
+                    <Button
+                        size="large"
+                        disabled="{$onResults || (!$isEvaluated && $onLast)}"
+                        buttonAction="{quiz.next}"
+                        title="{$_('next')}"
+                        ><Icon name="arrow-right" size="lg" /></Button
+                    >
+                {/if}
+            </svelte:fragment>
+
+            <Button
+                size="large"
+                color="{$onLast && !$isEvaluated ? 'primary' : ''}"
+                slot="right"
+                disabled="{$onResults || $onIntro}"
+                title="{$_('evaluate')}"
+                buttonAction="{() => quiz.jump(quiz.questions.length)}"
+                ><Icon name="check-double" size="lg" />
+                <span
+                    class="hidden {$onLast && !$isEvaluated ? 'spawned' : ''}"
+                >
+                    {$_('evaluate')}
+                </span>
+            </Button>
+        </Row>
+    {/if}
 </div>
 
 <!-- global styles applied to all elements in the app -->
@@ -269,16 +262,22 @@
     }
 
     .quizdown-content {
-        padding: 0;
         max-width: 800px;
-        height: 100%;
-        margin: auto;
+        height: calc(100% - 40px - 0.4em);
+        width: calc(100% - 40px);
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto;
+        padding: 20px;
     }
     /* Smaller screens */
     @media (max-width: 600px) {
         .quizdown-content {
             padding: 0;
             margin: 0;
+            height: calc(100% - 0.4em);
+            width: 100%;
         }
     }
 
