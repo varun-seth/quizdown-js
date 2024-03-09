@@ -38,9 +38,9 @@
                 on:click="{() => handleCheckboxChange(i)}"
             />
             <span
-                class="my-choice {question.questionType === 'MultipleChoice'
-                    ? 'my-choice-multi'
-                    : 'my-choice-single'}"
+                class="my-choice {question.questionType === 'SingleChoice'
+                    ? 'my-choice-single'
+                    : 'my-choice-multi'}"
             >
                 <span
                     class="my-choice-marker"
@@ -48,16 +48,16 @@
                         ? 'var(--quizdown-color-primary)'
                         : ''}"
                 >
-                    {#if question.questionType === 'MultipleChoice'}
+                    {#if question.questionType === 'SingleChoice'}
                         {#if checked[i]}
-                            <Icon name="check-square"></Icon>
+                            <Icon name="dot-circle" solid="{true}"></Icon>
                         {:else}
-                            <Icon name="square" solid="{false}"></Icon>
+                            <Icon name="circle" solid="{false}"></Icon>
                         {/if}
                     {:else if checked[i]}
-                        <Icon name="dot-circle" solid="{true}"></Icon>
+                        <Icon name="check-square"></Icon>
                     {:else}
-                        <Icon name="circle" solid="{false}"></Icon>
+                        <Icon name="square" solid="{false}"></Icon>
                     {/if}
                 </span>
                 {@html answer.html}

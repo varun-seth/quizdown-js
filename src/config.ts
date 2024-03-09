@@ -53,7 +53,7 @@ export class Config {
         // handle <=v0.3.0 snake_case options for backwards compatibility
 
         this.startOnLoad = get(options['startOnLoad'], true);
-        this.shuffleAnswers = get(options['shuffleAnswers'], true);
+        this.shuffleAnswers = get(options['shuffleAnswers'], false);
         this.shuffleQuestions = get(options['shuffleQuestions'], false);
         this.nQuestions = get(options['nQuestions'], undefined);
         this.primaryColor = get(options['primaryColor'], 'steelblue');

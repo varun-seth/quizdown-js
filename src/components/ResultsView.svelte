@@ -36,7 +36,7 @@
     </div>
     <div in:fade="{{ duration: 1000 }}" class="results">
         <ol>
-            {#each quiz.questions.filter((question) => question.maxScore) as question}
+            {#each quiz.questions as question}
                 <li
                     class="top-list-item"
                     on:click="{() => quiz.jump(question.index)}"

@@ -79,11 +79,9 @@
             <Container additionalClasses="intro-page">
                 <a href="/" title="home">
                     <Button title="home" size="large">
-                        <img
-                            src="/icon.svg"
-                            style="height: 48px"
-                            alt="home icon"
-                        />
+                        <span style="color: var(--quizdown-color-primary)">
+                            <Icon name="lightbulb" size="2x"></Icon>
+                        </span>
                     </Button>
                 </a>
                 <span style="">
@@ -104,7 +102,6 @@
                     <div
                         style="display: inline-flex; flex-direction: column; align-items: center"
                     >
-                        <span style="color: gray">Author</span>
                         {#if quiz.config.authorImageUrl}
                             <a
                                 href="{quiz.config.authorUrl
@@ -298,5 +295,9 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
+    }
+
+    pre {
+        margin: 0.3em 0;
     }
 </style>

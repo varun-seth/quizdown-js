@@ -171,6 +171,10 @@ export class NoChoiceQuestion extends Choice {
     ) {
         super(text, explanation, hint, answers, 'NoChoiceQuestion', options, 0);
     }
+    isCorrect() {
+        this.solved = true;
+        return this.solved;
+    }
 }
 
 export class Information extends BaseQuestion {

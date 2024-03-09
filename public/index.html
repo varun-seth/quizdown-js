@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta
             name="description"
-            content="Make interactive quizzes and share with everyone! Supports Markdown Language, Multiple Choice Questions, Single Choice Questions, Sequence arrangement etc."
+            content="Make interactive quizzes and share with anyone! Supports Markdown Language, Multiple Choice Questions, Single Choice Questions, Sequence arrangement etc. Latex equations and codeblocks with syntax highlighting"
         />
         <link rel="apple-touch-icon" href="/icon.png" />
 
@@ -157,6 +157,15 @@
                     const submitButton =
                         document.getElementById('submitButton');
 
+                    downloadFn('/demo.md', (markdown, params) => {
+                        const quizDemo = document.getElementById('quizDemo');
+
+                        quizdown
+                            .register(quizdownKatex)
+                            .register(quizdownHighlight)
+                            .createApp(markdown, quizDemo, params);
+                    });
+
                     // Add click event listener to the button
                     submitButton.addEventListener('click', function () {
                         const url = urlInput.value;
@@ -240,7 +249,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 800px;
+            max-width: 600px;
             padding: 20px;
             margin: auto;
             gap: 20px;
@@ -272,6 +281,11 @@
             }
         }
 
+        table {
+            text-align: center;
+            width: 100%;
+        }
+
         table,
         tbody,
         th,
@@ -284,6 +298,12 @@
         a:link,
         a:visited {
             color: #007bff; /* Or any color of your choice */
+        }
+
+        #quizDemo {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            border-radius: 5px;
         }
     </style>
 
@@ -305,13 +325,19 @@
                         "
                     >
                         <img src="/icon.svg" style="height: 32px" />
-                        <h1>QuizHub</h1>
+                        <h1>QuizHub.in</h1>
                     </a>
                 </div>
 
-                <h2 style="font-weight: 400">
-                    Create quizzes and share with everyone!
-                </h2>
+                <div style="max-width: 500px">
+                    <div style="font-weight: 400; font-size: 1.8rem">
+                        Create quizzes and share with anyone!
+                    </div>
+                    <p style="color: #77838f; font-size: 1rem">
+                        Latex equations and code-blocks with syntax
+                        highlighting.
+                    </p>
+                </div>
 
                 <a href="/edit/">
                     <button class="submit-button">
@@ -327,11 +353,16 @@
                     </button>
                 </a>
 
-                <br />
+                <hr />
+
+                <div id="quizDemo"></div>
+
+                <hr />
 
                 You can also load a quiz using the URL of your existing markdown
                 file.
                 <br />
+
                 <div
                     style="
                         display: flex;
@@ -391,6 +422,13 @@
                 </table>
                 Native github and gist urls are supported. The github repository
                 must be public. But the gist can be hidden.
+
+                <br />
+                <div style="text-align: center">
+                    <a href="/privacy.html"> Privacy Policy </a>
+                    &nbsp;
+                    <a href="/terms.html"> Terms Of Service </a>
+                </div>
             </div>
         </div>
     </body>

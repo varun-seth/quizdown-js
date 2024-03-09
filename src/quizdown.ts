@@ -36,6 +36,11 @@ function createApp(rawQuizdown: string, node: Element, config: Config): App {
         root = node.attachShadow({ mode: 'open' });
     }
 
+    if (!config) {
+        // prevents an error for empty config
+        config = new Config({});
+    }
+
     let quiz = parseQuizdown(rawQuizdown, config);
     let app = new App({
         // https://github.com/sveltejs/svelte/pull/5870
