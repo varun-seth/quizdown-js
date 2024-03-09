@@ -112,7 +112,21 @@
                         renderQuiz(newContent);
                     } else {
                         // Logic to update Monaco editor or perform other actions
-                        editor.getModel().setValue(newContent);
+                        const fullModelRange = editor
+                            .getModel()
+                            .getFullModelRange();
+                        const editOperation = {
+                            range: fullModelRange,
+                            text: newContent,
+                            forceMoveMarkers: true,
+                        };
+                        editor
+                            .getModel()
+                            .pushEditOperations(
+                                [],
+                                [editOperation],
+                                () => null
+                            );
                     }
                 });
 
