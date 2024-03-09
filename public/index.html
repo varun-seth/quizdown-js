@@ -237,6 +237,11 @@
             font-size: 1.1em;
             line-height: 1.5;
         }
+
+        h1 {
+            font-weight: normal;
+        }
+
         .quizdown {
             height: 100%;
         }
@@ -438,35 +443,6 @@
                 <div id="quizDemo"></div>
 
                 <br />
-
-                <span>
-                    You can also load a quiz using the URL of your existing
-                    markdown file. For example: Try copy-pasting
-                    <a
-                        onclick="document.getElementById('urlInput').value = 'https://gist.github.com/varun-seth/7d273c464beac64c7ace9493c91301f5'; return false;"
-                        href="https://gist.github.com/varun-seth/7d273c464beac64c7ace9493c91301f5"
-                        >this link</a
-                    >
-                </span>
-                <br />
-
-                <div
-                    style="
-                        display: flex;
-                        width: 100%;
-                        align-items: center;
-                        max-width: 480px;
-                    "
-                >
-                    <input
-                        class="url-input"
-                        type="text"
-                        placeholder="Enter the URL of a markdown file that contains the quiz."
-                        id="urlInput"
-                    />
-                    <button class="submit-button" id="submitButton">GO</button>
-                </div>
-                <br />
                 Following are some sample markdown files and their output
                 quizzes.
                 <table>
@@ -515,10 +491,42 @@
                         </td>
                     </tr>
                 </table>
+
+                <br />
+
+                <span>
+                    You can also load a quiz using the URL of your existing
+                    markdown file. For example: Try copy-pasting
+                    <a
+                        onclick="document.getElementById('urlInput').value = 'https://gist.github.com/varun-seth/7d273c464beac64c7ace9493c91301f5'; return false;"
+                        href="https://gist.github.com/varun-seth/7d273c464beac64c7ace9493c91301f5"
+                        >this link</a
+                    >
+                </span>
+                <br />
+
+                <div
+                    style="
+                        display: flex;
+                        width: 100%;
+                        align-items: center;
+                        max-width: 480px;
+                    "
+                >
+                    <input
+                        class="url-input"
+                        type="text"
+                        placeholder="Enter the URL of a markdown file that contains the quiz."
+                        id="urlInput"
+                    />
+                    <button class="submit-button" id="submitButton">GO</button>
+                </div>
+
                 Native github and gist urls are supported. The github repository
                 must be public. But the gist can be hidden.
 
                 <br />
+
                 <div style="text-align: center">
                     <a href="/privacy.html"> Privacy Policy </a>
                     &nbsp;

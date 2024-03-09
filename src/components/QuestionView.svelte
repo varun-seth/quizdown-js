@@ -50,3 +50,9 @@
 {/if}
 
 <svelte:component this="{componentMap[question.questionType]}" {question} />
+
+<style>
+    h3 {
+        font-weight: normal;
+    }
+</style>

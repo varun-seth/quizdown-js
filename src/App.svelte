@@ -296,6 +296,10 @@
         align-items: center;
     }
 
+    h1 {
+        font-weight: normal;
+    }
+
     pre {
         margin: 0.3em 0;
     }

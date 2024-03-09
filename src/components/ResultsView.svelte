@@ -76,6 +76,11 @@
 </div>
 
 <style>
+    h3,
+    h4 {
+        font-weight: normal;
+    }
+
     ol {
         padding-left: 0;
         display: inline-block;
