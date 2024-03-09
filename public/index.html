@@ -264,14 +264,27 @@
             border-radius: 5px;
             border: 1px solid #ccc;
         }
+
+        a:link,
+        a:visited {
+            color: #1b73e8;
+        }
+
+        a.submit-button,
         .submit-button {
+            text-decoration: none;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: #1b73e8;
             color: white;
             font-weight: bold;
+        }
+        .submit-button:hover,
+        .submit-button:focus,
+        .submit-button:active {
+            background-color: #185abc;
         }
 
         /* Smaller screens */
@@ -299,13 +312,8 @@
             background-color: #f2f2f2;
         }
 
-        a:link,
-        a:visited {
-            color: #007bff; /* Or any color of your choice */
-        }
-
         #quizDemo {
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
             width: 100%;
             border-radius: 5px;
             min-height: 480px;
@@ -319,13 +327,82 @@
             width: 100%;
             justify-content: center;
             text-decoration: none;
-            color: #007bff;
+            color: #1b73e8;
+        }
+
+        #forkongithub a {
+            padding: 0px;
+            display: inline-flex;
+            width: 100%;
+            justify-content: center;
+
+            background: white;
+            color: #000;
+            text-decoration: none;
+            font-family: arial, sans-serif;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            line-height: 1rem;
+            position: relative;
+            transition: 0.5s;
+        }
+        #forkongithub a:hover {
+            background: #1b73e8;
+            color: #fff;
+        }
+        #forkongithub a::before,
+        #forkongithub a::after {
+            content: '';
+            width: 100%;
+            display: block;
+            position: absolute;
+            top: 1px;
+            left: 0;
+            height: 1px;
+            background: #fff;
+        }
+        #forkongithub a::after {
+            bottom: 1px;
+            top: auto;
+        }
+        @media screen and (min-width: 800px) {
+            #forkongithub {
+                position: absolute;
+                display: block;
+                top: 0;
+                right: 0;
+                width: 200px;
+                overflow: hidden;
+                height: 200px;
+                z-index: 9999;
+                padding: 0px;
+            }
+            #forkongithub a {
+                padding: 5px 40px;
+
+                width: 200px;
+                position: absolute;
+                top: 40px;
+                right: -80px;
+                transform: rotate(45deg);
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                -moz-transform: rotate(45deg);
+                -o-transform: rotate(45deg);
+                box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+            }
         }
     </style>
 
     <body>
         <div class="container hidden" id="quizContainer"></div>
         <div class="container hidden" id="helpContainer">
+            <span id="forkongithub"
+                ><a href="https://github.com/varun-seth/quizhub.in"
+                    >GitHub</a
+                ></span
+            >
             <div id="help">
                 <div>
                     <a href="https://quizhub.in" class="logo">
@@ -338,24 +415,22 @@
                     <div style="font-weight: 400; font-size: 1.8rem">
                         Create quizzes and share with anyone!
                     </div>
-                    <p style="color: #77838f; font-size: 1rem">
+                    <p style="color: #5f6368; font-size: 1rem">
                         Latex equations and code-blocks with syntax
                         highlighting.
                     </p>
                 </div>
 
-                <a href="/edit/">
-                    <button class="submit-button">
-                        <div
-                            style="
-                                font-weight: 400;
-                                font-size: 1.5em;
-                                padding: 10px;
-                            "
-                        >
-                            Try QuizHub Editor
-                        </div>
-                    </button>
+                <a href="/edit/" class="submit-button">
+                    <div
+                        style="
+                            font-weight: 400;
+                            font-size: 1.5em;
+                            padding: 10px;
+                        "
+                    >
+                        Try QuizHub Editor
+                    </div>
                 </a>
 
                 <br />
