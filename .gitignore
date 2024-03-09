@@ -19,3 +19,4 @@ dist/*.map
 public/build/*
 githubgist.json
 TODO.md
+icon-*.png

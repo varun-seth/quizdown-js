@@ -2,6 +2,7 @@ const defaultText = `# Welcome to the Quiz!
 
 This is a basic Quiz demo. 
 
+<!-- This text is a comment, it is not shown in the quiz. -->
 <!-- Each question is declared by a heading \`##\` prefix, with a list of options. -->
 
 ## What is 2 + 2?
@@ -11,14 +12,15 @@ This is a basic Quiz demo.
 
 Select the correct option.
 
-- [ ] 0
-- [x] 4
-- [ ] 5
+1. [ ] 0
+2. [x] 4
+3. [ ] 5
 
 ## Solve for $x$ in  $x^2 = 4$
 
 <!-- Equations can be written by enclosing in $ $ (dollar signs) -->
 <!-- A Multiple-Choice Question multiple checkboxes with the 'x' character. -->
+<!-- Unordered list can also be used (defined by dashes). -->
 
 More than one option is correct.
 
@@ -28,7 +30,7 @@ More than one option is correct.
 
 ## Sort from smallest to largest
 
-<!-- An ordered list of options is shown as a Sequence question. -->
+<!-- An ordered list of options without checkboxes is shown as a Sequence question. -->
 
 Please drag these options to the correct order.
 

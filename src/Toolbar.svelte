@@ -25,6 +25,11 @@
     export const content = writable('');
 
     onMount(() => {
+        document.documentElement.style.setProperty(
+            '--toolbar-color-primary',
+            '#1b73e8'
+        );
+
         const storedUserInfo = localStorage.getItem(USER_KEY);
         if (storedUserInfo) {
             userInfo.set(JSON.parse(storedUserInfo));
@@ -192,7 +197,7 @@
     }
 
     function fetchUserProfile(accessToken) {
-        fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -497,7 +502,7 @@
         style="padding-left: 10px; display: inline-flex; align-items: center;"
     >
         <a href="/">
-            <Button>
+            <Button title="Home">
                 <img src="/icon.svg" alt="quiz home" style="height: 16px;" />
             </Button>
         </a>
@@ -534,8 +539,9 @@
         <Button
             title="Sample"
             buttonAction="{() => {
-                content.set(defaultText);
-                callOutsideOnInternalChange(defaultText);
+                let newContent = defaultText + '\n\n' + get(content);
+                content.set(newContent);
+                callOutsideOnInternalChange(newContent);
             }}"
         >
             Sample
@@ -548,7 +554,7 @@
 
     <!-- Right sided buttons -->
     <span style="padding-right: 10px; display:inline-flex; gap: 10px;">
-        {#if fileId}
+        {#if $userInfo}
             <span style="position: relative">
                 <Button buttonAction="{save}" disabled="{isSaving}">
                     Save
@@ -557,7 +563,9 @@
                     <div class="spinner within-spinner"></div>
                 {/if}
             </span>
+        {/if}
 
+        {#if fileId}
             <span style="position: relative">
                 <Button buttonAction="{share}" disabled="{isSharing}"
                     >Share & Launch</Button
@@ -605,7 +613,7 @@
         width: 16px;
         height: 16px;
         border-radius: 50%;
-        border-left-color: var(--quizdown-color-primary);
+        border-left-color: var(--toolbar-color-primary);
         animation: spin 1s ease infinite;
     }
 
@@ -654,11 +662,19 @@
             transform: translate(-50%, -50%) rotate(360deg);
         }
     }
-    input[type='text']:hover,
-    input[type='text']:focus {
+    input[type='text']:hover:not(:disabled),
+    input[type='text']:focus:not(:disabled) {
         outline: none;
-        border-color: var(--quizdown-color-primary);
+        border-color: var(--toolbar-color-primary);
         box-shadow: 0 0 8px 0
-            color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
+            color-mix(in srgb, var(--toolbar-color-primary) 30%, white 70%);
+    }
+
+    input[type='text']:disabled {
+        background-color: white;
+        filter: grayscale(100%);
+        color: gray;
+        cursor: initial;
+        opacity: 50%;
     }
 </style>

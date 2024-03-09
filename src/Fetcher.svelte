@@ -13,7 +13,6 @@
                 return response.text();
             })
             .then((text) => {
-                console.log(text);
                 callbackFn(text);
             })
             .catch((error) => console.error('Error:', error));
