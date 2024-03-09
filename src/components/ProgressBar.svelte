@@ -61,7 +61,9 @@
 
 <div class="progress" data-label="">
     <div
-        class="progress-slider {value < max - 1 ? 'progress-right-round' : ''}"
+        class="progress-slider {value < max - 1
+            ? 'progress-right-round'
+            : ''} {value < max ? 'soft-background' : ''}"
         style="width:{progressPercent1}"
     >
         <div
@@ -83,12 +85,14 @@
         /* background-color: color-mix(in srgb, var(--quizdown-color-primary) 10%, white 90%); */
     }
 
-    .progress .progress-slider {
+    .soft-background {
         background-color: color-mix(
             in srgb,
             var(--quizdown-color-primary) 30%,
             white 70%
         );
+    }
+    .progress .progress-slider {
         height: 100%;
         /* display: block; */
         display: flex;
