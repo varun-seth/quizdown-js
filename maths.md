@@ -1,5 +1,8 @@
 # Math Quiz
 
+Basic Math questions. These questions have been taken from 11-12th standard CBSE textbooks.
+
+
 ## Solve the expression
 
 $$
@@ -8,9 +11,9 @@ $$
 
 > Also check out $\sqrt{x+2}$!
 
-1. [x] Try out: $x=0.75$
-2. [ ] $x=0.5$ could also *be correct*!
-3. [ ] perhaps $x=1$?
+1. [x] $x=0.75$
+2. [ ] $x=0.5$
+3. [ ] $x=1$
 4. [ ] $x=1.5$
 
 

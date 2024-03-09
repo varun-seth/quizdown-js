@@ -1,12 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-        <title>Live Editor for Quiz</title>
+        <title>QuizHub Editor</title>
+        <meta
+            name="description"
+            content="Quizhub Editor - Make interactive quizzes and share with everyone! Supports Markdown Language, Multiple Choice Questions, Single Choice Questions, Sequence arrangement etc."
+        />
+        <link rel="apple-touch-icon" href="/icon.png" />
 
-        <link rel="icon" type="image/svg+xml" href="/favicon-edit.svg" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+
+        <script
+            src="https://accounts.google.com/gsi/client"
+            async
+            defer
+        ></script>
+        <script src="https://apis.google.com/js/api.js"></script>
 
         <script src="/build/quizdown.js"></script>
         <script src="/build/extensions/quizdownKatex.js"></script>
@@ -19,6 +33,8 @@
                 font-family: sans-serif;
                 height: 100%;
                 margin: 0;
+                display: flex;
+                flex-direction: column; /
             }
             #editorContainer,
             #quizContainer {
@@ -26,9 +42,18 @@
                 width: 50%;
                 float: left;
             }
+
+            .toolbar {
+                background: color-mix(in srgb, var(--toolbar-color-primary) 20%, white 80%);
+                height: 48px;
+                display: flex;
+                justify-content: space-between; /* Align items to the start and end */
+                align-items: center; /* Center items vertically */
+
+            }
             .container {
                 display: flex;
-                height: 100%;
+                height: calc(100% - 48px);
                 overflow: hidden;
             }
 
@@ -39,6 +64,7 @@
     </head>
 
     <body>
+        <div id="toolbar" class="toolbar"></div>
         <div class="container">
             <div id="editorContainer"></div>
             <div id="quizContainer"></div>
@@ -51,108 +77,72 @@
                 },
             });
             require(['vs/editor/editor.main'], function () {
-                function getSavedContent() {
-                    // Try getting content from sessionStorage first, then localStorage
-                    var savedContent =
-                        sessionStorage.getItem('liveEditorContent');
-                    if (savedContent) {
-                        return savedContent;
-                    } else {
-                        // Default content if nothing is saved
-                        return [
-                            '# Quiz Name',
-                            '',
-                            'This is a basic Quiz',
-                            '',
-                            '## What is 2 + 2 ?',
-                            '',
-                            "MCQ's can be defined by a list of options with checkboxes.",
-                            'A Single-Choice Question has only one checkbox with the x character.',
-                            '',
-                            '- [ ] 0',
-                            '- [x] 4',
-                            '- [ ] 5',
-                            '',
-                            '## Solve for x in x ^ 2 = 4',
-                            '',
-                            'A Multiple-Choice Question has more than 1 checkboxes having the x character',
-                            '',
-                            '- [x] -2',
-                            '- [ ] 0',
-                            '- [x] 2',
-                            '',
-                            '## Sort from smallest to largest',
-                            '',
-                            'An ordered list of options are shown as a Sequence question.',
-                            'The quiz-participant must drag these options to the correct order.',
-                            '',
-                            '1. 0',
-                            '2. 1/3',
-                            '3. 2/3',
-                            '',
-                        ].join('\n');
-                    }
-                }
+                const toolbarElement = document.getElementById('toolbar');
 
-                var editor = monaco.editor.create(
-                    document.getElementById('editorContainer'),
-                    {
-                        value: getSavedContent(),
-                        language: 'markdown',
-                        minimap: { enabled: false },
-                        // lineNumbers: 'off',
-                        glyphMargin: false,
-                        folding: false,
+                const myToolbar = quizdown.createToolbar(toolbarElement); // Assuming this is your toolbar instance
+
+                let editor;
+
+                myToolbar.registerTextChange((newContent) => {
+                    if (!editor) {
+                        console.log('Creating editor');
+                        editor = monaco.editor.create(
+                            document.getElementById('editorContainer'),
+                            {
+                                value: newContent,
+                                language: 'markdown',
+                                minimap: { enabled: false },
+                                // lineNumbers: 'off',
+                                glyphMargin: false,
+                                folding: false,
+                            }
+                        );
+                        editor.onDidChangeModelContent(onUpdate);
+                        // TODO: expose a function that shows the correct question.
+                        editor.onDidChangeCursorPosition(onUpdate);
+
+                        // Intercept Ctrl+S and Command+S
+                        editor.addCommand(
+                            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
+                            function () {
+                                myToolbar.save();
+                            }
+                        );
+
+                        renderQuiz(newContent);
+                    } else {
+                        // Logic to update Monaco editor or perform other actions
+                        const fullModelRange = editor
+                            .getModel()
+                            .getFullModelRange();
+                        const editOperation = {
+                            range: fullModelRange,
+                            text: newContent,
+                            forceMoveMarkers: true,
+                        };
+                        editor
+                            .getModel()
+                            .pushEditOperations(
+                                [],
+                                [editOperation],
+                                () => null
+                            );
                     }
-                );
+                });
 
                 let renderQuizDebounceTimer;
                 function onUpdate() {
-                    var currentPosition = editor.getPosition();
-                    var activeLineNumber = currentPosition.lineNumber;
-                    var currentContent = editor.getValue();
+                    let currentPosition = editor.getPosition();
+                    let activeLineNumber = currentPosition.lineNumber;
+                    let currentContent = editor.getValue();
+
                     clearTimeout(renderQuizDebounceTimer);
                     renderQuizDebounceTimer = setTimeout(function () {
                         renderQuiz(currentContent, activeLineNumber);
-                        sessionStorage.setItem(
-                            'liveEditorContent',
-                            currentContent
-                        );
+                        myToolbar.onTextChange(currentContent);
                     }, 400); // Wait for 1 second before rendering
                 }
-
-                editor.onDidChangeModelContent(onUpdate);
-                // TODO: expose a function that shows the correct question.
-                editor.onDidChangeCursorPosition(onUpdate);
-
-                // Intercept Ctrl+S and Command+S
-                editor.addCommand(
-                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
-                    function () {
-                        var content = editor.getValue();
-                        downloadContent(content, 'quiz.md');
-                    }
-                );
-
-                renderQuiz(editor.getValue());
             });
-
-            function downloadContent(content, filename) {
-                var element = document.createElement('a');
-                element.setAttribute(
-                    'href',
-                    'data:text/plain;charset=utf-8,' +
-                        encodeURIComponent(content)
-                );
-                element.setAttribute('download', filename);
-
-                element.style.display = 'none';
-                document.body.appendChild(element);
-
-                element.click();
-
-                document.body.removeChild(element);
-            }
 
             function renderQuiz(markdown, activeLineNumber = 0) {
                 const quizContainer = document.getElementById('quizContainer');
@@ -164,7 +154,7 @@
                 let config = {
                     shuffleAnswers: false,
                     shuffleQuestions: false,
-                    primaryColor: '#316FF6',
+                    primaryColor: '#1b73e8',
                     secondaryColor: '#f8f8f8',
                     activeLineNumber: activeLineNumber,
                 };
