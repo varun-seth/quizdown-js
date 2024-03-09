@@ -27,7 +27,7 @@
                     // Note: photoLink might not always be present
                     params.authorImageUrl =
                         owner.photoLink || 'defaultImageUrl';
-                    params.authorUrl = 'mailto://' + owner.emailAddress;
+                    params.authorUrl = 'mailto:' + owner.emailAddress;
                 }
 
                 // Fetch file content
