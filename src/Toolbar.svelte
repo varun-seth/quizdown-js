@@ -19,6 +19,7 @@
     let isLoading = false;
     let isSaving = false;
     let isSharing = false;
+    let isRenaming = false;
 
     // Store for toolbar content
     export const content = writable('');
@@ -37,11 +38,70 @@
         fileId = queryParams.get('gdrive');
         if (fileId) {
             // Proceed to make an API call to get the file
-            getFileDetails(fileId);
+            getFileDetails();
         } else {
             fetchStorageContent();
         }
     });
+
+    let renameDebounceTimer;
+
+    function handleFilenameChange(event) {
+        let newName = event.target.value;
+
+        if (!newName) {
+            console.log('Filename cannot be empty');
+            return;
+        }
+
+        filename.set(newName);
+
+        let currentAccesstoken = get(accessToken);
+        if (!currentAccesstoken) {
+            alert('Login required to rename file');
+            return;
+        }
+
+        clearTimeout(renameDebounceTimer);
+
+        renameDebounceTimer = setTimeout(() => {
+            renameFile(fileId, get(filename), currentAccesstoken.token);
+        }, 1000);
+    }
+
+    async function renameFile(fileId, newName, accessToken, afterRenameFn) {
+        if (!newName.endsWith('.md')) {
+            newName = `${newName}.md`;
+        }
+
+        isRenaming = true;
+        const url = `https://www.googleapis.com/drive/v3/files/${fileId}`;
+
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: new Headers({
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            }),
+            body: JSON.stringify({
+                name: newName,
+            }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('File renamed successfully:', result);
+            if (afterRenameFn) {
+                afterRenameFn(result);
+            }
+            isRenaming = false;
+            return result;
+        } else {
+            console.error('Failed to rename the file:', response.statusText);
+            isRenaming = false;
+            throw new Error('Failed to rename the file');
+        }
+    }
 
     function logout() {
         localStorage.removeItem(USER_KEY);
@@ -50,7 +110,7 @@
         accessToken.set(null);
     }
 
-    async function getFileDetails(fileId) {
+    async function getFileDetails() {
         let currentAccesstoken = get(accessToken);
         if (!currentAccesstoken) {
             alert('Login required to Edit file');
@@ -79,8 +139,13 @@
             content.set(fileContentText);
             callOutsideOnInternalChange(fileContentText);
         } else {
-            alert('Failed to load.');
-            console.error('Failed to fetch file content');
+            isLoading = false;
+            let message = await contentResponse.text();
+            console.error(message);
+            alert(
+                'Failed to load this content. Maybe this file was not created by QuizHub or modified by another application'
+            );
+            fileId = null;
             return;
         }
 
@@ -91,6 +156,10 @@
         if (metadataResponse.ok) {
             const metadata = await metadataResponse.json();
             let nameText = metadata.name;
+            if (nameText.endsWith('.md')) {
+                // Remove the last 3 characters (".md") from the string
+                nameText = nameText.slice(0, -3);
+            }
             filename.set(nameText);
         } else {
             console.error('Failed to fetch file metadata');
@@ -419,83 +488,104 @@
     }
 </script>
 
-<span style="padding-left: 10px; display: inline-flex">
-    <a href="/">
-        <Button>
-            <img src="/icon.svg" alt="quiz home" style="height: 16px;" />
-        </Button>
-    </a>
-    <Button
-        title="Start"
-        buttonAction="{() => {
-            createFileInDrive(true);
-        }}"
-    >
-        New
-    </Button>
-
-    <Button
-        title="Start"
-        buttonAction="{() => {
-            content.set(defaultText);
-            callOutsideOnInternalChange(defaultText);
-        }}"
-    >
-        Sample
-    </Button>
-
-    {#if $userInfo}
-        <Button buttonAction="{openGooglePicker}">Open</Button>
-    {/if}
-</span>
-
 {#if isLoading}
+    <span></span>
     <div class="spinner"></div>
-{/if}
-
-{#if $filename}
-    <a href="https://drive.google.com/file/d/{fileId}/view" target="_blank">
-        {$filename}
-    </a>
-{/if}
-
-<!-- Right sided buttons -->
-<span style="padding-right: 10px; display:inline-flex; gap: 10px;">
-    <Button buttonAction="{save}">
-        {#if isSaving}
-            Saving
-            <div class="spinner"></div>
-        {:else}
-            Save
-        {/if}
-    </Button>
-
-    <Button buttonAction="{share}">
-        {#if isSharing}
-            Sharing
-            <div class="spinner"></div>
-        {:else}
-            Share & Launch
-        {/if}
-    </Button>
-
-    {#if $userInfo}
-        <Button buttonAction="{logout}">Logout</Button>
-
-        <div class="user-info">
-            <img
-                class="user-image"
-                src="{$userInfo.picture}"
-                alt="{$userInfo.name}"
+    <span></span>
+{:else}
+    <span
+        style="padding-left: 10px; display: inline-flex; align-items: center;"
+    >
+        <a href="/">
+            <Button>
+                <img src="/icon.svg" alt="quiz home" style="height: 16px;" />
+            </Button>
+        </a>
+    </span>
+    {#if fileId}
+        <span class="input-container">
+            <input
+                disabled="{isRenaming}"
+                type="text"
+                value="{$filename}"
+                on:input="{handleFilenameChange}"
             />
-            <span>{$userInfo.name}</span>
-        </div>
-    {:else}
-        <Button buttonAction="{handleSignIn}">Login</Button>
+
+            {#if isRenaming}
+                <div class="spinner within-spinner"></div>
+            {/if}
+        </span>
+
+        <!-- <a href="https://drive.google.com/file/d/{fileId}/view" target="_blank">
+            [Drive]
+        </a> -->
     {/if}
 
-    <div id="signinDiv"></div>
-</span>
+    <span style="display: inline-flex;">
+        <Button
+            title="New"
+            buttonAction="{() => {
+                createFileInDrive(true);
+            }}"
+        >
+            New
+        </Button>
+
+        <Button
+            title="Sample"
+            buttonAction="{() => {
+                content.set(defaultText);
+                callOutsideOnInternalChange(defaultText);
+            }}"
+        >
+            Sample
+        </Button>
+
+        {#if $userInfo}
+            <Button buttonAction="{openGooglePicker}">Open</Button>
+        {/if}
+    </span>
+
+    <!-- Right sided buttons -->
+    <span style="padding-right: 10px; display:inline-flex; gap: 10px;">
+        {#if fileId}
+            <span style="position: relative">
+                <Button buttonAction="{save}" disabled="{isSaving}">
+                    Save
+                </Button>
+                {#if isSaving}
+                    <div class="spinner within-spinner"></div>
+                {/if}
+            </span>
+
+            <span style="position: relative">
+                <Button buttonAction="{share}" disabled="{isSharing}"
+                    >Share & Launch</Button
+                >
+                {#if isSharing}
+                    <div class="spinner within-spinner"></div>
+                {/if}
+            </span>
+        {/if}
+
+        {#if $userInfo}
+            <Button buttonAction="{logout}">Logout</Button>
+
+            <div class="user-info">
+                <img
+                    class="user-image"
+                    src="{$userInfo.picture}"
+                    alt="{$userInfo.name}"
+                />
+                <span>{$userInfo.name}</span>
+            </div>
+        {:else}
+            <Button buttonAction="{handleSignIn}">Login</Button>
+        {/if}
+
+        <div id="signinDiv"></div>
+    </span>
+{/if}
 
 <style>
     .user-info {
@@ -526,5 +616,49 @@
         100% {
             transform: rotate(360deg);
         }
+    }
+
+    .input-container {
+        width: 100%;
+        position: relative;
+        display: inline-block;
+    }
+
+    input[type='text'] {
+        text-align: center;
+        font-size: medium;
+        width: 100%;
+        min-width: 100px;
+        height: 34px;
+        box-sizing: border-box;
+        border: 2px solid white;
+        border-radius: 4px;
+        background-color: white;
+        transition:
+            border-color 0.3s ease-in-out,
+            box-shadow 0.3s ease-in-out;
+    }
+
+    .within-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: spin2 1s ease infinite;
+    }
+    @keyframes spin2 {
+        0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+        }
+    }
+    input[type='text']:hover,
+    input[type='text']:focus {
+        outline: none;
+        border-color: var(--quizdown-color-primary);
+        box-shadow: 0 0 8px 0
+            color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
     }
 </style>
