@@ -3,9 +3,14 @@
     export let disabled = false;
     export let title = '';
     export let color = '';
+    export let size = 'medium';
 
     // Reactive statement to dynamically set classes based on `color` value
     $: primaryClass = color == 'primary';
+
+    // Reactive statement to set padding based on button size
+    $: paddingSize =
+        size === 'large' ? '1rem' : size === 'small' ? '0.2rem' : '0.5rem';
 </script>
 
 <button
@@ -13,6 +18,7 @@
     {title}
     {disabled}
     on:click="{buttonAction}"
+    style="padding: {paddingSize};"
 >
     <slot />
 </button>
@@ -29,7 +35,6 @@
     button {
         background-color: white;
         color: var(--quizdown-color-text);
-        padding: 0.5rem 1rem;
         border-radius: 4px;
         border: 1px solid transparent;
         line-height: 1;

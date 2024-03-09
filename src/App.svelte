@@ -78,7 +78,7 @@
         {#if $onIntro}
             <Container additionalClasses="intro-page">
                 <a href="/" title="home">
-                    <Button title="home">
+                    <Button title="home" size="large">
                         <img
                             src="/icon.svg"
                             style="height: 48px"
@@ -133,6 +133,7 @@
 
                 <span style="margin-top: 2em; margin-bottom: 2em;">
                     <Button
+                        size="large"
                         title="Start"
                         buttonAction="{() => quiz.jump(0)}"
                         color="primary"
@@ -160,6 +161,7 @@
 
             <Row>
                 <Button
+                    size="large"
                     disabled="{!$isStarted}"
                     slot="left"
                     title="{$_('reset')}"
@@ -175,6 +177,7 @@
                 <svelte:fragment slot="center">
                     {#if $isStarted}
                         <Button
+                            size="large"
                             title="{$_('previous')}"
                             disabled="{$onIntro || $onFirst}"
                             buttonAction="{quiz.previous}"
@@ -192,6 +195,7 @@
                         </span>
 
                         <Button
+                            size="large"
                             disabled="{$onResults ||
                                 (!$isEvaluated && $onLast)}"
                             buttonAction="{quiz.next}"
@@ -202,6 +206,7 @@
                 </svelte:fragment>
 
                 <Button
+                    size="large"
                     color="{$onLast && !$isEvaluated ? 'primary' : ''}"
                     slot="right"
                     disabled="{$onResults || $onIntro}"
