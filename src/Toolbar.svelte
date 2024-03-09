@@ -331,10 +331,10 @@
         isRenewing = true;
         // TODO: Check access token expiry
         // TODO: Check if curent file is saved, show confirmation.
-        let name = 'Quiz.md';
+        let name = 'Quiz';
 
         const fileMetadata = {
-            name: name,
+            name: name + '.md',
             mimeType: 'text/markdown',
         };
 
@@ -570,7 +570,7 @@
         <Button
             title="Sample"
             buttonAction="{() => {
-                let newContent = defaultText + '\n\n' + get(content);
+                let newContent = get(content) + '\n\n' + defaultText;
                 content.set(newContent);
                 callOutsideOnInternalChange(newContent);
             }}"

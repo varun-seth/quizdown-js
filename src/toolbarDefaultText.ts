@@ -8,7 +8,6 @@ The main Text of the question is here.
 
 1. [x] Correct Option
 2. [ ] Incorrect Option
-
 `;
 
 export default defaultText;
