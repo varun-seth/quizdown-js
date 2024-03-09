@@ -16,6 +16,7 @@
     let fileId = null;
     let filename = writable('');
 
+    let isRenewing = false;
     let isLoading = false;
     let isSaving = false;
     let isSharing = false;
@@ -306,6 +307,7 @@
             callOutsideOnInternalChange('');
             return;
         }
+        isRenewing = true;
         // TODO: Check access token expiry
         // TODO: Check if curent file is saved, show confirmation.
         let name = 'Quiz.md';
@@ -327,6 +329,8 @@
             }
         );
 
+        isRenewing = false;
+
         if (response.status === 401) {
             logout();
             alert('Please login again');
@@ -341,7 +345,6 @@
         const file = await response.json();
 
         if (file.id) {
-            fileId = file.id;
             // Update URL with file ID
             const currentUrl = window.location.href.split('?')[0];
             const newUrl = `${currentUrl}?gdrive=${file.id}`;
@@ -349,6 +352,7 @@
             if (newWindow) {
                 window.open(newUrl, '_blank');
             } else {
+                fileId = file.id;
                 filename.set(name);
                 window.history.pushState({ path: newUrl }, '', newUrl);
             }
@@ -527,14 +531,20 @@
     {/if}
 
     <span style="display: inline-flex;">
-        <Button
-            title="New"
-            buttonAction="{() => {
-                createFileInDrive(true);
-            }}"
-        >
-            New
-        </Button>
+        <span style="position: relative">
+            <Button
+                title="New"
+                buttonAction="{() => {
+                    createFileInDrive(true);
+                }}"
+                disabled="{isRenewing}"
+            >
+                New
+            </Button>
+            {#if isRenewing}
+                <div class="spinner within-spinner"></div>
+            {/if}
+        </span>
 
         <Button
             title="Sample"
