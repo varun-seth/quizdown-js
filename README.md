@@ -1,10 +1,12 @@
-# quizdown [![npm version](https://badge.fury.io/js/quizdown.svg)](https://badge.fury.io/js/quizdown) [![Build](https://github.com/bonartm/quizdown-js/actions/workflows/build.yml/badge.svg)](https://github.com/bonartm/quizdown-js/actions/workflows/build.yml)
+# QuizHub
 
-> Markdownish syntax to instantly create simple interactive quiz apps for your static website.
+> Markdownish syntax to instantly create simple interactive quizzes and share with anyone!
 
-I'm working on this project in my free time to learn more about modern web development and languages. This is a toy project and should not be used in serious projects for now. 
+I'm working on this project in my free time to learn more about modern web development and languages. This is a toy project and should not be used in serious projects for now.
 
-### 🚀 Try the [quizdown live editor](https://bonartm.github.io/quizdown-live-editor/)
+This project uses and extends an open source library called [quizdown-js](https://github.com/bonartm/quizdown-js). My contribution is mainly towards making this library easier to use for non-developers.
+
+### 🚀 Try the [QuizHub live editor](https://quizhub.in/edit/)
 
 - supports markdown text formatting, images, syntax highlighting and math rendering.
 - different [quiz-types](./docs/syntax.md): single-choice, multiple-choice, sequence.
@@ -15,7 +17,7 @@ I'm working on this project in my free time to learn more about modern web devel
 
 ## Usage
 
-quizdown is easy to setup and best used in combination with existing static site generators like *Jekyll*, *Hugo* or *Sphinx*. Check out the extensions
+QuizHub's internal library is easy to use in any project. Best used in combination with existing static site generators like *Jekyll*, *Hugo* or *Sphinx*. Check out the extensions
 [hugo-quiz](https://github.com/bonartm/hugo-quiz) and [sphinxcontrib-quizdown](https://github.com/bonartm/sphinxcontrib-quizdown).
 
 ### 📚 [Documentation](./docs/)
@@ -52,7 +54,7 @@ To keep the bundle size low, syntax highlighting and math rendering are implemen
 </head>
 ```
 
-Write questions within a `quizdown` class (edit in the [🚀quizdown editor](https://bonartm.github.io/quizdown-live-editor/?code=---%0AprimaryColor%3A%20steelblue%0AshuffleQuestions%3A%20false%0AshuffleAnswers%3A%20true%0A---%0A%0A%23%23%23%20Select%20your%20superpowers!%0A%0A-%20%5B%20%5D%20Enhanced%20Strength%0A-%20%5B%20%5D%20Levitation%0A-%20%5Bx%5D%20Shapeshifting%0A%0A%23%23%23%20What%27s%20the%20capital%20of%20Germany%3F%0A%0A%3E%20Hint%3A%20The%20_largest_%20city%20in%20Germany...%0A%0A1.%20%5Bx%5D%20Berlin%0A1.%20%5B%20%5D%20Frankfurt%0A1.%20%5B%20%5D%20Paris%0A1.%20%5B%20%5D%20Cologne)):
+Write questions within a `quizdown` class (edit in the [🚀quizhub editor](https://quizhub.in/edit/)):
 
 ```html
 ...
@@ -74,9 +76,9 @@ Write questions within a `quizdown` class (edit in the [🚀quizdown editor](htt
 	> Hint: The _largest_ city in Germany...
 
 	1. [x] Berlin
-	1. [ ] Frankfurt
-	1. [ ] Paris
-	1. [ ] Cologne
+	2. [ ] Frankfurt
+	3. [ ] Paris
+	4. [ ] Cologne
 </div>
 ...
 ```
@@ -116,5 +118,6 @@ npm run dev
 
 
 ## Credits
+Built on top of the incredible [quizdown-js](https://github.com/bonartm/quizdown-js)
 
 Inspired by the [mermaid library](https://mermaid-js.github.io/mermaid/#/) and the python package [quizdown](https://github.com/jjfiv/quizdown).
