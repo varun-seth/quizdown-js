@@ -32,21 +32,11 @@
 {/if}
 
 {#if question.hint}
-    <div style="display: inline-flex;">
-        <Button
-            size="large"
-            title="{$_('hint')}"
-            buttonAction="{question.toggleHint}"
-            ><span
-                style="color: {!$showHint
-                    ? 'var(--quizdown-color-primary)'
-                    : ''}"
-            >
-                <Icon name="lightbulb" />
-            </span>
-        </Button>
-        <Hint hint="{question.hint}" show="{$showHint}" />
-    </div>
+    <Hint
+        hint="{question.hint}"
+        show="{$showHint}"
+        buttonAction="{question.toggleHint}"
+    />
 {/if}
 
 <svelte:component this="{componentMap[question.questionType]}" {question} />

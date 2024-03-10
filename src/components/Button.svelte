@@ -1,6 +1,6 @@
 <script lang="ts">
     export let buttonAction = () => {};
-    export let disabled = false;
+    export let disabled: boolean = false;
     export let title = '';
     export let color = '';
     export let size = 'medium';

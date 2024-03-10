@@ -76,7 +76,10 @@
     <ProgressBar value="{$index}" max="{quiz.questions.length}" />
 {/if}
 
-<div class="quizdown-content" bind:this="{node}">
+<div
+    class="quizdown-content {$onSolutions ? 'quizdown-content-solutions' : ''}"
+    bind:this="{node}"
+>
     {#if $onIntro}
         <Container additionalClasses="intro-page">
             <a href="/" title="home">
@@ -142,23 +145,17 @@
             </span>
         </Container>
     {:else if $onSolutions}
-        <div style="overflow: auto; height: 100%;">
-            <Container>
-                <Solution {quiz}></Solution>
-
-                <span class="floating-button">
-                    <Button
-                        size="large"
-                        color="primary"
-                        title="{$_('resultsTitle')}"
-                        buttonAction="{() => {
-                            quiz.toggleSolutions();
-                        }}"
-                        ><Icon name="arrow-left" size="lg" />
-                        Back
-                    </Button>
-                </span>
-            </Container>
+        <div class="solutions-container">
+            <Solution {quiz}></Solution>
+            <Button
+                size="large"
+                color="primary"
+                title="{$_('resultsTitle')}"
+                buttonAction="{() => {
+                    quiz.toggleSolutions();
+                }}"
+                ><Icon name="arrow-left" size="lg" />
+            </Button>
         </div>
     {:else}
         <Container>
@@ -191,7 +188,7 @@
                 </span>
             </Button>
             <svelte:fragment slot="center">
-                {#if $isStarted}
+                {#if $isStarted && !$onResults}
                     <Button
                         size="large"
                         title="{$_('previous')}"
@@ -294,13 +291,7 @@
         color: var(--quizdown-color-primary);
     }
 
-    .floating-button {
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-    }
     .quizdown-content {
-        max-width: 800px;
         height: calc(100% - 40px - 0.4em);
         width: calc(100% - 40px);
         flex-grow: 1;
@@ -308,7 +299,25 @@
         flex-direction: column;
         margin: 0 auto;
         padding: 20px;
+        max-width: 800px;
     }
+
+    .quizdown-content-solutions {
+        max-width: unset;
+        padding: 0px;
+        margin: 0px;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        overflow: auto;
+    }
+
+    .solutions-container {
+        padding: 20px;
+        max-width: 800px;
+        position: relative;
+    }
+
     /* Smaller screens */
     @media (max-width: 600px) {
         .quizdown-content {
@@ -316,16 +325,6 @@
             margin: 0;
             height: calc(100% - 0.4em);
             width: 100%;
-        }
-        .floating-button {
-            bottom: 0px;
-            right: 0px;
-        }
-    }
-
-    @media print {
-        .floating-button {
-            display: none;
         }
     }
 
