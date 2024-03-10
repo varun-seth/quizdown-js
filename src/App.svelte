@@ -109,10 +109,8 @@
                 >
                     {#if quiz.config.authorImageUrl}
                         <a
-                            href="{quiz.config.authorUrl
-                                ? quiz.config.authorUrl
-                                : quiz.config.authorImageUrl}"
-                            target="_blank"
+                            href="{quiz.config.authorUrl || null}"
+                            target="{quiz.config.authorUrl ? '_blank' : null}"
                         >
                             <img
                                 class="author-image"
@@ -345,7 +343,7 @@
         height: 64px;
         width: 64px;
         border-radius: 50%;
-        border: 2px solid gray;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     }
 
     .intro-page {

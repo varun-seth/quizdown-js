@@ -19,6 +19,8 @@ const toRename = {
     author_name: 'authorName',
     author_url: 'authorUrl',
     author_image_url: 'authorImageUrl',
+    author_image: 'authorImageUrl',
+    authorImage: 'authorImageUrl',
 };
 
 export function standardizeNames(options: object) {
