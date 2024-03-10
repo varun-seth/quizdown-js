@@ -147,6 +147,9 @@
     {:else if $onSolutions}
         <div class="solutions-container">
             <Solution {quiz}></Solution>
+        </div>
+        <!-- back button -->
+        <span class="floating-button">
             <Button
                 size="large"
                 color="primary"
@@ -156,7 +159,7 @@
                 }}"
                 ><Icon name="arrow-left" size="lg" />
             </Button>
-        </div>
+        </span>
     {:else}
         <Container>
             <SmoothResize {minHeight}>
@@ -317,6 +320,11 @@
         max-width: 800px;
         position: relative;
     }
+    .floating-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+    }
 
     /* Smaller screens */
     @media (max-width: 600px) {
@@ -325,6 +333,11 @@
             margin: 0;
             height: calc(100% - 0.4em);
             width: 100%;
+        }
+
+        .floating-button {
+            bottom: 0px;
+            right: 0px;
         }
     }
 
