@@ -72,6 +72,7 @@ let svelte_plugins = [
         preventAssignment: true,
         'process.env.CLIENT_ID': JSON.stringify(process.env.CLIENT_ID),
         'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
+        'process.env.PUB_KEY': JSON.stringify(process.env.PUB_KEY),
     }),
     svelte({
         preprocess: sveltePreprocess({

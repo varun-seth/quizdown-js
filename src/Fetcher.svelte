@@ -1,6 +1,7 @@
 <script>
     // This will be replaced at build time with the actual value
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.PUB_KEY;
+
     export function gdriveFetch(fileId, callbackFn, errorFn) {
         const metadataUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=owners,name,description&key=${apiKey}`;
         const contentUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
@@ -53,6 +54,13 @@
                     .then((text) => {
                         // Call callback with content and parameters
                         callbackFn(text, params);
+                    })
+                    .catch((error) => {
+                        if (errorFn) {
+                            errorFn(error);
+                        } else {
+                            console.error(error);
+                        }
                     });
             })
             .catch((error) => {
