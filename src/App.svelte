@@ -20,6 +20,7 @@
     // import Modal from './components/Modal.svelte';
     import { fade } from 'svelte/transition';
     import { beforeUpdate } from 'svelte';
+    import Solution from './components/Solution.svelte';
 
     export let quiz: Quiz;
     // https://github.com/sveltejs/svelte/issues/4079
@@ -28,15 +29,16 @@
     $: onLast = quiz.onLast;
     $: onFirst = quiz.onFirst;
     $: onIntro = quiz.onIntro;
+    $: onSolutions = quiz.onSolutions;
     $: onResults = quiz.onResults;
     $: isEvaluated = quiz.isEvaluated;
     $: isStarted = quiz.isStarted;
     $: allVisited = quiz.allVisited;
 
-    let maxScore: number;
+    let points: number;
 
     beforeUpdate(() => {
-        maxScore = quiz.maxScoreTotal();
+        points = quiz.pointsTotal();
     });
 
     //let game = new Linear(quiz);
@@ -70,7 +72,9 @@
     });
 </script>
 
-<ProgressBar value="{$index}" max="{quiz.questions.length}" />
+{#if !$onSolutions}
+    <ProgressBar value="{$index}" max="{quiz.questions.length}" />
+{/if}
 
 <div class="quizdown-content" bind:this="{node}">
     {#if $onIntro}
@@ -93,7 +97,7 @@
             <div>
                 {$_('count')}: {quiz.questions.length}
                 <br />
-                {$_('points')}: {maxScore}
+                {$_('points')}: {points}
             </div>
 
             {#if quiz.config.authorName}
@@ -137,8 +141,26 @@
                 </Button>
             </span>
         </Container>
-    {/if}
-    {#if !$onIntro}
+    {:else if $onSolutions}
+        <div style="overflow: auto; height: 100%;">
+            <Container>
+                <Solution {quiz}></Solution>
+
+                <span class="floating-button">
+                    <Button
+                        size="large"
+                        color="primary"
+                        title="{$_('resultsTitle')}"
+                        buttonAction="{() => {
+                            quiz.toggleSolutions();
+                        }}"
+                        ><Icon name="arrow-left" size="lg" />
+                        Back
+                    </Button>
+                </span>
+            </Container>
+        </div>
+    {:else}
         <Container>
             <SmoothResize {minHeight}>
                 <Animated update="{$index}">
@@ -202,14 +224,25 @@
                 size="large"
                 color="{$onLast && !$isEvaluated ? 'primary' : ''}"
                 slot="right"
-                disabled="{$onResults || $onIntro}"
-                title="{$_('evaluate')}"
-                buttonAction="{() => quiz.jump(quiz.questions.length)}"
-                ><Icon name="check-double" size="lg" />
+                disabled="{$onIntro}"
+                title="{!$onResults ? $_('evaluate') : $_('solution')}"
+                buttonAction="{() => {
+                    if (!$onResults) {
+                        quiz.jump(quiz.questions.length);
+                    } else {
+                        quiz.toggleSolutions();
+                    }
+                }}"
+                ><Icon
+                    name="{!$onResults ? 'clipboard-check' : 'clipboard-list'}"
+                    size="lg"
+                />
                 <span
-                    class="hidden {$onLast && !$isEvaluated ? 'spawned' : ''}"
+                    class="hidden {($onLast && !$isEvaluated) || $onResults
+                        ? 'spawned'
+                        : ''}"
                 >
-                    {$_('evaluate')}
+                    {!$onResults ? $_('evaluate') : $_('solution')}
                 </span>
             </Button>
         </Row>
@@ -261,6 +294,11 @@
         color: var(--quizdown-color-primary);
     }
 
+    .floating-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+    }
     .quizdown-content {
         max-width: 800px;
         height: calc(100% - 40px - 0.4em);
@@ -278,6 +316,16 @@
             margin: 0;
             height: calc(100% - 0.4em);
             width: 100%;
+        }
+        .floating-button {
+            bottom: 0px;
+            right: 0px;
+        }
+    }
+
+    @media print {
+        .floating-button {
+            display: none;
         }
     }
 

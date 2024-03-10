@@ -290,6 +290,15 @@
             overflow: hidden;
         }
 
+        @media print {
+            #quizContainer,
+            .quizdown {
+                height: auto;
+                overflow: visible;
+                max-height: none;
+            }
+        }
+
         #help {
             display: flex;
             flex-direction: column;

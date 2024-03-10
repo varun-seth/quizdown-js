@@ -13,4 +13,12 @@
         flex-grow: 1;
         overflow-y: auto;
     }
+
+    @media print {
+        /* Hide only during printing. */
+        .container {
+            overflow-y: visible;
+            height: auto;
+        }
+    }
 </style>

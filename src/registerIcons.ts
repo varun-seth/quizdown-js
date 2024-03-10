@@ -1,4 +1,9 @@
-import { library, config, IconDefinition, IconPack } from '@fortawesome/fontawesome-svg-core';
+import {
+    library,
+    config,
+    IconDefinition,
+    IconPack,
+} from '@fortawesome/fontawesome-svg-core';
 import {
     faArrowLeft,
     faArrowRight,
@@ -12,7 +17,10 @@ import {
     faDotCircle,
     faCircleCheck,
     faCircleXmark,
-	faPlay,
+    faPlay,
+    faScroll,
+    faClipboardList,
+    faClipboardCheck,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -22,10 +30,15 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 
 function isIconDefinition(icon: any): icon is IconDefinition {
-    return icon && typeof icon === 'object' && 'iconName' in icon && 'prefix' in icon;
+    return (
+        icon &&
+        typeof icon === 'object' &&
+        'iconName' in icon &&
+        'prefix' in icon
+    );
 }
 
-export default function() {
+export default function () {
     config.autoAddCss = false;
     const icons = [
         faArrowLeft,
@@ -43,8 +56,11 @@ export default function() {
         faSquareRegular,
         faCircleRegular,
         faDotCircleRegular,
-		faPlay,
+        faPlay,
+        faScroll,
+        faClipboardList,
+        faClipboardCheck,
     ].filter(isIconDefinition);
 
-    library.add(...icons as IconDefinition[]);
+    library.add(...(icons as IconDefinition[]));
 }

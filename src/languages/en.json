@@ -9,6 +9,7 @@
     "score": "Score",
     "points": "Points",
     "count": "Count",
+    "solution": "Solution",
     "resultsText": "You have answered {points} out of {total} questions correctly!",
     "questionLetter": "Q"
 }

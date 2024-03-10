@@ -4,6 +4,8 @@
     import Icon from './Icon.svelte';
     let checked = {};
 
+    export let solved: boolean = false;
+
     // Function to handle checkbox changes
     function handleCheckboxChange(i) {
         if (question.questionType === 'SingleChoice') {
@@ -33,6 +35,7 @@
     {#each question.answers as answer, i}
         <label style="position: relative">
             <input
+                disabled="{solved}"
                 type="checkbox"
                 bind:checked="{checked[i]}"
                 on:click="{() => handleCheckboxChange(i)}"
@@ -49,12 +52,12 @@
                         : ''}"
                 >
                     {#if question.questionType === 'SingleChoice'}
-                        {#if checked[i]}
+                        {#if checked[i] || (solved && answer.correct)}
                             <Icon name="dot-circle" solid="{true}"></Icon>
                         {:else}
                             <Icon name="circle" solid="{false}"></Icon>
                         {/if}
-                    {:else if checked[i]}
+                    {:else if checked[i] || (solved && answer.correct)}
                         <Icon name="check-square"></Icon>
                     {:else}
                         <Icon name="square" solid="{false}"></Icon>
@@ -82,26 +85,28 @@
         padding: 0.5rem;
         margin: 5px;
         border: 3px solid transparent;
+    }
+    [type='checkbox']:enabled + span {
         cursor: pointer;
     }
 
-    [type='checkbox']:hover + span,
-    [type='checkbox']:focus + span {
+    [type='checkbox']:enabled:hover + span,
+    [type='checkbox']:enabled:focus + span {
         border: 3px solid
             color-mix(in srgb, var(--quizdown-color-primary) 30%, white 70%);
     }
 
-    [type='checkbox']:not(:hover) + span .my-choice-marker,
-    [type='checkbox']:not(:focus) + span .my-choice-marker {
+    [type='checkbox']:enabled:not(:hover) + span .my-choice-marker,
+    [type='checkbox']:enabled:not(:focus) + span .my-choice-marker {
         color: gray;
     }
 
-    [type='checkbox']:hover + span .my-choice-marker,
-    [type='checkbox']:focus + span .my-choice-marker {
+    [type='checkbox']:enabled:hover + span .my-choice-marker,
+    [type='checkbox']:enabled:focus + span .my-choice-marker {
         color: var(--quizdown-color-primary);
     }
 
-    [type='checkbox']:checked + span {
+    [type='checkbox']:checked:enabled + span {
         border: 3px solid var(--quizdown-color-primary);
     }
 

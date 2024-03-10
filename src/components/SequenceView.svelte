@@ -3,9 +3,25 @@
     import type { BaseQuestion } from '../quiz';
     export let question: BaseQuestion;
 
+    export let solved: boolean = false;
+
     $: {
         question.selected = question.answers.map((answer) => answer.id);
     }
+
+    function sortAnswers(answers) {
+        return [...answers].sort((a, b) => a.id - b.id);
+    }
 </script>
 
-<DragDropList bind:data="{question.answers}" />
+{#if !solved}
+    <DragDropList bind:data="{question.answers}" />
+{:else}
+    <ol style="margin: 1rem;">
+        {#each sortAnswers(question.answers) as answer}
+            <li>
+                {@html answer.html}
+            </li>
+        {/each}
+    </ol>
+{/if}

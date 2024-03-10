@@ -220,6 +220,7 @@ export class Quiz {
     isStarted: Writable<boolean>;
     isEvaluated: Writable<boolean>;
     allVisited: Writable<boolean>;
+    onSolutions: Writable<boolean>;
 
     constructor(questions: Array<BaseQuestion>, config: Config) {
         this.questions = questions;
@@ -244,6 +245,7 @@ export class Quiz {
         this.onResults = writable(false);
         this.allVisited = writable(this.questions.length == 1);
         this.isEvaluated = writable(false);
+        this.onSolutions = writable(false);
         autoBind(this);
 
         let index = -1;
@@ -304,6 +306,10 @@ export class Quiz {
         }
     }
 
+    toggleSolutions(): void {
+        this.onSolutions.update((value) => !value);
+    }
+
     next(): boolean {
         return this.jump(get(this.index) + 1);
     }
@@ -321,6 +327,7 @@ export class Quiz {
         this.isStarted.set(false);
         this.isEvaluated.set(false);
         this.questions.forEach((q) => q.reset());
+        this.onSolutions.set(false);
         return this.jump(-1);
     }
 
