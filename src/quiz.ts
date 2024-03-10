@@ -45,7 +45,7 @@ export abstract class BaseQuestion {
     readonly options: Config;
     showHint: Writable<boolean>;
     visited: boolean;
-    readonly maxScore: number;
+    readonly points: number;
     index: number;
 
     constructor(
@@ -55,9 +55,9 @@ export abstract class BaseQuestion {
         answers: Array<Answer>,
         questionType: QuestionType,
         options: Config,
-        maxScore: number = 1
+        points: number = 1
     ) {
-        this.maxScore = maxScore;
+        this.points = points;
         this.text = text;
         this.explanation = explanation;
         this.hint = hint;
@@ -220,7 +220,6 @@ export class Quiz {
     isStarted: Writable<boolean>;
     isEvaluated: Writable<boolean>;
     allVisited: Writable<boolean>;
-    totalPoints: number;
 
     constructor(questions: Array<BaseQuestion>, config: Config) {
         this.questions = questions;
@@ -325,22 +324,22 @@ export class Quiz {
         return this.jump(-1);
     }
 
-    maxScoreTotal(): number {
+    pointsTotal(): number {
         let total = 0;
         for (let q of this.questions) {
-            total += q.maxScore;
+            total += q.points;
         }
         return total;
     }
 
     evaluate(): number {
-        let points = 0;
+        let score = 0;
         for (var q of this.questions) {
             if (q.isCorrect()) {
-                points += q.maxScore;
+                score += q.points;
             }
         }
         this.isEvaluated.set(true);
-        return points;
+        return score;
     }
 }

@@ -10,12 +10,12 @@
     import Loading from './Loading.svelte';
     import { get } from 'svelte/store';
 
+    let score = 0;
     let points = 0;
-    let total = 0;
 
     beforeUpdate(() => {
-        points = quiz.evaluate();
-        total = quiz.maxScoreTotal();
+        score = quiz.evaluate();
+        points = quiz.pointsTotal();
     });
 
     function format(n: number) {
@@ -28,10 +28,10 @@
 <h3 style="text-align: center;">{$_('resultsTitle')}</h3>
 <div class="results-container">
     <div class="scores">
-        <ScoreBadge fraction="{total > 0 ? points / total : 1}"></ScoreBadge>
+        <ScoreBadge fraction="{points > 0 ? score / points : 1}"></ScoreBadge>
 
         <h4 style="text-wrap: nowrap;">
-            {$_('score')} : {points} / {format(total)}
+            {$_('score')} : {score} / {format(points)}
         </h4>
     </div>
     <div in:fade="{{ duration: 1000 }}" class="results">
