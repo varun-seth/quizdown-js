@@ -52,12 +52,12 @@
                         : ''}"
                 >
                     {#if question.questionType === 'SingleChoice'}
-                        {#if checked[i] || (solved && answer.correct)}
+                        {#if !solved ? checked[i] : answer.correct}
                             <Icon name="dot-circle" solid="{true}"></Icon>
                         {:else}
                             <Icon name="circle" solid="{false}"></Icon>
                         {/if}
-                    {:else if checked[i] || (solved && answer.correct)}
+                    {:else if !solved ? checked[i] : answer.correct}
                         <Icon name="check-square"></Icon>
                     {:else}
                         <Icon name="square" solid="{false}"></Icon>
