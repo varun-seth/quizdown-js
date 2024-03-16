@@ -23,6 +23,7 @@
     let isRenewing = false;
     let isLoading = false;
     let isSaving = false;
+    let isUnsaved = false;
     let isSharing = false;
     let isRenaming = false;
 
@@ -151,6 +152,8 @@
         userInfo.set(null);
         localStorage.removeItem(TOKEN_KEY);
         accessToken.set(null);
+        sessionStorage.removeItem('liveEditorContent');
+        location.href = '/';
     }
 
     async function getFileDetails() {
@@ -280,6 +283,8 @@
         if (!fileId) {
             sessionStorage.setItem('liveEditorContent', text);
             console.log('Updated content');
+        } else {
+            isUnsaved = true;
         }
     }
 
@@ -299,9 +304,10 @@
 
         // Ensure the Picker API is loaded
         gapi.load('picker', () => {
-            var view = new google.picker.DocsView(google.picker.ViewId.DOCS)
-                .setQuery('*.md') // Markdown files.
-                .setIncludeFolders(true) // This shows folders in the picker
+            var view = new google.picker.DocsView()
+                // filter by only markdown files (using mimetype works better than filename)
+                // Disabled folder view, this shows all files in flat way, sorted by recency.
+                .setMimeTypes('text/markdown')
                 .setMode(google.picker.DocsViewMode.LIST) // Set the view mode to LIST instead of GRID
                 .setOwnedByMe(true) // This limits to files owned by the user.
                 .setSelectFolderEnabled(false); // Set to true if you want users to be able to select folders.
@@ -312,7 +318,7 @@
                 .setDeveloperKey(apiKey)
                 .setCallback(pickerCallback)
                 .setInitialView(view)
-                .setTitle('Select a Quiz file (markdown files end with .md)')
+                .setTitle('Select a Quiz file')
                 .build();
 
             picker.setVisible(true);
@@ -426,6 +432,8 @@
 
         if (response.ok) {
             isSaving = false;
+            isUnsaved = false;
+            // TODO: if user makes more changes during saving then save that as well.
             const result = await response.json();
             console.log('File updated successfully:', result);
             if (callbackOnSaved) {
@@ -613,6 +621,7 @@
                     disabled="{isSaving}"
                     title="Start"
                     iconName="floppy-disk"
+                    color="{isUnsaved ? 'primary' : ''}"
                 ></Button>
                 {#if isSaving}
                     <div class="spinner within-spinner"></div>
