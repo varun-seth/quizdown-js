@@ -112,6 +112,13 @@
 
                 let editor;
 
+                // Resize handling for Monaco Editor
+                window.addEventListener('resize', () => {
+                    if (editor) {
+                        editor.layout();
+                    }
+                });
+
                 myToolbar.registerTextChange((newContent, config) => {
                     if (!editor) {
                         console.log('Creating editor');
