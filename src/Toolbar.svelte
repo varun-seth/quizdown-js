@@ -1,9 +1,13 @@
 <script>
     import Button from './components/Button.svelte';
+    import registerIcons from './registerIcons.js';
+
     import Icon from './components/Icon.svelte';
     import defaultText from './toolbarDefaultText';
     import { writable, get } from 'svelte/store';
     import { onMount } from 'svelte';
+
+    registerIcons();
 
     const TOKEN_KEY = 'google_token';
     const USER_KEY = 'google_user';
@@ -572,9 +576,8 @@
                     createFileInDrive(true);
                 }}"
                 disabled="{isRenewing}"
-            >
-                New
-            </Button>
+                iconName="plus"
+            ></Button>
             {#if isRenewing}
                 <div class="spinner within-spinner"></div>
             {/if}
@@ -587,22 +590,30 @@
                 content.set(newContent);
                 callOutsideOnInternalChange(newContent);
             }}"
+            iconName="list-ul"
         >
             Sample
         </Button>
 
         {#if $userInfo}
-            <Button buttonAction="{openGooglePicker}">Open</Button>
+            <Button
+                buttonAction="{openGooglePicker}"
+                title="open"
+                iconName="folder-open"
+            ></Button>
         {/if}
     </span>
 
     <!-- Right sided buttons -->
-    <span style="padding-right: 10px; display:inline-flex; gap: 10px;">
+    <span style="padding-right: 10px; display:inline-flex;">
         {#if $userInfo}
             <span style="position: relative">
-                <Button buttonAction="{save}" disabled="{isSaving}">
-                    Save
-                </Button>
+                <Button
+                    buttonAction="{save}"
+                    disabled="{isSaving}"
+                    title="Start"
+                    iconName="floppy-disk"
+                ></Button>
                 {#if isSaving}
                     <div class="spinner within-spinner"></div>
                 {/if}
@@ -611,8 +622,11 @@
 
         {#if fileId}
             <span style="position: relative">
-                <Button buttonAction="{share}" disabled="{isSharing}"
-                    >Share & Launch</Button
+                <Button
+                    buttonAction="{share}"
+                    disabled="{isSharing}"
+                    title="Share & Launch"
+                    iconName="rocket">Launch</Button
                 >
                 {#if isSharing}
                     <div class="spinner within-spinner"></div>
@@ -621,8 +635,6 @@
         {/if}
 
         {#if $userInfo}
-            <Button buttonAction="{logout}">Logout</Button>
-
             <div class="user-info">
                 <img
                     class="user-image"
@@ -631,8 +643,13 @@
                 />
                 <span>{$userInfo.name}</span>
             </div>
+            <Button
+                buttonAction="{logout}"
+                iconName="right-from-bracket"
+                title="logout"
+            ></Button>
         {:else}
-            <Button buttonAction="{handleSignIn}">Login</Button>
+            <Button title="login" buttonAction="{handleSignIn}">Login</Button>
         {/if}
 
         <div id="signinDiv"></div>
@@ -653,7 +670,7 @@
     }
 
     .spinner {
-        border: 4px solid rgba(0, 0, 0, 0.1);
+        border: 4px solid color-mix(in srgb, white 90%, grey 10%);
         width: 16px;
         height: 16px;
         border-radius: 50%;

@@ -1,9 +1,14 @@
 <script lang="ts">
+    import Icon from './Icon.svelte';
+
+    import type { IconName } from '@fortawesome/fontawesome-svg-core';
+
     export let buttonAction = () => {};
     export let disabled: boolean = false;
     export let title = '';
     export let color = '';
     export let size = 'medium';
+    export let iconName: IconName = null;
 
     // Reactive statement to dynamically set classes based on `color` value
     $: primaryClass = color == 'primary';
@@ -20,6 +25,9 @@
     on:click="{buttonAction}"
     style="padding: {paddingSize};"
 >
+    {#if iconName != null}
+        <Icon name="{iconName}" />
+    {/if}
     <slot />
 </button>
 

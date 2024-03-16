@@ -5,22 +5,27 @@ import {
     IconPack,
 } from '@fortawesome/fontawesome-svg-core';
 import {
-    faArrowLeft,
-    faArrowRight,
-    faRedo,
+    faArrowLeft, // navigation.prev
+    faArrowRight, // navigation.next
+    faRedo, // navigation.reset
     faCheckDouble,
     faCog,
-    faCircleNotch,
-    faLightbulb,
-    faCheckSquare,
-    faSquare,
-    faDotCircle,
-    faCircleCheck,
-    faCircleXmark,
-    faPlay,
-    faScroll,
-    faClipboardList,
-    faClipboardCheck,
+    faCircleNotch, // loading component, not used currently.
+    faLightbulb, // hint icon
+    faCheckSquare, // MCQ checked
+    faSquare, // MCQ unchecked
+    faDotCircle, //
+    faCircleCheck, // results -> correct
+    faCircleXmark, // results -> wrong
+    faPlay, // start button
+    faClipboardList, // navigation.solutions
+    faClipboardCheck, // navigation.evaluate
+    faFloppyDisk,
+    faPlus,
+    faRocket,
+    faFolderOpen,
+    faListUl,
+    faRightFromBracket,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -57,9 +62,14 @@ export default function () {
         faCircleRegular,
         faDotCircleRegular,
         faPlay,
-        faScroll,
         faClipboardList,
         faClipboardCheck,
+        faFloppyDisk,
+        faPlus,
+        faRocket,
+        faFolderOpen,
+        faListUl,
+        faRightFromBracket,
     ].filter(isIconDefinition);
 
     library.add(...(icons as IconDefinition[]));

@@ -37,7 +37,11 @@
     $: if (name) {
         let iconObj = { prefix: prefix, iconName: name } as IconLookup;
         const result = icon(iconObj, params);
-        html = result.html[0];
+        if (result) {
+            html = result.html[0];
+        } else {
+            console.warn('no name found: ' + name);
+        }
     }
 
     // Dynamically adjust the CSS based on the size prop
@@ -69,11 +73,9 @@
 
 <style>
     .icon-container {
-        display: inline-block;
+        display: inline-flex;
         line-height: 0; /* Removes extra space inside the container */
-    }
-    .icon-container svg {
-        width: 100%;
-        height: 100%;
+        justify-content: center;
+        align-items: center;
     }
 </style>
