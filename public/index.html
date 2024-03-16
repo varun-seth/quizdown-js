@@ -9,16 +9,16 @@
             name="description"
             content="Make interactive quizzes and share with anyone! Supports Markdown Language, Multiple Choice Questions, Single Choice Questions, Sequence arrangement etc. Latex equations and codeblocks with syntax highlighting"
         />
-        <link rel="apple-touch-icon" href="/icon.png" />
+        <link rel="apple-touch-icon" href="icon.png" />
 
-        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="icon" type="image/svg+xml" href="icon.svg" />
 
         <title>QuizHub</title>
 
-        <script src="./build/quizdown.js"></script>
-        <script src="./build/extensions/quizdownKatex.js"></script>
-        <script src="./build/extensions/quizdownHighlight.js"></script>
-        <script>
+        <script defer src="./build/quizdown.js"></script>
+        <script defer src="./build/extensions/quizdownKatex.js"></script>
+        <script defer src="./build/extensions/quizdownHighlight.js"></script>
+        <script defer>
             function markdownDownload(url, fn, errorFn) {
                 fetch(url)
                     .then((response) => {
@@ -188,6 +188,7 @@
                     const helpContainer =
                         document.getElementById('helpContainer');
                     helpContainer.classList.remove('hidden');
+                    spinner.classList.add('hidden');
                     const submitButton =
                         document.getElementById('submitButton');
 
@@ -453,14 +454,14 @@
             }
         }
 
-        .within-spinner {
+        .spinning {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            animation: spin2 1s ease infinite;
+            animation: spin 1s ease infinite;
         }
-        @keyframes spin2 {
+        @keyframes spin {
             0% {
                 transform: translate(-50%, -50%) rotate(0deg);
             }
@@ -471,11 +472,13 @@
     </style>
 
     <body>
-        <div class="container hidden" id="quizContainer">
-            <div id="spinner" class="hidden spinner within-spinner">
-                <img src="/icon.svg" style="height: 32px" />
-            </div>
+        <div id="spinner" class="spinning">
+            <img
+                src="/icon.svg"
+                style="height: 32px; position: relative; top: 8.5px"
+            />
         </div>
+        <div class="container hidden" id="quizContainer"></div>
         <div class="hidden" id="helpContainer">
             <span id="forkongithub"
                 ><a href="https://github.com/varun-seth/quizhub.in"
