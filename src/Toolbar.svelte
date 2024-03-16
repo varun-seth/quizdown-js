@@ -25,6 +25,15 @@
     // Store for toolbar content
     export const content = writable('');
 
+    export function getConfig() {
+        return {
+            title: get(filename),
+            authorName: get(userInfo).name,
+            authorUrl: 'mailto:' + get(userInfo).email,
+            authorImageUrl: get(userInfo).picture,
+        };
+    }
+
     function markdownDownload(url, fn, errorFn) {
         fetch(url)
             .then((response) => response.text())
@@ -80,8 +89,6 @@
             return;
         }
 
-        filename.set(newName);
-
         let currentAccesstoken = get(accessToken);
         if (!currentAccesstoken) {
             alert('Login required to rename file');
@@ -91,11 +98,12 @@
         clearTimeout(renameDebounceTimer);
 
         renameDebounceTimer = setTimeout(() => {
-            renameFile(fileId, get(filename), currentAccesstoken.token);
+            renameFile(fileId, newName, currentAccesstoken.token);
         }, 1000);
     }
 
     async function renameFile(fileId, newName, accessToken, afterRenameFn) {
+        let newNameCopy = newName;
         if (!newName.endsWith('.md')) {
             newName = `${newName}.md`;
         }
@@ -121,6 +129,11 @@
                 afterRenameFn(result);
             }
             isRenaming = false;
+
+            filename.set(newNameCopy);
+
+            // rerender the quiz intro
+            callOutsideOnInternalChange(get(content));
             return result;
         } else {
             console.error('Failed to rename the file:', response.statusText);

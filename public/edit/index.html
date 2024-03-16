@@ -83,7 +83,7 @@
 
                 let editor;
 
-                myToolbar.registerTextChange((newContent) => {
+                myToolbar.registerTextChange((newContent, config) => {
                     if (!editor) {
                         console.log('Creating editor');
                         editor = monaco.editor.create(
@@ -110,8 +110,16 @@
                             }
                         );
 
-                        renderQuiz(newContent);
+                        renderQuiz(newContent, config);
                     } else {
+                        //
+                        let currentContent = editor.getValue();
+                        if (currentContent == newContent) {
+                            // simply re-render
+                            onUpdate();
+                            return;
+                        }
+
                         // Logic to update Monaco editor or perform other actions
                         const fullModelRange = editor
                             .getModel()
@@ -136,16 +144,18 @@
                     let currentPosition = editor.getPosition();
                     let activeLineNumber = currentPosition.lineNumber;
                     let currentContent = editor.getValue();
+                    let config = myToolbar.getConfig();
+                    config['activeLineNumber'] = activeLineNumber;
 
                     clearTimeout(renderQuizDebounceTimer);
                     renderQuizDebounceTimer = setTimeout(function () {
-                        renderQuiz(currentContent, activeLineNumber);
+                        renderQuiz(currentContent, config);
                         myToolbar.onTextChange(currentContent);
                     }, 400); // Wait for 1 second before rendering
                 }
             });
 
-            function renderQuiz(markdown, activeLineNumber = 0) {
+            function renderQuiz(markdown, params) {
                 const quizContainer = document.getElementById('quizContainer');
                 quizContainer.innerHTML = ''; // Clear previous content
                 const newQuizElement = document.createElement('div');
@@ -157,8 +167,8 @@
                     shuffleQuestions: false,
                     primaryColor: '#1b73e8',
                     secondaryColor: '#f8f8f8',
-                    activeLineNumber: activeLineNumber,
                 };
+                Object.assign(config, params);
                 quizdown
                     .register(quizdownKatex)
                     .register(quizdownHighlight)
