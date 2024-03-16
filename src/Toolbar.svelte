@@ -5,7 +5,7 @@
     import Icon from './components/Icon.svelte';
     import defaultText from './toolbarDefaultText';
     import { writable, get } from 'svelte/store';
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
 
     registerIcons();
 
@@ -50,6 +50,20 @@
             config['authorImageUrl'] = userInfo1.picture;
         }
         return config;
+    }
+
+    function handleBeforeUnload(event) {
+        console.log('look here');
+        if (isUnsaved) {
+            const message =
+                'You have unsaved changes. Are you sure you want to leave?';
+            // event.returnValue = message; // Standard for most browsers
+            event.preventDefault(); // Standard method to trigger the confirmation dialog
+
+            event.returnValue = message;
+
+            return message; // For some browsers including IE
+        }
     }
 
     function markdownDownload(url, fn, errorFn) {
@@ -100,6 +114,12 @@
         }
 
         fetchStorageContent();
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
     });
 
     let renameDebounceTimer;
@@ -216,7 +236,7 @@
         }
 
         const metadataResponse = await fetch(
-            `https://www.googleapis.com/drive/v3/files/${fileId}?fields=name`,
+            `https://www.googleapis.com/drive/v3/files/${fileId}?fields=name,mimeType`,
             { headers }
         );
         if (metadataResponse.ok) {
@@ -571,10 +591,8 @@
     <span
         style="padding-left: 10px; display: inline-flex; align-items: center;"
     >
-        <a href="/">
-            <Button title="Home">
-                <img src="/icon.svg" alt="quiz home" style="height: 16px;" />
-            </Button>
+        <a href="/" style="color: black">
+            <Button title="Home" iconName="lightbulb"></Button>
         </a>
     </span>
     {#if fileId}
