@@ -15,18 +15,6 @@
 
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
 
-        <script
-            src="https://accounts.google.com/gsi/client"
-            async
-            defer
-        ></script>
-        <script src="https://apis.google.com/js/api.js"></script>
-
-        <script src="/build/quizdown.js"></script>
-        <script src="/build/extensions/quizdownKatex.js"></script>
-        <script src="/build/extensions/quizdownHighlight.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.js"></script>
-
         <style>
             html,
             body {
@@ -60,15 +48,53 @@
             .quizdown {
                 height: 100%;
             }
+
+            .hidden {
+                display: none!important;
+            }
+
+            .spinning {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                animation: spin 1s ease infinite;
+            }
+            @keyframes spin {
+                0% {
+                    transform: translate(-50%, -50%) rotate(0deg);
+                }
+                100% {
+                    transform: translate(-50%, -50%) rotate(360deg);
+                }
+            }
         </style>
     </head>
 
     <body>
+        <div id="spinner" class="spinning">
+            <img
+                src="/icon.svg"
+                style="height: 32px; position: relative; top: 8.5px"
+            />
+        </div>
         <div id="toolbar" class="toolbar"></div>
         <div class="container">
             <div id="editorContainer"></div>
             <div id="quizContainer"></div>
         </div>
+
+        <script
+            src="https://accounts.google.com/gsi/client"
+            async
+            defer
+        ></script>
+        <script src="https://apis.google.com/js/api.js"></script>
+
+        <script src="/build/quizdown.js"></script>
+        <script src="/build/extensions/quizdownKatex.js"></script>
+        <script src="/build/extensions/quizdownHighlight.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.js"></script>
 
         <script>
             require.config({
@@ -77,6 +103,9 @@
                 },
             });
             require(['vs/editor/editor.main'], function () {
+                const spinnerElement = document.getElementById('spinner');
+                spinnerElement.classList.add('hidden');
+
                 const toolbarElement = document.getElementById('toolbar');
 
                 const myToolbar = quizdown.createToolbar(toolbarElement); // Assuming this is your toolbar instance
@@ -115,7 +144,7 @@
                         //
                         let currentContent = editor.getValue();
                         if (currentContent == newContent) {
-                            // simply re-render
+                            // simply re-render without pushing any edits.
                             onUpdate();
                             return;
                         }
