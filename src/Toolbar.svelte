@@ -17,8 +17,17 @@
     const userInfo = writable(null);
     const accessToken = writable('');
 
+    let originalTitle = 'QuizHub Editor';
+
     let fileId = null;
     let filename = writable('');
+
+    $: if ($filename) {
+        document.title = `${isUnsaved ? '*' : ''}${$filename} - ${originalTitle}`;
+    } else {
+        // If filename is empty or reset, revert to the original title
+        document.title = originalTitle;
+    }
 
     let isRenewing = false;
     let isLoading = false;
@@ -31,12 +40,16 @@
     export const content = writable('');
 
     export function getConfig() {
-        return {
+        let config = {
             title: get(filename),
-            authorName: get(userInfo).name,
-            authorUrl: 'mailto:' + get(userInfo).email,
-            authorImageUrl: get(userInfo).picture,
         };
+        let userInfo1 = get(userInfo);
+        if (userInfo1) {
+            config['authorName'] = userInfo1.name;
+            config['authorUrl'] = 'mailto:' + userInfo1.email;
+            config['authorImageUrl'] = userInfo1.picture;
+        }
+        return config;
     }
 
     function markdownDownload(url, fn, errorFn) {
@@ -50,6 +63,11 @@
     }
 
     onMount(() => {
+        document.documentElement.style.setProperty(
+            '--quizdown-color-primary',
+            '#1b73e8'
+        );
+
         document.documentElement.style.setProperty(
             '--toolbar-color-primary',
             '#1b73e8'
@@ -147,13 +165,15 @@
         }
     }
 
-    function logout() {
+    function logout(relocate = false) {
         localStorage.removeItem(USER_KEY);
         userInfo.set(null);
         localStorage.removeItem(TOKEN_KEY);
         accessToken.set(null);
         sessionStorage.removeItem('liveEditorContent');
-        location.href = '/';
+        if (relocate) {
+            location.href = '/';
+        }
     }
 
     async function getFileDetails() {
@@ -425,7 +445,7 @@
             method: 'PATCH',
             headers: new Headers({
                 Authorization: `Bearer ${accessToken}`,
-                'Content-Type': 'text/plain', // Adjust based on the file type you're updating
+                'Content-Type': 'text/markdown',
             }),
             body: newContent, // The new content of the file
         });
@@ -610,10 +630,7 @@
                 iconName="folder-open"
             ></Button>
         {/if}
-    </span>
 
-    <!-- Right sided buttons -->
-    <span style="padding-right: 10px; display:inline-flex;">
         {#if $userInfo}
             <span style="position: relative">
                 <Button
@@ -628,7 +645,10 @@
                 {/if}
             </span>
         {/if}
+    </span>
 
+    <!-- Right sided buttons -->
+    <span style="padding-right: 10px; display:inline-flex;">
         {#if fileId}
             <span style="position: relative">
                 <Button
@@ -653,7 +673,7 @@
                 <span>{$userInfo.name}</span>
             </div>
             <Button
-                buttonAction="{logout}"
+                buttonAction="{() => logout(true)}"
                 iconName="right-from-bracket"
                 title="logout"
             ></Button>

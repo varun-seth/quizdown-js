@@ -78,4 +78,8 @@
         justify-content: center;
         align-items: center;
     }
+    .icon-container :global(svg) {
+        width: 100%;
+        height: 100%;
+    }
 </style>

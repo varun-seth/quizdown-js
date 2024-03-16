@@ -66,7 +66,7 @@
     button:hover:not(:checked):not(:active):not(:disabled) {
         /*reducing brightness also impacts colored icons*/
         /*replacing background-color instead*/
-        background-color: color-mix(in srgb, white 90%, black 10%);
+        background-color: color-mix(in srgb, white 90%, gray 10%);
     }
 
     button:hover:not(:checked):not(:active):not(:disabled).primary {
