@@ -37,6 +37,7 @@ export type QuestionType =
 export abstract class BaseQuestion {
     readonly text: string;
     answers: Array<Answer>;
+    initialOrder: Array<number>;
     readonly explanation: string;
     selected: Array<number>;
     solved: boolean;
@@ -69,7 +70,7 @@ export abstract class BaseQuestion {
         this.questionType = questionType;
         this.visited = false;
         autoBind(this);
-        this.reset();
+        this.reset(); // shuffles if needed
     }
 
     toggleHint() {
@@ -85,6 +86,7 @@ export abstract class BaseQuestion {
         if (this.options.shuffleAnswers) {
             this.answers = shuffle(this.answers, this.answers.length);
         }
+        this.initialOrder = this.answers.map((answer) => answer.id);
     }
 
     setQuizId(quizId: string) {
@@ -92,7 +94,10 @@ export abstract class BaseQuestion {
     }
 
     getStateKey() {
-        return `${this.quizId}#${this.index}`;
+        return `${this.quizId}.${this.index}`;
+    }
+    getOrderKey() {
+        return `${this.quizId}.${this.index}~`;
     }
 
     delState() {
@@ -100,6 +105,7 @@ export abstract class BaseQuestion {
             return;
         }
         sessionStorage.removeItem(this.getStateKey());
+        sessionStorage.removeItem(this.getOrderKey());
     }
     saveState() {
         if (!this.quizId) {
@@ -110,6 +116,17 @@ export abstract class BaseQuestion {
             JSON.stringify(this.selected)
         );
     }
+    saveOrder() {
+        if (!this.quizId) {
+            return;
+        }
+        if (this.options.shuffleAnswers) {
+            sessionStorage.setItem(
+                this.getOrderKey(),
+                JSON.stringify(this.initialOrder)
+            );
+        }
+    }
     loadState() {
         if (!this.quizId) {
             return;
@@ -117,23 +134,44 @@ export abstract class BaseQuestion {
         let value = sessionStorage.getItem(this.getStateKey());
         if (value !== null && value != undefined) {
             this.selected = JSON.parse(value);
-
-            // prevent shuffling.
-            if (this.options.shuffleAnswers) {
+            this.visited = true;
+        }
+    }
+    loadOrder() {
+        if (!this.quizId) {
+            return;
+        }
+        // fix shuffling.
+        if (this.options.shuffleAnswers) {
+            // restores to inital view of a question across reloads.
+            let order = sessionStorage.getItem(this.getOrderKey());
+            if (order !== undefined && order !== null) {
+                let values = JSON.parse(order);
+                this.initialOrder = values;
+                sortByOrder(this.answers, values);
+            }
+            if (this.questionType == 'Sequence') {
                 // for sequence-view questions, sort by selected.
-                if (this.questionType == 'Sequence') {
-                    this.answers.sort((a, b) => {
-                        // Find the index of the ids in orderArray
-                        const indexOfA = this.selected.indexOf(a.id);
-                        const indexOfB = this.selected.indexOf(b.id);
-                        // Sort based on the index positions
-                        return indexOfA - indexOfB;
-                    });
-                }
+                sortByOrder(this.answers, this.selected);
             }
         }
     }
+
     abstract isCorrect(): boolean;
+}
+
+function sortByOrder(array: Array<Answer>, order: Array<number>) {
+    const orderIndexMap = new Map();
+    order.forEach((id, index) => {
+        orderIndexMap.set(id, index);
+    });
+
+    // Sort the array based on the precomputed index positions
+    array.sort((a, b) => {
+        const indexOfA = orderIndexMap.get(a.id);
+        const indexOfB = orderIndexMap.get(b.id);
+        return indexOfA - indexOfB;
+    });
 }
 
 class Blanks extends BaseQuestion {
@@ -288,6 +326,7 @@ export class Quiz {
             this.questions.forEach((q) => {
                 q.setQuizId(this.config.quizId);
                 q.loadState();
+                q.loadOrder();
             });
         }
 
@@ -332,6 +371,11 @@ export class Quiz {
     private setActive() {
         let idx = get(this.index);
         this.active.update((act) => this.questions[idx]);
+        if (!this.questions[idx].visited) {
+            // first time.
+            this.questions[idx].saveOrder();
+            this.questions[idx].saveState();
+        }
         this.questions[idx].visited = true;
     }
 
@@ -345,39 +389,29 @@ export class Quiz {
     }
 
     jump(index: number): boolean {
-        if (index == -1) {
+        if (-1 <= index && index <= this.questions.length) {
             this.index.set(index);
-            this.onIntro.set(true);
-            this.onFirst.set(false);
-            this.onLast.set(false);
-            this.onResults.set(false);
-            // This only occurs when reset button is pressed.
-            this.delIndex();
-            return true;
-        }
-        if (0 <= index && index <= this.questions.length - 1) {
-            this.isStarted.set(true);
-            this.onIntro.set(false);
-            // on a question
-            this.index.set(index);
-            this.setActive();
-            this.allVisited.set(this.checkAllVisited());
-            this.onResults.set(false);
-            this.onLast.set(index == this.questions.length - 1);
+            this.isStarted.set(index !== -1);
+            this.onIntro.set(index === -1);
             this.onFirst.set(index == 0);
+            this.onLast.set(index == this.questions.length - 1);
+            this.onResults.set(index == this.questions.length);
             this.saveIndex(index);
-            return true;
-        } else if (index == this.questions.length) {
-            // on results page
-            this.onIntro.set(false);
-            this.onResults.set(true);
-            this.onLast.set(false);
-            this.index.set(index);
-            this.saveIndex(index);
-            return true;
         } else {
             return false;
         }
+        if (index == -1) {
+            // This only occurs when reset button is pressed.
+            this.delIndex();
+        } else if (0 <= index && index <= this.questions.length - 1) {
+            // on a question
+            this.setActive();
+            this.allVisited.set(this.checkAllVisited());
+        } else if (index == this.questions.length) {
+            // on results page
+            return true;
+        }
+        return true;
     }
 
     getIndexKey() {

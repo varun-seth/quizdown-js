@@ -220,7 +220,7 @@
 
             <Button
                 size="large"
-                color="{$onLast && !$isEvaluated ? 'primary' : ''}"
+                color="{$allVisited && !$isEvaluated ? 'primary' : ''}"
                 slot="right"
                 disabled="{$onIntro}"
                 title="{!$onResults ? $_('evaluate') : $_('solution')}"
