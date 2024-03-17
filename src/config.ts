@@ -63,7 +63,7 @@ export class Config {
         this.textColor = get(options['textColor'], 'black');
         this.locale = get(options['locale'], null);
         this.skipIntro = get(options['locale'], false);
-        this.quizId = get(options['quizId'], 'quiz-0');
+        this.quizId = get(options['quizId'], null);
         this.authorName = get(options['authorName'], '');
         this.authorUrl = get(options['authorUrl'], '');
         this.authorImageUrl = get(options['authorImageUrl'], '');

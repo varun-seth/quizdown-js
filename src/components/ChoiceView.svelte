@@ -20,6 +20,7 @@
                 question.selected.push(i); // Add if not exists
             }
         }
+        question.saveState();
     }
 
     // Watch for changes in selection to update the checked state
@@ -126,6 +127,8 @@
         left: 0.8rem;
         top: 50%;
         transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
     }
     :global(.my-choice p) {
         margin-block-start: 0;

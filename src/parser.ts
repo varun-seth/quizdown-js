@@ -167,10 +167,10 @@ function extractQuestions(
             questions.push(question);
         } else {
             if (
-                config.activeLineNumber >= 0 &&
-                config.activeLineNumber >= questions.length - 1
+                config.activeQuestion >= 0 &&
+                config.activeQuestion <= questions.length - 1
             ) {
-                config.activeLineNumber -= 1;
+                config.activeQuestion -= 1;
             }
         }
         startIdx = nextQuestionIdx; // Move start index forward to the next question's start or to the end of the array

@@ -47,6 +47,7 @@ export abstract class BaseQuestion {
     visited: boolean;
     readonly points: number;
     index: number;
+    quizId: string;
 
     constructor(
         text: string,
@@ -77,11 +78,59 @@ export abstract class BaseQuestion {
 
     reset() {
         this.selected = [];
+        this.delState();
         this.solved = false;
         this.visited = false;
         this.showHint.set(false);
         if (this.options.shuffleAnswers) {
             this.answers = shuffle(this.answers, this.answers.length);
+        }
+    }
+
+    setQuizId(quizId: string) {
+        this.quizId = quizId;
+    }
+
+    getStateKey() {
+        return `${this.quizId}#${this.index}`;
+    }
+
+    delState() {
+        if (!this.quizId) {
+            return;
+        }
+        sessionStorage.removeItem(this.getStateKey());
+    }
+    saveState() {
+        if (!this.quizId) {
+            return;
+        }
+        sessionStorage.setItem(
+            this.getStateKey(),
+            JSON.stringify(this.selected)
+        );
+    }
+    loadState() {
+        if (!this.quizId) {
+            return;
+        }
+        let value = sessionStorage.getItem(this.getStateKey());
+        if (value !== null && value != undefined) {
+            this.selected = JSON.parse(value);
+
+            // prevent shuffling.
+            if (this.options.shuffleAnswers) {
+                // for sequence-view questions, sort by selected.
+                if (this.questionType == 'Sequence') {
+                    this.answers.sort((a, b) => {
+                        // Find the index of the ids in orderArray
+                        const indexOfA = this.selected.indexOf(a.id);
+                        const indexOfB = this.selected.indexOf(b.id);
+                        // Sort based on the index positions
+                        return indexOfA - indexOfB;
+                    });
+                }
+            }
         }
     }
     abstract isCorrect(): boolean;
@@ -233,6 +282,15 @@ export class Quiz {
             question.index = i;
             i++;
         }
+
+        if (!this.config.shuffleQuestions && config.quizId) {
+            // if questions are not shuffled, then answers can be saved reliably.
+            this.questions.forEach((q) => {
+                q.setQuizId(this.config.quizId);
+                q.loadState();
+            });
+        }
+
         if (this.questions.length == 0) {
             console.warn('No questions for quiz provided');
         }
@@ -252,6 +310,17 @@ export class Quiz {
 
         if (config.activeQuestion != undefined && config.activeQuestion >= 0) {
             index = config.activeQuestion;
+        } else {
+            let savedIndex = this.loadIndex();
+            if (
+                savedIndex !== null &&
+                savedIndex !== undefined &&
+                typeof savedIndex == 'number' &&
+                0 <= savedIndex &&
+                savedIndex <= this.questions.length
+            ) {
+                index = savedIndex;
+            }
         }
 
         this.index = writable(index);
@@ -282,9 +351,11 @@ export class Quiz {
             this.onFirst.set(false);
             this.onLast.set(false);
             this.onResults.set(false);
+            // This only occurs when reset button is pressed.
+            this.delIndex();
             return true;
         }
-        if (index <= this.questions.length - 1 && index >= 0) {
+        if (0 <= index && index <= this.questions.length - 1) {
             this.isStarted.set(true);
             this.onIntro.set(false);
             // on a question
@@ -294,16 +365,45 @@ export class Quiz {
             this.onResults.set(false);
             this.onLast.set(index == this.questions.length - 1);
             this.onFirst.set(index == 0);
+            this.saveIndex(index);
             return true;
         } else if (index == this.questions.length) {
             // on results page
+            this.onIntro.set(false);
             this.onResults.set(true);
             this.onLast.set(false);
             this.index.set(index);
+            this.saveIndex(index);
             return true;
         } else {
             return false;
         }
+    }
+
+    getIndexKey() {
+        return `${this.config.quizId}#`;
+    }
+
+    saveIndex(index: number) {
+        if (!this.config.quizId) {
+            return;
+        }
+        sessionStorage.setItem(this.getIndexKey(), JSON.stringify(index));
+    }
+    loadIndex(): number {
+        if (!this.config.quizId) {
+            return;
+        }
+        const index = sessionStorage.getItem(this.getIndexKey());
+        if (index !== null) {
+            return JSON.parse(index);
+        }
+    }
+    delIndex() {
+        if (!this.config.quizId) {
+            return;
+        }
+        sessionStorage.removeItem(this.getIndexKey());
     }
 
     toggleSolutions(): void {

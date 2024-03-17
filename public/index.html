@@ -110,6 +110,7 @@
                 let authorName;
                 let authorUrl;
                 let authorImageUrl;
+                let quizId;
 
                 let urlToFetch = '';
                 if (gdrive) {
@@ -117,10 +118,12 @@
                     urlToFetch = `${gdrive}`;
                     fetcher = quizdown.createFetcher(fetcherElement);
                     downloadFn = fetcher.gdriveFetch;
+                    quizId = gdrive;
                 }
                 if (gistId) {
                     // super shortcut. domain.com/#id
                     urlToFetch = `https://api.github.com/gists/${gistId}`;
+                    quizId = gistId;
 
                     downloadFn = markdownDownloadGist;
                 } else if (githubShortcut) {
@@ -131,16 +134,19 @@
                     const branchname = parts[2];
                     const filepath = parts.slice(3).join('/');
                     urlToFetch = `https://raw.githubusercontent.com/${username}/${projectname}/${branchname}/${filepath}`;
+                    quizId = githubShortcut;
                 } else if (gistShortcut) {
                     // Construct the Gist raw content URL from the gistShortcut value
                     const parts = gistShortcut.split('/');
                     const gistId = parts.pop();
                     // Gists don't have a branch name or a direct file path in the URL, so use the Gist API URL format
                     urlToFetch = `https://api.github.com/gists/${gistId}`;
+                    quizId = gistId;
                     downloadFn = markdownDownloadGist;
                 } else if (sourceUrl) {
                     // Use the direct URL provided by source or s
                     urlToFetch = sourceUrl;
+                    quizId = sourceUrl;
                 }
 
                 if (urlToFetch) {
@@ -160,6 +166,7 @@
                             }
 
                             let config = {
+                                quizId: quizId,
                                 shuffleAnswers: false,
                                 shuffleQuestions: false,
                                 primaryColor: '#1b73e8',

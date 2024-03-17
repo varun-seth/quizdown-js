@@ -7,6 +7,7 @@
 
     $: {
         question.selected = question.answers.map((answer) => answer.id);
+        question.saveState();
     }
 
     function sortAnswers(answers) {
