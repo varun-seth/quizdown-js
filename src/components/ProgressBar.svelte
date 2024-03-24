@@ -6,13 +6,14 @@
 
     export let value: number;
     export let max: number;
+    export let hideInitialAnimation: boolean = false;
 
     const progress1 = tweened(0, {
-        duration: 150,
+        duration: 250,
         easing: linear,
     });
     const progress2 = tweened(1, {
-        duration: 150,
+        duration: 250,
         easing: linear,
     });
     const lastValue = writable(value);
@@ -28,7 +29,15 @@
         })();
 
         if (value == previousValue) {
-            return;
+            if (hideInitialAnimation) {
+                progress1.set(value + 1, { duration: 0 });
+                progress2.set(1 / (value + 1), { duration: 0 });
+            } else {
+                progress1.set(value, { duration: 0 });
+                progress1.set(value + 1, { duration: 200 });
+                progress2.set(0, { duration: 0 });
+                progress2.set(1 / (value + 1), { duration: 200 });
+            }
         } else if (value > previousValue) {
             //
             if (value > 0) {

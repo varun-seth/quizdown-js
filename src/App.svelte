@@ -73,7 +73,11 @@
 </script>
 
 {#if !$onSolutions}
-    <ProgressBar value="{$index}" max="{quiz.questions.length}" />
+    <ProgressBar
+        value="{$index}"
+        max="{quiz.questions.length}"
+        hideInitialAnimation="{quiz.config.activeQuestion !== undefined}"
+    />
 {/if}
 
 <div
