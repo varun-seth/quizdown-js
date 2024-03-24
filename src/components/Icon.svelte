@@ -24,6 +24,7 @@
     export let spin = false;
     export let name: IconName;
     export let solid = true;
+    export let title: string | undefined = '';
 
     let prefix = solid ? 'fas' : 'far';
     let html = '';
@@ -67,7 +68,7 @@
     }
 </script>
 
-<div class="icon-container" style="{iconSizeStyle}">
+<div {title} class="icon-container" style="{iconSizeStyle}">
     {@html html}
 </div>
 

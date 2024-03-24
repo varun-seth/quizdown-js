@@ -27,6 +27,7 @@ import {
     faListUl,
     faRightFromBracket,
     faInfoCircle,
+    faQuestionCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -74,6 +75,7 @@ export default function () {
         faRightFromBracket,
         faCommentRegular,
         faInfoCircle,
+        faQuestionCircle,
     ].filter(isIconDefinition);
 
     library.add(...(icons as IconDefinition[]));

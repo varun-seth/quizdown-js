@@ -7,6 +7,7 @@
     import SequenceView from './SequenceView.svelte';
     import ChoiceView from './ChoiceView.svelte';
     import Hint from './Hint.svelte';
+    import Icon from './Icon.svelte';
 </script>
 
 <h2 style="text-align: center;">
@@ -17,7 +18,12 @@
     {#each quiz.questions as question, i}
         <div>
             <div class="question-heading">
-                {$_('questionLetter')}{i + 1}.
+                <Icon
+                    title="{$_('questionLetter')}{i + 1}"
+                    name="{question.questionType == 'Information'
+                        ? 'circle-info'
+                        : 'circle-question'}"
+                ></Icon>
                 {@html question.text}
             </div>
 
