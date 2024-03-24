@@ -46,17 +46,20 @@
                     .then((data) => {
                         const files = data.files;
                         const fileKeys = Object.keys(files);
+                        let markdown;
+                        let filename;
                         if (fileKeys.length === 1) {
                             // If only one file, use it directly
-                            markdown = files[fileKeys[0]].content;
+                            filename = fileKeys[0];
+                            markdown = files[filename].content;
                         } else {
                             // If multiple files, find the first .md file
-                            const mdFileKey = fileKeys.find((key) =>
+                            filename = fileKeys.find((key) =>
                                 files[key].filename
                                     .toLowerCase()
                                     .endsWith('.md')
                             );
-                            if (mdFileKey) {
+                            if (filename) {
                                 markdown = files[mdFileKey].content;
                             } else {
                                 throw new Error(
@@ -65,6 +68,7 @@
                             }
                         }
                         let params = {};
+                        params['filename'] = filename;
                         if (data['owner']) {
                             params['authorName'] = data['owner']['login'];
                             params['authorImageUrl'] =
@@ -171,6 +175,7 @@
                                 shuffleQuestions: false,
                                 primaryColor: '#1b73e8',
                                 secondaryColor: '#ffffff',
+                                updateWindowTitle: true,
                             };
                             Object.assign(config, params);
                             quizdown

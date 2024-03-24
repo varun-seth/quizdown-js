@@ -46,7 +46,7 @@
         let userInfo1 = get(userInfo);
         if (userInfo1) {
             config['authorName'] = userInfo1.name;
-            config['authorUrl'] = 'mailto:' + userInfo1.email;
+            config['authorEmail'] = userInfo1.email;
             config['authorImageUrl'] = userInfo1.picture;
         }
         return config;
@@ -517,7 +517,7 @@
                 'Content-Type': 'application/json',
             }),
             body: JSON.stringify({
-                role: 'reader',
+                role: 'commenter',
                 type: 'anyone',
             }),
         });

@@ -3,7 +3,7 @@
     const apiKey = process.env.PUB_KEY;
 
     export function gdriveFetch(fileId, callbackFn, errorFn) {
-        const metadataUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=owners,name,description&key=${apiKey}`;
+        const metadataUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=owners,name,description,webViewLink&key=${apiKey}`;
         const contentUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
 
         // Fetch file metadata
@@ -35,7 +35,8 @@
                     // Note: photoLink might not always be present
                     params.authorImageUrl =
                         owner.photoLink || 'defaultImageUrl';
-                    params.authorUrl = 'mailto:' + owner.emailAddress;
+                    params.authorEmail = owner.emailAddress;
+                    params.authorUrl = metadata.webViewLink;
                 }
 
                 // Fetch file content

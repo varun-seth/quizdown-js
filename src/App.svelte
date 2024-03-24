@@ -35,6 +35,12 @@
     $: isStarted = quiz.isStarted;
     $: allVisited = quiz.allVisited;
 
+    $: if (quiz.config.updateWindowTitle) {
+        document.title = quiz.config.title
+            ? `${quiz.config.title} - QuizHub`
+            : `QuizHub`;
+    }
+
     let points: number;
 
     beforeUpdate(() => {
