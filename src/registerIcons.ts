@@ -32,6 +32,7 @@ import {
     faSquare as faSquareRegular,
     faCircle as faCircleRegular,
     faDotCircle as faDotCircleRegular,
+    faComment as faCommentRegular,
 } from '@fortawesome/free-regular-svg-icons';
 
 function isIconDefinition(icon: any): icon is IconDefinition {
@@ -70,6 +71,7 @@ export default function () {
         faFolderOpen,
         faListUl,
         faRightFromBracket,
+        faCommentRegular,
     ].filter(isIconDefinition);
 
     library.add(...(icons as IconDefinition[]));

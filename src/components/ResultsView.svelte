@@ -43,7 +43,8 @@
                 >
                     <span class="list-question">
                         <span
-                            style="padding: 5px; color: {question.solved
+                            class="judgement-marks"
+                            style="color: {question.solved
                                 ? '#16cc16'
                                 : '#ff3131'}"
                         >
@@ -54,20 +55,10 @@
                             ></Icon>
                         </span>
                         <span style="padding: 5px;">
-                            {@html question.text}
+                            {@html question.text
+                                ? question.text
+                                : `${$_('questionLetter')}${question.index}`}
                         </span>
-                    </span>
-                    <span class="list-answer-comment">
-                        <!-- answer comments when selected and available -->
-                        {#each question.selected as selected}
-                            {#if question.answers[selected].comment !== ''}
-                                <li class="list-comment">
-                                    {@html question.answers[selected].html}
-                                    <br />
-                                    {@html question.answers[selected].comment}
-                                </li>
-                            {/if}
-                        {/each}
                     </span>
                 </li>
             {/each}
@@ -113,11 +104,6 @@
         background: rgb(0, 0, 0, 0.05);
     }
 
-    .list-comment {
-        margin-left: 2em;
-        list-style-type: initial;
-    }
-
     .results-container {
         display: flex;
         flex-direction: row-reverse;
@@ -146,5 +132,10 @@
         .scores {
             margin-top: 0;
         }
+    }
+
+    .judgement-marks {
+        display: inline-flex;
+        padding: 5px;
     }
 </style>

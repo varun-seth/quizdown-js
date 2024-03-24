@@ -44,11 +44,13 @@
             <span
                 class="my-choice {question.questionType === 'SingleChoice'
                     ? 'my-choice-single'
-                    : 'my-choice-multi'}"
+                    : 'my-choice-multi'} {solved &&
+                    answer.correct &&
+                    'highlight-neutral'}"
             >
                 <span
                     class="my-choice-marker"
-                    style="color: {checked[i]
+                    style="color: {checked[i] && !solved
                         ? 'var(--quizdown-color-primary)'
                         : ''}"
                 >
@@ -67,6 +69,17 @@
                 {@html answer.html}
             </span>
         </label>
+
+        {#if solved && answer.comment != ''}
+            <div class="feedback-container">
+                <div>
+                    <Icon name="comment" solid="{false}"></Icon>
+                </div>
+                <div class="feedback">
+                    {@html answer.comment}
+                </div>
+            </div>
+        {/if}
     {/each}
 </fieldset>
 
@@ -133,5 +146,30 @@
     :global(.my-choice p) {
         margin-block-start: 0;
         margin-block-end: 0;
+    }
+
+    :global(.feedback p) {
+        margin-block-start: 0;
+        margin-block-end: 0;
+    }
+
+    .feedback-container {
+        display: flex;
+        margin-left: 1.5em;
+        margin-right: 1.5em;
+        gap: 0.5em;
+        margin-block-end: 1em;
+    }
+
+    .highlight-neutral {
+        background-color: #ebebeb;
+    }
+
+    .highlight-correct {
+        background-color: #befabe;
+    }
+
+    .highlight-wrong {
+        background-color: #ffe3e3;
     }
 </style>
