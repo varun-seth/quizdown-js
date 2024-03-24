@@ -17,14 +17,9 @@
             .then((metadata) => {
                 // Extract parameters from metadata
                 const params = {};
-                let newName = metadata.name;
-
-                if (newName) {
-                    if (newName.endsWith('.md')) {
-                        // Remove the last 3 characters (".md") from the string
-                        newName = newName.slice(0, -3);
-                    }
-                    params['title'] = newName;
+                let filename = metadata.name;
+                if (filename) {
+                    params['filename'] = filename;
                 }
                 if (metadata.description) {
                     params['description'] = metadata.description;

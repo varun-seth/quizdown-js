@@ -41,6 +41,7 @@ export class Config {
     locale: 'de' | 'en' | 'es' | 'fr' | null;
     skipIntro: boolean; // an intro screen shows start button and minor description
     title: string;
+    filename: string;
     authorName: string;
     authorUrl: string;
     authorImageUrl: string;
@@ -68,6 +69,7 @@ export class Config {
         this.authorUrl = get(options['authorUrl'], '');
         this.authorImageUrl = get(options['authorImageUrl'], '');
         this.title = get(options['title'], '');
+        this.filename = get(options['filename'], '');
         this.description = get(options['description'], '');
     }
 }

@@ -295,6 +295,20 @@ export class Answer {
     }
 }
 
+function filenameToTitle(filename: string): string {
+    if (filename.endsWith('.md')) {
+        filename = filename.slice(0, -3);
+    }
+
+    const words = filename.replace(/_/g, ' ').split(' ');
+
+    const titleCaseString = words
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+    return titleCaseString;
+}
+
 export class Quiz {
     questions: Array<BaseQuestion>;
     active: Writable<BaseQuestion>;
@@ -312,6 +326,11 @@ export class Quiz {
     constructor(questions: Array<BaseQuestion>, config: Config) {
         this.questions = questions;
         this.config = config;
+
+        if (!this.config.title && this.config.filename) {
+            this.config.title = filenameToTitle(this.config.filename);
+        }
+
         if (this.config.shuffleQuestions) {
             this.questions = shuffle(this.questions, this.config.nQuestions);
         }
