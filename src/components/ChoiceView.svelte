@@ -68,18 +68,18 @@
                 </span>
                 {@html answer.html}
             </span>
-        </label>
 
-        {#if solved && answer.comment != ''}
-            <div class="feedback-container">
-                <div>
-                    <Icon name="comment" solid="{false}"></Icon>
+            {#if solved && answer.comment != ''}
+                <div class="feedback-container">
+                    <div class="icon">
+                        <Icon name="circle-info"></Icon>
+                    </div>
+                    <div class="feedback">
+                        {@html answer.comment}
+                    </div>
                 </div>
-                <div class="feedback">
-                    {@html answer.comment}
-                </div>
-            </div>
-        {/if}
+            {/if}
+        </label>
     {/each}
 </fieldset>
 
@@ -155,14 +155,21 @@
 
     .feedback-container {
         display: flex;
-        margin-left: 1.5em;
-        margin-right: 1.5em;
+        margin-left: 0.3em;
+        margin-right: 0.3em;
         gap: 0.5em;
         margin-block-end: 1em;
+        padding: 0.5em;
+        border-radius: 5px;
+        background-color: color-mix(
+            in srgb,
+            var(--quizdown-color-primary) 10%,
+            white 90%
+        );
     }
 
-    .highlight-neutral {
-        background-color: #ebebeb;
+    .feedback-container .icon {
+        color: var(--quizdown-color-primary);
     }
 
     .highlight-correct {
@@ -171,5 +178,10 @@
 
     .highlight-wrong {
         background-color: #ffe3e3;
+    }
+
+    .highlight-neutral {
+        border-radius: 0.2em;
+        border: 3px solid gray !important;
     }
 </style>
